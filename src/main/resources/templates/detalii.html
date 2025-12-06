@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Detalii Carte</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f4f7f6; color: #333; margin: 0; padding: 40px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 40px; display: flex; gap: 40px; flex-wrap: wrap; }
+
+        .left-col { flex: 1; min-width: 300px; }
+        .cover-img { width: 100%; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+        .right-col { flex: 2; min-width: 300px; }
+        .badge { background: #6c5ce7; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8em; font-weight: 600; }
+        h1 { margin: 10px 0; color: #2c3e50; font-size: 2.2em; }
+        .author { font-size: 1.2em; color: #7f8c8d; margin-bottom: 20px; }
+
+        /* Tabel Detalii */
+        .specs-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        .specs-table td { padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.95em; }
+        .specs-label { font-weight: 600; color: #555; width: 150px; }
+
+        /* Zona Rezumat */
+        .rezumat-section { background: #f9f9f9; padding: 20px; border-radius: 10px; border-left: 5px solid #00b894; margin-top: 20px; }
+        .btn-gen-rezumat {
+            background: #00b894; color: white; border: none; padding: 12px 25px; border-radius: 25px;
+            font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1em; display: inline-flex; align-items: center;
+        }
+        .btn-gen-rezumat:hover { background: #01a3a4; transform: scale(1.05); }
+
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #fff; border-radius: 50%; width: 15px; height: 15px; animation: spin 1s linear infinite; display: inline-block; margin-right: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .back-link { display: block; margin-top: 30px; color: #7f8c8d; text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="left-col">
+        <img th:src="${carte.imagine}" class="cover-img" alt="Coperta">
+    </div>
+
+    <div class="right-col">
+        <span class="badge" th:text="${carte.categoria}">Gen</span>
+        <h1 th:text="${carte.titlu}">Titlu Carte</h1>
+        <div class="author" th:text="'de ' + ${carte.autor}">Autor</div>
+
+        <table class="specs-table">
+            <tr><td class="specs-label">Editura:</td><td th:text="${carte.editura}">-</td></tr>
+            <tr><td class="specs-label">An apariție:</td><td th:text="${carte.an}">-</td></tr>
+            <tr><td class="specs-label">Nr. Pagini:</td><td th:text="${carte.nr_pagini}">-</td></tr>
+            <tr><td class="specs-label">Limba:</td><td>Română</td></tr>
+        </table>
+
+        <h3 style="color:#2d3436;">📖 Despre această carte</h3>
+
+        <div id="rezumat-container">
+            <div th:if="${not #strings.isEmpty(carte.descriere_ampla)}" class="rezumat-section">
+                <p th:text="${carte.descriere_ampla}" style="white-space: pre-wrap; line-height: 1.6; margin:0;"></p>
+            </div>
+
+            <div th:if="${#strings.isEmpty(carte.descriere_ampla)}">
+                <p style="color:#777; margin-bottom: 15px;">Nu există încă un rezumat detaliat pentru această carte.</p>
+                <button id="btn-rezumat" class="btn-gen-rezumat" onclick="cereRezumat()">
+                    ✨ Generează Rezumatul cu AI
+                </button>
+            </div>
+        </div>
+
+        <a href="/" class="back-link">⬅ Înapoi la listă</a>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    function cereRezumat() {
+        const btn = document.getElementById('btn-rezumat');
+        const container = document.getElementById('rezumat-container');
+        const titlu = /*[[${carte.titlu}]]*/ '';
+        const autor = /*[[${carte.autor}]]*/ '';
+
+        btn.disabled = true;
+        btn.innerHTML = '<div class="loader"></div> AI-ul citește cartea...';
+
+        fetch('/api/agent/rezumat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({titlu: titlu, autor: autor})
+        })
+            .then(response => response.text())
+            .then(text => {
+                container.innerHTML = `
+                <div class="rezumat-section" style="animation: fadeIn 1s;">
+                    <p style="white-space: pre-wrap; line-height: 1.6; margin:0;">${text}</p>
+                </div>
+            `;
+            })
+            .catch(err => {
+                btn.innerHTML = "❌ Eroare. Încearcă din nou.";
+                btn.disabled = false;
+            });
+    }
+</script>
+
+</body>
+</html>

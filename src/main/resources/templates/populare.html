@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Generator Favorite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #fff0f0; margin: 0; padding: 0; color: #333; }
+        .header { background: linear-gradient(135deg, #ff7675 0%, #d63031 100%); padding: 40px; text-align: center; color: white; }
+        .controls { background: rgba(255,255,255,0.2); padding: 20px; border-radius: 20px; display: inline-block; margin-top: 20px; }
+        select { padding: 12px; border-radius: 20px; border: none; font-size: 16px; margin: 5px; outline:none; }
+        button { padding: 12px 30px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; background: #2d3436; color: white; }
+        .container { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; padding: 20px; max-width: 1400px; margin: 0 auto; }
+        .card { background: white; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; text-decoration: none; color: inherit; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .card:hover { transform: translateY(-5px); }
+        .card-img { height: 320px; object-fit: cover; width: 100%; }
+        .card-body { padding: 15px; }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #fff; border-radius: 50%; width: 15px; height: 15px; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🔥 Generator Favorite</h1>
+    <div class="controls">
+        <select id="sursa">
+            <option value="Cărturești">Cărturești</option>
+            <option value="Bookzone">Bookzone</option>
+            <option value="Elefant">Elefant</option>
+        </select>
+        <select id="autor">
+            <option value="Oricare">Orice Autor</option>
+            <option th:each="a : ${autori}" th:value="${a}" th:text="${a}"></option>
+        </select>
+        <button id="btn-gen" onclick="genereaza()">🔍 Caută</button>
+        <div id="status" style="margin-top:10px; min-height:20px; font-weight:bold;"></div>
+    </div>
+    <br><br>
+    <a href="/" style="color:white; font-weight:bold; text-decoration:none;">⬅ Înapoi la Bibliotecă</a>
+</div>
+
+<div class="container">
+    <div th:if="${#lists.isEmpty(carti)}" style="text-align:center; grid-column:1/-1; color:#888;">Selectează opțiunile de sus!</div>
+    <a th:each="carte : ${carti}" th:href="@{/detalii(titlu=${carte.titlu})}" class="card">
+        <img th:src="${carte.imagine}" class="card-img" alt="Coperta">
+        <div class="card-body">
+            <span style="background:#ffeaa7; color:#d35400; padding:3px 10px; border-radius:10px; font-size:0.75em; font-weight:bold;">Top</span>
+            <h3 style="margin:5px 0; font-size:1.1em;" th:text="${carte.titlu}">Titlu</h3>
+            <div style="color:#7f8c8d; font-size:0.9em;" th:text="${carte.autor}">Autor</div>
+        </div>
+    </a>
+</div>
+
+<script>
+    function genereaza() {
+        const sursa = document.getElementById('sursa').value;
+        const autor = document.getElementById('autor').value;
+        const btn = document.getElementById('btn-gen');
+        const status = document.getElementById('status');
+
+        btn.disabled = true; btn.innerHTML = '<div class="loader"></div>';
+        status.innerText = "Caut...";
+
+        fetch('/api/agent/custom', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({sursa: sursa, autor: autor})
+        })
+            .then(r => r.text())
+            .then(t => {
+                if(t.includes("Eroare")) status.innerText = "❌ " + t;
+                else { status.innerText = "✅ Gata!"; setTimeout(() => location.reload(), 500); }
+                btn.disabled = false; btn.innerHTML = "🔍 Caută";
+            });
+    }
+</script>
+</body>
+</html>
