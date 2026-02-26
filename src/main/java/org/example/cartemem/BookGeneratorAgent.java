@@ -26,7 +26,7 @@ public class BookGeneratorAgent {
     private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(60)).build();
 
     // --- CHEIA TA ACTUALIZATĂ ---
-    private final String GEMINI_API_KEY = "AIzaSyAOAwp4W5F9i34SxW4ZBabY9VXlasnebFU";
+    private final String GEMINI_API_KEY = "AIzaSyBb2btisyLRTkvQDm6C8lSZtqnxpjp6QnA";
 
     // --- MODELUL STABIL DIN LISTA TA (gemini-2.5-flash) ---
     private final String MODEL_NAME = "gemini-2.5-flash";
@@ -81,6 +81,20 @@ public class BookGeneratorAgent {
             e.printStackTrace();
             return "Eroare internă la generarea rezumatului.";
         }
+    }
+
+    // --- 4. Generare Drum Învățare (Learning Path) ---
+    public String genereazaDrumInvatare(String obiectiv) {
+        // Îi cerem AI-ului să fie un curator de cursuri
+        String prompt = "Utilizatorul vrea să învețe de la zero despre: '" + obiectiv + "'. " +
+                "Sugerează o listă de 10 cărți fundamentale, ordonate logic de la introducere (începători) la expert. " +
+                "Include cele mai respectate titluri din domeniu. " +
+                "Asigură-te că răspunzi STRICT cu un Array JSON valid, cu aceste câmpuri: " +
+                "titlu, autor, an (int), editura, nr_pagini (int), descriere (max 20 cuvinte). " +
+                "Fără explicații în afara JSON-ului.";
+
+        // Refolosim executaFluxul, dar marcăm categoria special
+        return executaFluxul(prompt, "Invatare: " + obiectiv);
     }
 
     // --- MOTORUL PRINCIPAL ---
@@ -239,25 +253,125 @@ public class BookGeneratorAgent {
             return "https://placehold.co/400x600?text=Fara+Coperta";
         }
     }
+    public String reparaDateLipsa() {
+        int actualizate = 0;
+        try (Session session = driver.session()) {
+            // 1. Găsim cărțile care au 0 pagini sau valoare nulă
+            var result = session.run("MATCH (c:Carte) WHERE c.nr_pagini IS NULL OR c.nr_pagini = 0 RETURN c.titlu AS titlu, c.autor AS autor");
+
+            while (result.hasNext()) {
+                var record = result.next();
+                String titlu = record.get("titlu").asString();
+                String autor = record.get("autor").asString();
+
+                // 2. Interogăm Google Books pentru a găsi numărul de pagini
+                int pagini = cautaNrPaginiOnline(titlu, autor);
+
+                if (pagini > 0) {
+                    session.run("MATCH (c:Carte {titlu: $t}) SET c.nr_pagini = $p",
+                            Map.of("t", titlu, "p", pagini));
+                    actualizate++;
+                }
+            }
+        } catch (Exception e) {
+            return "Eroare la reparare: " + e.getMessage();
+        }
+        return "✅ Am reușit să completez numărul de pagini pentru " + actualizate + " cărți!";
+    }
+
+    // Metodă privată care extrage DOAR numărul de pagini de la Google
+    private int cautaNrPaginiOnline(String t, String a) {
+        try {
+            String query = URLEncoder.encode("intitle:" + t + " inauthor:" + a, StandardCharsets.UTF_8);
+            String url = "https://www.googleapis.com/books/v1/volumes?q=" + query + "&maxResults=1";
+
+            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
+            HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+
+            if (resp.statusCode() == 200) {
+                JsonNode n = objectMapper.readTree(resp.body());
+                if (n.has("items")) {
+                    JsonNode vol = n.get("items").get(0).path("volumeInfo");
+                    if (vol.has("pageCount")) {
+                        return vol.get("pageCount").asInt();
+                    }
+                }
+            }
+        } catch (Exception e) {}
+        return 0;
+    }
 
     private void salveazaInMemgraph(String titlu, String autor, String gen, String img, Map<String, Object> detalii) {
         try (Driver tempDriver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("", ""))) {
             try (Session s = tempDriver.session()) {
+
+                // 1. Logica de extragere si conversie sigura pentru nr_pagini
+                int pagini = 0;
+                Object pgRaw = detalii.get("nr_pagini");
+
+                if (pgRaw != null) {
+                    try {
+                        if (pgRaw instanceof Number) {
+                            pagini = ((Number) pgRaw).intValue();
+                        } else {
+                            // Daca AI-ul a trimis text "350", il transformam in numar
+                            pagini = Integer.parseInt(pgRaw.toString().replaceAll("[^0-9]", ""));
+                        }
+                    } catch (Exception e) {
+                        pagini = 0;
+                    }
+                }
+
+                // 2. Daca tot e 0, cautam pe Google Books (Backup)
+                if (pagini <= 0) {
+                    pagini = extrageNrPaginiDeLaGoogle(titlu, autor);
+                }
+
+                // 3. Fallback final daca nu gasim nicaieri
+                if (pagini <= 0) pagini = 220;
+
+                // 4. Executia Cypher
                 s.run("MERGE (c:Carte {titlu: $t}) " +
                                 "SET c.autor=$autor, c.categoria=$gen, c.imagine=$img, c.descriere=$desc, " +
                                 "    c.an=$an, c.editura=$editura, c.nr_pagini=$nr_pagini " +
-                                "MERGE (au:Autor {nume: $autor}) MERGE (c)-[:SCRISA_DE]->(au)",
+                                "MERGE (au:Autor {nume: $autor}) " +
+                                "MERGE (c)-[:SCRISA_DE]->(au)",
                         Map.of(
                                 "t", titlu,
                                 "autor", detalii.getOrDefault("autor", "Necunoscut"),
                                 "gen", gen,
                                 "img", img,
                                 "desc", detalii.getOrDefault("descriere", "Fără descriere"),
-                                "an", detalii.getOrDefault("an", 2000),
+                                "an", detalii.getOrDefault("an", 2020),
                                 "editura", detalii.getOrDefault("editura", "Necunoscută"),
-                                "nr_pagini", detalii.getOrDefault("nr_pagini", 0)
+                                "nr_pagini", pagini
                         ));
+                System.out.println("✅ Salvat: " + titlu + " (" + pagini + " pagini)");
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            System.err.println("❌ Eroare la salvarea in Memgraph: " + e.getMessage());
+        }
+    }
+    private int extrageNrPaginiDeLaGoogle(String t, String a) {
+        try {
+            String query = URLEncoder.encode("intitle:" + t + " inauthor:" + a, StandardCharsets.UTF_8);
+            String url = "https://www.googleapis.com/books/v1/volumes?q=" + query + "&maxResults=1";
+
+            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
+            HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+
+            if (resp.statusCode() == 200) {
+                JsonNode n = objectMapper.readTree(resp.body());
+                if (n.has("items") && n.get("items").size() > 0) {
+                    JsonNode info = n.get("items").get(0).path("volumeInfo");
+                    if (info.has("pageCount")) {
+                        return info.get("pageCount").asInt();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("⚠️ Google Books nu a returnat pagini pentru: " + t);
+        }
+        return 0;
     }
 }

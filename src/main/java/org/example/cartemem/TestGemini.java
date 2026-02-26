@@ -8,7 +8,7 @@ import java.net.http.HttpResponse;
 public class TestGemini {
     public static void main(String[] args) throws Exception {
         // Cheia ta (cea din mesajul tau recent)
-        String key = "AIzaSyAOAwp4W5F9i34SxW4ZBabY9VXlasnebFU";
+        String key = "AIzaSyBb2btisyLRTkvQDm6C8lSZtqnxpjp6QnA";
 
         // Cerem lista tuturor modelelor disponibile pentru aceasta cheie
         String url = "https://generativelanguage.googleapis.com/v1beta/models?key=" + key;

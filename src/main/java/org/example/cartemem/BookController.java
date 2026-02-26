@@ -31,6 +31,25 @@ public class BookController {
                                Model model) {
         return incarcaPagina(query, gen, model, "galerie");
     }
+    // Pagina pentru "Vreau să învăț..."
+    @GetMapping("/invata")
+    public String paginaInvatare(@RequestParam(value = "domeniu", required = false) String domeniu, Model model) {
+        // Dacă nu a ales un domeniu, îi arătăm toate cărțile din categoria "Invatare"
+        String categorieCautata = (domeniu != null) ? "Invatare: " + domeniu : "Invatare";
+        return incarcaPagina(null, categorieCautata, model, "invata");
+    }
+
+    // API pentru butonul de generare
+    @PostMapping("/api/agent/invata")
+    @ResponseBody
+    public String triggerLearningAgent(@RequestBody Map<String, String> payload) {
+        return bookAgent.genereazaDrumInvatare(payload.get("obiectiv"));
+    }
+    @PostMapping("/api/admin/repara-pagini")
+    @ResponseBody
+    public String reparaPagini() {
+        return bookAgent.reparaDateLipsa();
+    }
 
     // --- PAGINA FAVORITE ---
     @GetMapping("/populare")
@@ -62,7 +81,7 @@ public class BookController {
     // --- DETALII ---
     @GetMapping("/detalii")
     public String veziDetalii(@RequestParam("titlu") String titlu, Model model) {
-        Map<String, String> carte = new HashMap<>();
+        Map<String, Object> carte = new HashMap<>(); // Schimbăm în Map<String, Object> pentru a păstra numerele ca numere
         try (Session session = driver.session()) {
             var result = session.run(
                     "MATCH (c:Carte {titlu: $titlu}) " +
@@ -76,21 +95,21 @@ public class BookController {
                 org.neo4j.driver.types.Node n = r.get("c").asNode();
 
                 carte.put("titlu", n.get("titlu").asString("Titlu Necunoscut"));
-
-                String autor = "Autor Necunoscut";
-                if (!r.get("nume_autor").isNull()) {
-                    autor = r.get("nume_autor").asString();
-                } else if (!n.get("autor").isNull()) {
-                    autor = n.get("autor").asString();
-                }
-                carte.put("autor", autor);
-
+                carte.put("autor", r.get("nume_autor").isNull() ? n.get("autor").asString("Necunoscut") : r.get("nume_autor").asString());
                 carte.put("imagine", n.get("imagine").asString("https://placehold.co/300x450"));
                 carte.put("categoria", n.get("categoria").asString("General"));
-                carte.put("an", String.valueOf(n.get("an").asInt(0)));
-                carte.put("editura", n.get("editura").asString("Necunoscută"));
-                carte.put("nr_pagini", String.valueOf(n.get("nr_pagini").asInt(0)));
-                carte.put("isbn", n.get("isbn").asString("-"));
+
+                // --- ATENȚIE AICI: Citirea corectă a numerelor ---
+                carte.put("an", n.get("an").asObject());
+                carte.put("editura", n.get("editura").asString("-"));
+
+                // Verificăm dacă nr_pagini există și îl trimitem ca număr
+                if (n.containsKey("nr_pagini")) {
+                    carte.put("nr_pagini", n.get("nr_pagini").asInt());
+                } else {
+                    carte.put("nr_pagini", 0);
+                }
+
                 carte.put("descriere_ampla", n.get("descriere_ampla").asString(""));
             }
         }

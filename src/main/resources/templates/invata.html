@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mentor Învățare AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00b894;
+            --secondary-color: #6c5ce7;
+            --bg-color: #f8f9fa;
+            --text-dark: #2d3436;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-color);
+            margin: 0;
+            color: var(--text-dark);
+        }
+
+        /* Header / Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #00cec9 100%);
+            padding: 60px 20px;
+            text-align: center;
+            color: white;
+        }
+        .hero h1 { margin: 0; font-size: 2.5em; }
+        .hero p { opacity: 0.9; margin-top: 10px; }
+
+        /* Search Bar Area */
+        .search-container {
+            max-width: 650px;
+            margin: -40px auto 40px;
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .search-container input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #edf2f7;
+            border-radius: 30px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .search-container input:focus { border-color: var(--secondary-color); }
+
+        .btn-magic {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+        .btn-magic:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+        }
+        .btn-magic:disabled { background: #b2bec3; cursor: not-allowed; }
+
+        /* Grid & Cards */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px 50px; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 30px;
+        }
+
+        .book-card {
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transition: 0.3s;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 4px solid transparent;
+        }
+        .book-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .book-card img {
+            width: 100%;
+            height: 380px;
+            object-fit: cover;
+            background: #e2e8f0;
+        }
+
+        .book-info { padding: 20px; flex-grow: 1; }
+        .tag {
+            font-size: 0.7em;
+            color: var(--primary-color);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .book-info h3 { margin: 8px 0; font-size: 1.15em; line-height: 1.3; }
+        .book-info p { color: #636e72; font-size: 0.9em; margin: 0; }
+
+        .view-more {
+            margin-top: 15px;
+            font-size: 0.85em;
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        /* Loader */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .empty-state {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 50px;
+            color: #b2bec3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <h1>🎓 Ce vrei să înveți astăzi?</h1>
+    <p>Spune-mi domeniul dorit, iar AI-ul îți va crea o bibliotecă de studiu personalizată.</p>
+</div>
+
+<div class="search-container">
+    <input type="text" id="obiectiv" placeholder="ex: Vreau să învăț Medicină Veterinară / Marketing..." />
+    <button class="btn-magic" id="btn-gen" onclick="genereazaPlan()">Creează Planul</button>
+</div>
+
+<div id="loader" class="loader"></div>
+
+<div class="container">
+    <div class="grid">
+        <div th:if="${#lists.isEmpty(carti)}" class="empty-state">
+            <p>Nu există încă un plan. Introdu un domeniu mai sus pentru a începe învățarea!</p>
+        </div>
+
+        <a th:each="carte : ${carti}"
+           th:href="@{/detalii(titlu=${carte.titlu})}"
+           class="book-card">
+
+            <img th:src="${carte.imagine}" alt="Coperta cărții">
+
+            <div class="book-info">
+                <span class="tag">📚 Recomandare Studiu</span>
+                <h3 th:text="${carte.titlu}">Titlu Carte</h3>
+                <p th:text="${carte.autor}">Autor</p>
+                <div class="view-more">Vezi detalii & resurse →</div>
+            </div>
+        </a>
+    </div>
+
+    <div style="text-align: center; margin-top: 60px;">
+        <a href="/" style="text-decoration: none; color: #636e72; font-weight: 600; font-size: 0.9em;">
+            ⬅ Înapoi la Biblioteca Generală
+        </a>
+    </div>
+</div>
+
+<script>
+    function genereazaPlan() {
+        const input = document.getElementById('obiectiv');
+        const btn = document.getElementById('btn-gen');
+        const loader = document.getElementById('loader');
+        const obiectiv = input.value.trim();
+
+        if (!obiectiv) {
+            alert("Te rugăm să introduci un domeniu de studiu!");
+            return;
+        }
+
+        // Interfață în stare de încărcare
+        btn.disabled = true;
+        btn.innerText = "Se generează...";
+        loader.style.display = "block";
+
+        fetch('/api/agent/invata', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ obiectiv: obiectiv })
+        })
+            .then(response => {
+                if (!response.ok) throw new Error("Eroare server");
+                return response.text();
+            })
+            .then(data => {
+                // Reîncărcăm pagina filtrată după noul domeniu
+                window.location.href = "/invata?domeniu=" + encodeURIComponent(obiectiv);
+            })
+            .catch(err => {
+                alert("Eroare la comunicarea cu AI-ul. Verifică consola.");
+                console.error(err);
+                btn.disabled = false;
+                btn.innerText = "Creează Planul";
+                loader.style.display = "none";
+            });
+    }
+</script>
+
+</body>
+</html>
