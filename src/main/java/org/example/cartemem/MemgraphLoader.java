@@ -104,23 +104,34 @@ public class MemgraphLoader implements CommandLineRunner {
         }
         List<String> kw = (List<String>) bookData.getOrDefault("cuvinte_cheie", new ArrayList<>());
 
+        // EXTRAGE NR PAGINI DIN JSON
+        int pagini = 0;
+        if (bookData.containsKey("nr_pagini")) {
+            pagini = (int) bookData.get("nr_pagini");
+        }
+
         String query =
                 "MERGE (c:Carte {titlu: $titlu}) " +
                         "SET c.an = $an, c.editura = $editura, c.tara = $tara, c.limba = $limba, " +
-                        "    c.categoria = $cat, c.descriere = $desc, c.imagine = $img " +
+                        "    c.categoria = $cat, c.descriere = $desc, c.imagine = $img, " +
+                        "    c.nr_pagini = $nr_pagini " + // AM ADAUGAT ASTA
                         "MERGE (a:Autor {nume: $autor}) " +
                         "MERGE (c)-[:SCRISA_DE]->(a) " +
                         "WITH c " +
                         "FOREACH (k IN $kw | MERGE (t:Tag {nume: k}) MERGE (c)-[:ARE_TAG]->(t))";
 
-        session.run(query, Map.of(
-                "titlu", titlu, "autor", autor,
-                "an", bookData.getOrDefault("an", 0),
-                "editura", bookData.getOrDefault("editura", ""),
-                "tara", bookData.getOrDefault("tara", ""),
-                "limba", bookData.getOrDefault("limba", ""),
-                "cat", bookData.getOrDefault("categoria", ""),
-                "desc", desc, "img", img, "kw", kw
+        session.run(query, Map.ofEntries(
+                Map.entry("titlu", titlu),
+                Map.entry("autor", autor),
+                Map.entry("an", bookData.getOrDefault("an", 0)),
+                Map.entry("editura", bookData.getOrDefault("editura", "")),
+                Map.entry("tara", bookData.getOrDefault("tara", "")),
+                Map.entry("limba", bookData.getOrDefault("limba", "")),
+                Map.entry("cat", bookData.getOrDefault("categorie", "")),
+                Map.entry("desc", desc),
+                Map.entry("img", img),
+                Map.entry("kw", kw),
+                Map.entry("nr_pagini", pagini)
         ));
     }
 

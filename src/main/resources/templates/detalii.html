@@ -49,8 +49,8 @@
         <table class="specs-table">
             <tr><td class="specs-label">Editura:</td><td th:text="${carte.editura}">-</td></tr>
             <tr><td class="specs-label">An apariție:</td><td th:text="${carte.an}">-</td></tr>
-            <tr><td class="specs-label">Nr. Pagini:</td><td th:text="${carte.nr_pagini != null and carte.nr_pagini > 0 ? carte.nr_pagini : 'Informație indisponibilă'}">-</td>
-            <tr><td class="specs-label">Limba:</td><td>Română</td></tr>
+            <tr><td class="specs-label">Nr. Pagini:</td><td th:text="${carte.nr_pagini != null and carte.nr_pagini > 0 ? carte.nr_pagini : 'Informație indisponibilă'}">-</td></tr>
+            <tr><td class="specs-label">Limba:</td><td th:text="${carte.limba}">-</td></tr>
         </table>
 
         <h3 style="color:#2d3436;">📖 Despre această carte</h3>

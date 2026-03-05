@@ -11868,5 +11868,1065 @@
     "categorie": "Horror",
     "nr_pagini": 300,
     "cuvinte_cheie": ["casă blestemată", "gotic", "vecini", "psihologic"]
+  },
+  {
+    "titlu": "Luceafărul",
+    "autor": "Mihai Eminescu",
+    "an": 1883,
+    "editura": "Socec",
+    "limba": "Romana",
+    "categorie": "Poezie",
+    "nr_pagini": 90,
+    "cuvinte_cheie": ["clasic", "geniu", "dragoste", "astral"]
+  },
+  {
+    "titlu": "The Waste Land",
+    "autor": "T.S. Eliot",
+    "an": 1922,
+    "editura": "Boni & Liveright",
+    "limba": "Engleza",
+    "categorie": "Poezie",
+    "nr_pagini": 64,
+    "cuvinte_cheie": ["modernism", "fragmentare", "deziluzie", "clasic"]
+  },
+  {
+    "titlu": "The Prophet",
+    "autor": "Kahlil Gibran",
+    "an": 1923,
+    "editura": "Alfred A. Knopf",
+    "limba": "Engleza",
+    "categorie": "Poezie",
+    "nr_pagini": 107,
+    "cuvinte_cheie": ["filosofie", "spiritualitate", "viata", "eseuri"]
+  },
+  {
+    "titlu": "Oedipus Rex",
+    "autor": "Sophocles",
+    "an": -429,
+    "editura": "Diverse",
+    "limba": "Greaca veche",
+    "categorie": "Piese de Teatru",
+    "nr_pagini": 120,
+    "cuvinte_cheie": ["tragedie", "destin", "Grecia antica", "rege"]
+  },
+  {
+    "titlu": "Death of a Salesman",
+    "autor": "Arthur Miller",
+    "an": 1949,
+    "editura": "Viking Press",
+    "limba": "Engleza",
+    "categorie": "Piese de Teatru",
+    "nr_pagini": 144,
+    "cuvinte_cheie": ["drama", "visul american", "familie", "esec"]
+  },
+  {
+    "titlu": "Dune",
+    "autor": "Frank Herbert",
+    "an": 1965,
+    "editura": "Chilton Books",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 612,
+    "cuvinte_cheie": ["planeta", "ecologie", "politica", "mesia"]
+  },
+  {
+    "titlu": "Neuromancer",
+    "autor": "William Gibson",
+    "an": 1984,
+    "editura": "Ace",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 271,
+    "cuvinte_cheie": ["cyberpunk", "AI", "hacker", "viitor"]
+  },
+  {
+    "titlu": "Man's Search for Meaning",
+    "autor": "Viktor Frankl",
+    "an": 1946,
+    "editura": "Beacon Press",
+    "limba": "Germana",
+    "categorie": "Psihologie",
+    "nr_pagini": 165,
+    "cuvinte_cheie": ["supravietuire", "logoterapie", "sens", "Holocaust"]
+  },
+  {
+    "titlu": "The Interpretation of Dreams",
+    "autor": "Sigmund Freud",
+    "an": 1899,
+    "editura": "Franz Deuticke",
+    "limba": "Germana",
+    "categorie": "Psihologie",
+    "nr_pagini": 688,
+    "cuvinte_cheie": ["vise", "inconstient", "psihanaliza", "teorie"]
+  },
+  {
+    "titlu": "The Shadow over Innsmouth",
+    "autor": "H.P. Lovecraft",
+    "an": 1936,
+    "editura": "Visionary Publishing",
+    "limba": "Engleza",
+    "categorie": "Horror",
+    "nr_pagini": 158,
+    "cuvinte_cheie": ["cosmic horror", "monstri", "mister", "ocean"]
+  },
+  {
+    "titlu": "Foundation",
+    "autor": "Isaac Asimov",
+    "an": 1951,
+    "editura": "Gnome Press",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 255,
+    "cuvinte_cheie": ["imperiu galactic", "psihohistorie", "viitor", "serie"]
+  },
+  {
+    "titlu": "The Left Hand of Darkness",
+    "autor": "Ursula K. Le Guin",
+    "an": 1969,
+    "editura": "Ace",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 286,
+    "cuvinte_cheie": ["antropologie", "gen", "iarna", "politica"]
+  },
+  {
+    "titlu": "Ubik",
+    "autor": "Philip K. Dick",
+    "an": 1969,
+    "editura": "Doubleday",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 202,
+    "cuvinte_cheie": ["realitate", "timp", "psihic", "moarte"]
+  },
+  {
+    "titlu": "Hyperion",
+    "autor": "Dan Simmons",
+    "an": 1989,
+    "editura": "Doubleday",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 482,
+    "cuvinte_cheie": ["pelerinaj", "timp", "tehnologie", "poezie"]
+  },
+  {
+    "titlu": "Snow Crash",
+    "autor": "Neal Stephenson",
+    "an": 1992,
+    "editura": "Bantam Spectra",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 470,
+    "cuvinte_cheie": ["metavers", "virus", "limba", "actiune"]
+  },
+  {
+    "titlu": "The War of the Worlds",
+    "autor": "H.G. Wells",
+    "an": 1898,
+    "editura": "William Heinemann",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 192,
+    "cuvinte_cheie": ["invazie", "martieni", "clasic", "victorian"]
+  },
+  {
+    "titlu": "Brave New World",
+    "autor": "Aldous Huxley",
+    "an": 1932,
+    "editura": "Chatto & Windus",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 268,
+    "cuvinte_cheie": ["distopie", "genetica", "societate", "control"]
+  },
+  {
+    "titlu": "I, Robot",
+    "autor": "Isaac Asimov",
+    "an": 1950,
+    "editura": "Gnome Press",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 224,
+    "cuvinte_cheie": ["roboti", "legi", "logica", "povestiri"]
+  },
+  {
+    "titlu": "Contact",
+    "autor": "Carl Sagan",
+    "an": 1985,
+    "editura": "Simon & Schuster",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 432,
+    "cuvinte_cheie": ["semnal", "univers", "stiinta", "prima intalnire"]
+  },
+  {
+    "titlu": "The Martian",
+    "autor": "Andy Weir",
+    "an": 2011,
+    "editura": "Crown",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 369,
+    "cuvinte_cheie": ["Marte", "supravietuire", "umor", "stiinta"]
+  },
+  {
+    "titlu": "Solaris",
+    "autor": "Stanisław Lem",
+    "an": 1961,
+    "editura": "MON",
+    "limba": "Poloneza",
+    "categorie": "SF",
+    "nr_pagini": 204,
+    "cuvinte_cheie": ["ocean", "psihologie", "planeta", "comunicare"]
+  },
+  {
+    "titlu": "The Forever War",
+    "autor": "Joe Haldeman",
+    "an": 1974,
+    "editura": "St. Martin's Press",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 236,
+    "cuvinte_cheie": ["razboi", "timp", "armata", "viitor"]
+  },
+  {
+    "titlu": "Starship Troopers",
+    "autor": "Robert A. Heinlein",
+    "an": 1959,
+    "editura": "Putnam",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 263,
+    "cuvinte_cheie": ["razboi", "insecte", "filosofie", "armata"]
+  },
+  {
+    "titlu": "A Canticle for Leibowitz",
+    "autor": "Walter M. Miller Jr.",
+    "an": 1959,
+    "editura": "Lippincott",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 320,
+    "cuvinte_cheie": ["post-apocaliptic", "religie", "istorie", "ciclu"]
+  },
+  {
+    "titlu": "The Time Machine",
+    "autor": "H.G. Wells",
+    "an": 1895,
+    "editura": "Heinemann",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 118,
+    "cuvinte_cheie": ["viitor", "evolutie", "calatorie in timp", "clasic"]
+  },
+  {
+    "titlu": "Altered Carbon",
+    "autor": "Richard K. Morgan",
+    "an": 2002,
+    "editura": "Gollancz",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 375,
+    "cuvinte_cheie": ["cyberpunk", "nemurire", "detectiv", "corpuri"]
+  },
+  {
+    "titlu": "Old Man's War",
+    "autor": "John Scalzi",
+    "an": 2005,
+    "editura": "Tor",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 320,
+    "cuvinte_cheie": ["razboi galactic", "batranete", "corpuri noi", "umor"]
+  },
+  {
+    "titlu": "Do Androids Dream of Electric Sheep?",
+    "autor": "Philip K. Dick",
+    "an": 1968,
+    "editura": "Doubleday",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 210,
+    "cuvinte_cheie": ["androidi", "empatie", "post-apocaliptic", "Blade Runner"]
+  },
+  {
+    "titlu": "Rendezvous with Rama",
+    "autor": "Arthur C. Clarke",
+    "an": 1973,
+    "editura": "Gollancz",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 256,
+    "cuvinte_cheie": ["explorare", "nava", "mister", "stiinta"]
+  },
+  {
+    "titlu": "Ringworld",
+    "autor": "Larry Niven",
+    "an": 1970,
+    "editura": "Ballantine",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 342,
+    "cuvinte_cheie": ["mega-structura", "univers", "aventura", "inginerie"]
+  },
+  {
+    "titlu": "Ender's Game",
+    "autor": "Orson Scott Card",
+    "an": 1985,
+    "editura": "Tor",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 324,
+    "cuvinte_cheie": ["copil geniu", "razboi", "joc", "strategie"]
+  },
+  {
+    "titlu": "The Moon Is a Harsh Mistress",
+    "autor": "Robert A. Heinlein",
+    "an": 1966,
+    "editura": "Putnam",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 382,
+    "cuvinte_cheie": ["Luna", "revolutie", "AI", "societate"]
+  },
+  {
+    "titlu": "Red Mars",
+    "autor": "Kim Stanley Robinson",
+    "an": 1992,
+    "editura": "HarperCollins",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 572,
+    "cuvinte_cheie": ["Marte", "colonizare", "stiinta", "politica"]
+  },
+  {
+    "titlu": "The Mote in God's Eye",
+    "autor": "Larry Niven & Jerry Pournelle",
+    "an": 1974,
+    "editura": "Simon & Schuster",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 537,
+    "cuvinte_cheie": ["prima intalnire", "alieni", "imperiu", "mister"]
+  },
+  {
+    "titlu": "Consider Phlebas",
+    "autor": "Iain M. Banks",
+    "an": 1987,
+    "editura": "Macmillan",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 471,
+    "cuvinte_cheie": ["The Culture", "razboi", "tehnologie", "aventura"]
+  },
+  {
+    "titlu": "The Three-Body Problem",
+    "autor": "Liu Cixin",
+    "an": 2008,
+    "editura": "Chongqing Press",
+    "limba": "Chineza",
+    "categorie": "SF",
+    "nr_pagini": 302,
+    "cuvinte_cheie": ["fizica", "invazie aliena", "China", "istorie"]
+  },
+  {
+    "titlu": "Children of Time",
+    "autor": "Adrian Tchaikovsky",
+    "an": 2015,
+    "editura": "Tor",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 600,
+    "cuvinte_cheie": ["evolutie", "paianjeni", "nava", "supravietuire"]
+  },
+  {
+    "titlu": "Project Hail Mary",
+    "autor": "Andy Weir",
+    "an": 2021,
+    "editura": "Ballantine",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 476,
+    "cuvinte_cheie": ["amnezie", "stiinta", "salvarea lumii", "aliati"]
+  },
+  {
+    "titlu": "All Systems Red",
+    "autor": "Martha Wells",
+    "an": 2017,
+    "editura": "Tor.com",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 144,
+    "cuvinte_cheie": ["Murderbot", "robot", "securitate", "sarcasm"]
+  },
+  {
+    "titlu": "Leviatan se trezeste",
+    "autor": "James S.A. Corey",
+    "an": 2011,
+    "editura": "Orbit",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 561,
+    "cuvinte_cheie": ["space opera", "mister", "detectiv", "protopolecula"]
+  },
+  {
+    "titlu": "Annihilation",
+    "autor": "Jeff VanderMeer",
+    "an": 2014,
+    "editura": "FSG Originals",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 195,
+    "cuvinte_cheie": ["Zona X", "expeditie", "biologie", "bizar"]
+  },
+  {
+    "titlu": "The Windup Girl",
+    "autor": "Paolo Bacigalupi",
+    "an": 2009,
+    "editura": "Night Shade Books",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 359,
+    "cuvinte_cheie": ["biopunk", "energie", "Thailanda", "viitor"]
+  },
+  {
+    "titlu": "Blindsight",
+    "autor": "Peter Watts",
+    "an": 2006,
+    "editura": "Tor",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 384,
+    "cuvinte_cheie": ["constiinta", "vampir", "alieni", "psihologie"]
+  },
+  {
+    "titlu": "The Diamond Age",
+    "autor": "Neal Stephenson",
+    "an": 1995,
+    "editura": "Bantam Spectra",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 499,
+    "cuvinte_cheie": ["nanotehnologie", "educatie", "viitor", "victorian"]
+  },
+  {
+    "titlu": "Pushing Ice",
+    "autor": "Alastair Reynolds",
+    "an": 2005,
+    "editura": "Gollancz",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 458,
+    "cuvinte_cheie": ["cometa", "timp", "nava", "supravietuire"]
+  },
+  {
+    "titlu": "The Songs of Distant Earth",
+    "autor": "Arthur C. Clarke",
+    "an": 1986,
+    "editura": "Gollancz",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 256,
+    "cuvinte_cheie": ["ocean", "nava", "viitor", "nostalgie"]
+  },
+  {
+    "titlu": "Slaughterhouse-Five",
+    "autor": "Kurt Vonnegut",
+    "an": 1969,
+    "editura": "Delacorte",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 190,
+    "cuvinte_cheie": ["razboi", "calatorie in timp", "satira", "Dresda"]
+  },
+  {
+    "titlu": "The Hitchhiker's Guide to the Galaxy",
+    "autor": "Douglas Adams",
+    "an": 1979,
+    "editura": "Pan Books",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 180,
+    "cuvinte_cheie": ["umor", "univers", "prosoape", "aventura"]
+  },
+  {
+    "titlu": "A Scanner Darkly",
+    "autor": "Philip K. Dick",
+    "an": 1977,
+    "editura": "Doubleday",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 217,
+    "cuvinte_cheie": ["droguri", "identitate", "supraveghere", "psihologic"]
+  },
+  {
+    "titlu": "The City and the City",
+    "autor": "China Miéville",
+    "an": 2009,
+    "editura": "Macmillan",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 312,
+    "cuvinte_cheie": ["mister", "detectiv", "doua orase", "perceptie"]
+  },
+  {
+    "titlu": "Exhalation",
+    "autor": "Ted Chiang",
+    "an": 2019,
+    "editura": "Knopf",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 368,
+    "cuvinte_cheie": ["antologie", "logica", "timp", "viata"]
+  },
+  {
+    "titlu": "Wool",
+    "autor": "Hugh Howey",
+    "an": 2011,
+    "editura": "Self-published",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 509,
+    "cuvinte_cheie": ["siloz", "post-apocaliptic", "secrete", "pamant"]
+  },
+  {
+    "titlu": "Revelation Space",
+    "autor": "Alastair Reynolds",
+    "an": 2000,
+    "editura": "Gollancz",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 585,
+    "cuvinte_cheie": ["hard SF", "univers", "mister", "tehnologie"]
+  },
+  {
+    "titlu": "A Clockwork Orange",
+    "autor": "Anthony Burgess",
+    "an": 1962,
+    "editura": "Heinemann",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 176,
+    "cuvinte_cheie": ["violență", "control", "limbaj", "distopie"]
+  },
+  {
+    "titlu": "The Power",
+    "autor": "Naomi Alderman",
+    "an": 2016,
+    "editura": "Viking",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 341,
+    "cuvinte_cheie": ["electricitate", "femei", "revolta", "societate"]
+  },
+  {
+    "titlu": "Cloud Atlas",
+    "autor": "David Mitchell",
+    "an": 2004,
+    "editura": "Sceptre",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 544,
+    "cuvinte_cheie": ["generatii", "destin", "istorie", "structura"]
+  },
+  {
+    "titlu": "The Rise and Fall of D.O.D.O.",
+    "autor": "Neal Stephenson & Nicole Galland",
+    "an": 2017,
+    "editura": "William Morrow",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 752,
+    "cuvinte_cheie": ["magie", "calatorie in timp", "tehnologie", "umor"]
+  },
+  {
+    "titlu": "Anathem",
+    "autor": "Neal Stephenson",
+    "an": 2008,
+    "editura": "William Morrow",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 937,
+    "cuvinte_cheie": ["filosofie", "matematica", "lumi paralele", "calugari"]
+  },
+  {
+    "titlu": "House of Suns",
+    "autor": "Alastair Reynolds",
+    "an": 2008,
+    "editura": "Gollancz",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 512,
+    "cuvinte_cheie": ["cloni", "milioane de ani", "galaxie", "mister"]
+  },
+  {
+    "titlu": "Sea of Rust",
+    "autor": "C. Robert Cargill",
+    "an": 2017,
+    "editura": "Harper Voyager",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 365,
+    "cuvinte_cheie": ["roboti", "post-uman", "western", "supravietuire"]
+  },
+  {
+    "titlu": "Delta-v",
+    "autor": "Daniel Suarez",
+    "an": 2019,
+    "editura": "Dutton",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 448,
+    "cuvinte_cheie": ["asteroizi", "minierit", "viitor apropiat", "aventura"]
+  },
+  {
+    "titlu": "Children of Ruin",
+    "autor": "Adrian Tchaikovsky",
+    "an": 2019,
+    "editura": "Orbit",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 600,
+    "cuvinte_cheie": ["caracatite", "evolutie", "spatiu", "comunicare"]
+  },
+  {
+    "titlu": "Artemis",
+    "autor": "Andy Weir",
+    "an": 2017,
+    "editura": "Crown",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 305,
+    "cuvinte_cheie": ["Luna", "furt", "oras", "stiinta"]
+  },
+  {
+    "titlu": "Dark Matter",
+    "autor": "Blake Crouch",
+    "an": 2016,
+    "editura": "Crown",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 342,
+    "cuvinte_cheie": ["lumi paralele", "alegere", "familie", "fizica"]
+  },
+  {
+    "titlu": "Recursion",
+    "autor": "Blake Crouch",
+    "an": 2019,
+    "editura": "Crown",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 336,
+    "cuvinte_cheie": ["memorie", "timp", "realitate", "thriller"]
+  },
+  {
+    "titlu": "The 5th Wave",
+    "autor": "Rick Yancey",
+    "an": 2013,
+    "editura": "Putnam",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 457,
+    "cuvinte_cheie": ["invazie", "adolescenti", "valuri", "supravietuire"]
+  },
+  {
+    "titlu": "Station Eleven",
+    "autor": "Emily St. John Mandel",
+    "an": 2014,
+    "editura": "Knopf",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 333,
+    "cuvinte_cheie": ["pandemie", "arta", "post-apocaliptic", "teatru"]
+  },
+  {
+    "titlu": "Seveneves",
+    "autor": "Neal Stephenson",
+    "an": 2015,
+    "editura": "William Morrow",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 880,
+    "cuvinte_cheie": ["Luna", "explozie", "supravietuire", "genetica"]
+  },
+  {
+    "titlu": "We Are Legion (We Are Bob)",
+    "autor": "Dennis E. Taylor",
+    "an": 2016,
+    "editura": "Ether Books",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 306,
+    "cuvinte_cheie": ["cloni", "AI", "spatiu", "umor"]
+  },
+  {
+    "titlu": "Dragon's Egg",
+    "autor": "Robert L. Forward",
+    "an": 1980,
+    "editura": "Del Rey",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 352,
+    "cuvinte_cheie": ["stea neutronica", "evolutie", "alieni", "hard SF"]
+  },
+  {
+    "titlu": "Eon",
+    "autor": "Greg Bear",
+    "an": 1985,
+    "editura": "Bluejay Books",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 504,
+    "cuvinte_cheie": ["asteroid", "timp", "razboi", "dimensiuni"]
+  },
+  {
+    "titlu": "Forge of God",
+    "autor": "Greg Bear",
+    "an": 1987,
+    "editura": "Tor",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 474,
+    "cuvinte_cheie": ["sfarsitul lumii", "alieni", "pamant", "distrugere"]
+  },
+  {
+    "titlu": "The Sparrow",
+    "autor": "Mary Doria Russell",
+    "an": 1996,
+    "editura": "Villard",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 408,
+    "cuvinte_cheie": ["iezuiti", "prima intalnire", "religie", "tragedie"]
+  },
+  {
+    "titlu": "Armor",
+    "autor": "John Steakley",
+    "an": 1984,
+    "editura": "DAW",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 426,
+    "cuvinte_cheie": ["armura", "razboi", "insecte", "supravietuire"]
+  },
+  {
+    "titlu": "A Deepness in the Sky",
+    "autor": "Vernor Vinge",
+    "an": 1999,
+    "editura": "Tor",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 606,
+    "cuvinte_cheie": ["alieni", "paianjeni", "timp", "tehnologie"]
+  },
+  {
+    "titlu": "Fire Upon the Deep",
+    "autor": "Vernor Vinge",
+    "an": 1992,
+    "editura": "Tor",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 391,
+    "cuvinte_cheie": ["internet galactic", "minte colectiva", "alieni", "viitor"]
+  },
+  {
+    "titlu": "The Inverted World",
+    "autor": "Christopher Priest",
+    "an": 1974,
+    "editura": "Faber & Faber",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 256,
+    "cuvinte_cheie": ["oras mobil", "geometrie", "perceptie", "pamant"]
+  },
+  {
+    "titlu": "Blood Music",
+    "autor": "Greg Bear",
+    "an": 1985,
+    "editura": "Arbor House",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 262,
+    "cuvinte_cheie": ["nano", "biologie", "evolutie", "celule"]
+  },
+  {
+    "titlu": "Gateway",
+    "autor": "Frederik Pohl",
+    "an": 1977,
+    "editura": "St. Martin's Press",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 313,
+    "cuvinte_cheie": ["nava", "mister", "spatiu", "teama"]
+  },
+  {
+    "titlu": "The Stars My Destination",
+    "autor": "Alfred Bester",
+    "an": 1956,
+    "editura": "Sidgwick & Jackson",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 258,
+    "cuvinte_cheie": ["razbunare", "teleportare", "clasic", "viitor"]
+  },
+  {
+    "titlu": "The Demolished Man",
+    "autor": "Alfred Bester",
+    "an": 1953,
+    "editura": "Shasta",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 250,
+    "cuvinte_cheie": ["telepatie", "crima", "politie", "viitor"]
+  },
+  {
+    "titlu": "Dragonflight",
+    "autor": "Anne McCaffrey",
+    "an": 1968,
+    "editura": "Ballantine",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 303,
+    "cuvinte_cheie": ["dragoni", "telepatie", "Pern", "supravietuire"]
+  },
+  {
+    "titlu": "Wasp",
+    "autor": "Eric Frank Russell",
+    "an": 1957,
+    "editura": "Eyre & Spottiswoode",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 176,
+    "cuvinte_cheie": ["sabotaj", "razboi", "alieni", "umor"]
+  },
+  {
+    "titlu": "The Gods Themselves",
+    "autor": "Isaac Asimov",
+    "an": 1972,
+    "editura": "Doubleday",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 288,
+    "cuvinte_cheie": ["energie", "lumi paralele", "alieni", "stiinta"]
+  },
+  {
+    "titlu": "Childhood's End",
+    "autor": "Arthur C. Clarke",
+    "an": 1953,
+    "editura": "Ballantine",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 224,
+    "cuvinte_cheie": ["evolutie", "supraveghetori", "alieni", "final"]
+  },
+  {
+    "titlu": "The Man in the High Castle",
+    "autor": "Philip K. Dick",
+    "an": 1962,
+    "editura": "Putnam",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 240,
+    "cuvinte_cheie": ["istorie alternativa", "razboi", "Axele", "mister"]
+  },
+  {
+    "titlu": "Startide Rising",
+    "autor": "David Brin",
+    "an": 1983,
+    "editura": "Bantam",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 461,
+    "cuvinte_cheie": ["delfini", "spatiu", "alieni", "aventura"]
+  },
+  {
+    "titlu": "The Postman",
+    "autor": "David Brin",
+    "an": 1985,
+    "editura": "Bantam",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 321,
+    "cuvinte_cheie": ["post-apocaliptic", "civilizatie", "simbol", "reconstructie"]
+  },
+  {
+    "titlu": "Downward to the Earth",
+    "autor": "Robert Silverberg",
+    "an": 1970,
+    "editura": "Doubleday",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 176,
+    "cuvinte_cheie": ["elefanti", "planeta", "spiritual", "alieni"]
+  },
+  {
+    "titlu": "Dying Inside",
+    "autor": "Robert Silverberg",
+    "an": 1972,
+    "editura": "Scribner",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 245,
+    "cuvinte_cheie": ["telepatie", "pierdere", "psihologic", "viata"]
+  },
+  {
+    "titlu": "Roadside Picnic",
+    "autor": "Arkady & Boris Strugatsky",
+    "an": 1972,
+    "editura": "Diverse",
+    "limba": "Rusa",
+    "categorie": "SF",
+    "nr_pagini": 224,
+    "cuvinte_cheie": ["Zona", "alieni", "stalker", "mister"]
+  },
+  {
+    "titlu": "The Dispossessed",
+    "autor": "Ursula K. Le Guin",
+    "an": 1974,
+    "editura": "Harper & Row",
+    "limba": "Engleza",
+    "categorie": "SF",
+    "nr_pagini": 310,
+    "cuvinte_cheie": ["anarhie", "politica", "fizica", "Luna"]
+  },
+  {
+    "titlu": "Dreadnought",
+    "autor": "April Daniels",
+    "an": 2017,
+    "editura": "Diversion",
+    "limba": "Engleza",
+    "categorie": "YA",
+    "nr_pagini": 280,
+    "cuvinte_cheie": ["supereroi", "transgender", "identitate", "actiune"]
+  },
+  {
+    "titlu": "The Gilded Ones",
+    "autor": "Namina Forna",
+    "an": 2021,
+    "editura": "Delacorte",
+    "limba": "Engleza",
+    "categorie": "YA",
+    "nr_pagini": 416,
+    "cuvinte_cheie": ["fantezie", "femei", "razboi", "sange"]
+  },
+  {
+    "titlu": "Cemetery Boys",
+    "autor": "Aiden Thomas",
+    "an": 2020,
+    "editura": "Swoon",
+    "limba": "Engleza",
+    "categorie": "YA",
+    "nr_pagini": 352,
+    "cuvinte_cheie": ["fantome", "transgender", "familie", "mister"]
+  },
+  {
+    "titlu": "Lore",
+    "autor": "Alexandra Bracken",
+    "an": 2021,
+    "editura": "Disney",
+    "limba": "Engleza",
+    "categorie": "YA",
+    "nr_pagini": 480,
+    "cuvinte_cheie": ["mitologie", "zei", "joc", "New York"]
+  },
+  {
+    "titlu": "Last Night at the Telegraph Club",
+    "autor": "Malinda Lo",
+    "an": 2021,
+    "editura": "Dutton",
+    "limba": "Engleza",
+    "categorie": "YA",
+    "nr_pagini": 416,
+    "cuvinte_cheie": ["istoric", "LGBTQ", "Chinatown", "anii 50"]
+  },
+  {
+    "titlu": "The Invisible Life of Addie LaRue",
+    "autor": "V.E. Schwab",
+    "an": 2020,
+    "editura": "Tor",
+    "limba": "Engleza",
+    "categorie": "YA",
+    "nr_pagini": 448,
+    "cuvinte_cheie": ["nemurire", "uitare", "arta", "istorie"]
+  },
+  {
+    "titlu": "Ace of Spades",
+    "autor": "Faridah Abike-Iyimide",
+    "an": 2021,
+    "editura": "Feiwel",
+    "limba": "Engleza",
+    "categorie": "YA",
+    "nr_pagini": 470,
+    "cuvinte_cheie": ["thriller", "scoala", "rasism", "secrete"]
+  },
+  {
+    "titlu": "Concrete Rose",
+    "autor": "Angie Thomas",
+    "an": 2021,
+    "editura": "Balzer",
+    "limba": "Engleza",
+    "categorie": "YA",
+    "nr_pagini": 368,
+    "cuvinte_cheie": ["familie", "tatal", "adolescent", "origini"]
+  },
+  {
+    "titlu": "Iron Widow",
+    "autor": "Xiran Jay Zhao",
+    "an": 2021,
+    "editura": "Penguin",
+    "limba": "Engleza",
+    "categorie": "YA",
+    "nr_pagini": 394,
+    "cuvinte_cheie": ["mecha", "revolta", "feminin", "istorie"]
+  },
+  {
+    "titlu": "Malibu Rising",
+    "autor": "Taylor Jenkins Reid",
+    "an": 2021,
+    "editura": "Ballantine",
+    "limba": "Engleza",
+    "categorie": "Nuvele",
+    "nr_pagini": 384,
+    "cuvinte_cheie": ["familie", "anii 80", "foc", "celebritate"]
+  },
+  {
+    "titlu": "Project Hail Mary",
+    "autor": "Andy Weir",
+    "an": 2021,
+    "editura": "Ballantine",
+    "limba": "Engleza",
+    "categorie": "Nuvele",
+    "nr_pagini": 476,
+    "cuvinte_cheie": ["spatiu", "salvare", "aliat", "amnezie"]
+  },
+  {
+    "titlu": "Beautiful World, Where Are You",
+    "autor": "Sally Rooney",
+    "an": 2021,
+    "editura": "Faber",
+    "limba": "Engleza",
+    "categorie": "Nuvele",
+    "nr_pagini": 352,
+    "cuvinte_cheie": ["prietenie", "dragoste", "viata", "scrisori"]
+  },
+  {
+    "titlu": "The Paper Palace",
+    "autor": "Miranda Cowley Heller",
+    "an": 2021,
+    "editura": "Riverhead",
+    "limba": "Engleza",
+    "categorie": "Nuvele",
+    "nr_pagini": 400,
+    "cuvinte_cheie": ["vara", "alegere", "trecut", "familie"]
+  },
+  {
+    "titlu": "Harlem Shuffle",
+    "autor": "Colson Whitehead",
+    "an": 2021,
+    "editura": "Doubleday",
+    "limba": "Engleza",
+    "categorie": "Nuvele",
+    "nr_pagini": 336,
+    "cuvinte_cheie": ["Harlem", "crima", "familie", "istorie"]
   }
 ]

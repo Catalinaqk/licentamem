@@ -26,7 +26,7 @@ public class BookGeneratorAgent {
     private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(60)).build();
 
     // --- CHEIA TA ACTUALIZATĂ ---
-    private final String GEMINI_API_KEY = "AIzaSyBb2btisyLRTkvQDm6C8lSZtqnxpjp6QnA";
+    private final String GEMINI_API_KEY = "AIzaSyB8EQqw4GixfN4bWzsYCKr9GWjNOQsZNvQ";
 
     // --- MODELUL STABIL DIN LISTA TA (gemini-2.5-flash) ---
     private final String MODEL_NAME = "gemini-2.5-flash";
@@ -302,55 +302,85 @@ public class BookGeneratorAgent {
     }
 
     private void salveazaInMemgraph(String titlu, String autor, String gen, String img, Map<String, Object> detalii) {
-        try (Driver tempDriver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic("", ""))) {
-            try (Session s = tempDriver.session()) {
+        try (Session s = driver.session()) {
+            // 1. Identificăm datele de bază
+            String t = (String) detalii.getOrDefault("titlu", titlu);
+            String a = (String) detalii.getOrDefault("autor", autor);
 
-                // 1. Logica de extragere si conversie sigura pentru nr_pagini
-                int pagini = 0;
-                Object pgRaw = detalii.get("nr_pagini");
+            // 2. Căutăm OBLIGATORIU datele oficiale de pe Google (Paginile corecte + Copertă clară)
+            Map<String, Object> dateGoogle = cautaDateOficialeGoogle(t, a);
 
-                if (pgRaw != null) {
-                    try {
-                        if (pgRaw instanceof Number) {
-                            pagini = ((Number) pgRaw).intValue();
-                        } else {
-                            // Daca AI-ul a trimis text "350", il transformam in numar
-                            pagini = Integer.parseInt(pgRaw.toString().replaceAll("[^0-9]", ""));
-                        }
-                    } catch (Exception e) {
-                        pagini = 0;
-                    }
-                }
+            int pagini = (int) dateGoogle.get("pagini");
+            String imagineClara = (String) dateGoogle.get("imagine");
 
-                // 2. Daca tot e 0, cautam pe Google Books (Backup)
-                if (pagini <= 0) {
-                    pagini = extrageNrPaginiDeLaGoogle(titlu, autor);
-                }
+            // Editura: Dacă AI-ul a văzut-o în poză, o lăsăm. Dacă e "Necunoscut", luăm de la Google.
+            String edituraAI = detalii.getOrDefault("editura", "Necunoscut").toString();
+            String edituraFinala = (edituraAI.equalsIgnoreCase("Necunoscut") || edituraAI.equals("-"))
+                    ? (String) dateGoogle.get("editura")
+                    : edituraAI;
 
-                // 3. Fallback final daca nu gasim nicaieri
-                if (pagini <= 0) pagini = 220;
+            // Anul: Dacă AI a dat 0, luăm de la Google.
+            int anFinal = 0;
+            Object anRaw = detalii.get("an");
+            if (anRaw instanceof Number) anFinal = ((Number) anRaw).intValue();
+            if (anFinal == 0) anFinal = (int) dateGoogle.get("an");
 
-                // 4. Executia Cypher
-                s.run("MERGE (c:Carte {titlu: $t}) " +
-                                "SET c.autor=$autor, c.categoria=$gen, c.imagine=$img, c.descriere=$desc, " +
-                                "    c.an=$an, c.editura=$editura, c.nr_pagini=$nr_pagini " +
-                                "MERGE (au:Autor {nume: $autor}) " +
-                                "MERGE (c)-[:SCRISA_DE]->(au)",
-                        Map.of(
-                                "t", titlu,
-                                "autor", detalii.getOrDefault("autor", "Necunoscut"),
-                                "gen", gen,
-                                "img", img,
-                                "desc", detalii.getOrDefault("descriere", "Fără descriere"),
-                                "an", detalii.getOrDefault("an", 2020),
-                                "editura", detalii.getOrDefault("editura", "Necunoscută"),
-                                "nr_pagini", pagini
-                        ));
-                System.out.println("✅ Salvat: " + titlu + " (" + pagini + " pagini)");
-            }
+            // 3. Pregătim parametrii într-un HashMap (Map.of dă eroare la mai mult de 10 elemente!)
+            Map<String, Object> params = new HashMap<>();
+            params.put("t", t);
+            params.put("autor", a);
+            params.put("gen", gen);
+            params.put("img", imagineClara);
+            params.put("desc", detalii.getOrDefault("descriere", "Carte scanată."));
+            params.put("an", anFinal);
+            params.put("editura", edituraFinala);
+            params.put("nr_pagini", pagini);
+            params.put("limba", detalii.getOrDefault("limba", "Română"));
+
+            s.run("MERGE (c:Carte {titlu: $t}) " +
+                    "SET c.autor=$autor, c.categoria=$gen, c.imagine=$img, c.descriere=$desc, " +
+                    "    c.an=$an, c.editura=$editura, c.nr_pagini=$nr_pagini, c.limba=$limba " +
+                    "MERGE (au:Autor {nume: $autor}) " +
+                    "MERGE (c)-[:SCRISA_DE]->(au)", params);
+
+            System.out.println("✅ Salvat hibrid: " + t + " (" + pagini + " pagini)");
         } catch (Exception e) {
             System.err.println("❌ Eroare la salvarea in Memgraph: " + e.getMessage());
         }
+    }
+    private Map<String, Object> cautaDateOficialeGoogle(String t, String a) {
+        Map<String, Object> date = new HashMap<>();
+        date.put("pagini", 0);
+        date.put("editura", "Necunoscută");
+        date.put("an", 2024);
+        date.put("imagine", "https://placehold.co/300x450");
+
+        try {
+            String query = URLEncoder.encode("intitle:\"" + t + "\" inauthor:\"" + a + "\"", StandardCharsets.UTF_8);
+            String url = "https://www.googleapis.com/books/v1/volumes?q=" + query + "&maxResults=1";
+
+            HttpResponse<String> resp = httpClient.send(HttpRequest.newBuilder().uri(URI.create(url)).GET().build(),
+                    HttpResponse.BodyHandlers.ofString());
+
+            if (resp.statusCode() == 200) {
+                JsonNode items = objectMapper.readTree(resp.body()).path("items");
+                if (items.isArray() && items.size() > 0) {
+                    JsonNode info = items.get(0).path("volumeInfo");
+                    date.put("pagini", info.path("pageCount").asInt(0));
+                    date.put("editura", info.path("publisher").asText("Necunoscută"));
+
+                    String pDate = info.path("publishedDate").asText("2024");
+                    date.put("an", Integer.parseInt(pDate.length() >= 4 ? pDate.substring(0, 4) : "2024"));
+
+                    if (info.has("imageLinks")) {
+                        date.put("imagine", info.path("imageLinks").path("thumbnail").asText().replace("http:", "https:"));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️ Google Books inaccesibil: " + e.getMessage());
+        }
+        return date;
     }
     private int extrageNrPaginiDeLaGoogle(String t, String a) {
         try {
@@ -373,5 +403,71 @@ public class BookGeneratorAgent {
             System.out.println("⚠️ Google Books nu a returnat pagini pentru: " + t);
         }
         return 0;
+    }
+
+
+    // Adaugă această metodă în BookGeneratorAgent.java
+
+    public String recunoasteCarteDinPoza(String base64Image) {
+        try {
+            // 1. Curățare Base64 (Eliminăm prefixul de browser dacă există)
+            if (base64Image.contains(",")) {
+                base64Image = base64Image.substring(base64Image.indexOf(",") + 1);
+            }
+
+            String prompt = "Analizează această poză de copertă. Identifică Titlul și Autorul. " +
+                    "Răspunde STRICT JSON: {\"titlu\":\"...\", \"autor\":\"...\", \"editura\":\"...\", \"an\":0}";
+
+            // 2. Construcție structură Multimodală
+            Map<String, Object> textPart = Map.of("text", prompt);
+            Map<String, Object> imagePart = Map.of("inline_data", Map.of(
+                    "mime_type", "image/jpeg",
+                    "data", base64Image
+            ));
+
+            Map<String, Object> contents = Map.of("parts", List.of(textPart, imagePart));
+
+            Map<String, Object> requestBody = Map.of(
+                    "contents", List.of(contents),
+                    "generationConfig", Map.of("responseMimeType", "application/json")
+            );
+
+            String jsonPayload = objectMapper.writeValueAsString(requestBody);
+
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create(GEMINI_URL))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .build();
+
+            System.out.println("📸 Trimitere imagine către Gemini...");
+            HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+
+            if (resp.statusCode() != 200) {
+                System.err.println("❌ Eroare API: " + resp.body());
+                return "❌ Eroare Gemini (HTTP " + resp.statusCode() + ")";
+            }
+
+            JsonNode root = objectMapper.readTree(resp.body());
+            JsonNode candidate = root.path("candidates").get(0);
+
+            if (candidate == null || candidate.path("content").path("parts").isEmpty()) {
+                return "❌ AI-ul nu a putut citi imaginea.";
+            }
+
+            String aiJson = candidate.path("content").path("parts").get(0).path("text").asText();
+            Map<String, Object> detalii = objectMapper.readValue(aiJson, new TypeReference<>() {});
+
+            String titlu = (String) detalii.get("titlu");
+            String autor = (String) detalii.get("autor");
+
+            salveazaInMemgraph(titlu, autor, "Scanata", null, detalii);
+
+            return "✅ Cartea '" + titlu + "' a fost identificată!";
+
+        } catch (Exception e) {
+            System.err.println("❌ Excepție: " + e.getMessage());
+            return "❌ Eroare tehnică: " + e.getMessage();
+        }
     }
 }

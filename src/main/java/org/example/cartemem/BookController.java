@@ -24,34 +24,93 @@ public class BookController {
         this.bookAgent = bookAgent;
     }
 
-    // --- PAGINA PRINCIPALĂ ---
+    // --- 1. PAGINA PRINCIPALĂ (GALERIE) ---
     @GetMapping({"/", "/carti"})
     public String arataCartile(@RequestParam(value = "q", required = false) String query,
                                @RequestParam(value = "gen", required = false) String gen,
                                Model model) {
         return incarcaPagina(query, gen, model, "galerie");
     }
-    // Pagina pentru "Vreau să învăț..."
-    @GetMapping("/invata")
-    public String paginaInvatare(@RequestParam(value = "domeniu", required = false) String domeniu, Model model) {
-        // Dacă nu a ales un domeniu, îi arătăm toate cărțile din categoria "Invatare"
-        String categorieCautata = (domeniu != null) ? "Invatare: " + domeniu : "Invatare";
-        return incarcaPagina(null, categorieCautata, model, "invata");
+
+    // --- 2. SCANARE & STERGE (NOU) ---
+    @GetMapping("/scaneaza")
+    public String paginaScanare(Model model) {
+        List<Map<String, String>> scanate = new ArrayList<>();
+        try (Session session = driver.session()) {
+            var result = session.run("MATCH (c:Carte {categoria: 'Scanata'})-[:SCRISA_DE]->(a:Autor) " +
+                    "RETURN c.titlu AS titlu, c.imagine AS imagine, a.nume AS autor " +
+                    "ORDER BY id(c) DESC");
+            while (result.hasNext()) {
+                var r = result.next();
+                Map<String, String> carte = new HashMap<>();
+                carte.put("titlu", r.get("titlu").asString());
+                carte.put("autor", r.get("autor").asString());
+                carte.put("imagine", r.get("imagine").asString());
+                scanate.add(carte);
+            }
+        }
+        model.addAttribute("cartiScanate", scanate);
+        return "scaneaza";
     }
 
-    // API pentru butonul de generare
-    @PostMapping("/api/agent/invata")
+    @PostMapping("/api/delete-book")
     @ResponseBody
-    public String triggerLearningAgent(@RequestBody Map<String, String> payload) {
-        return bookAgent.genereazaDrumInvatare(payload.get("obiectiv"));
-    }
-    @PostMapping("/api/admin/repara-pagini")
-    @ResponseBody
-    public String reparaPagini() {
-        return bookAgent.reparaDateLipsa();
+    public String stergeCarte(@RequestBody Map<String, String> payload) {
+        String titlu = payload.get("titlu");
+        try (Session session = driver.session()) {
+            session.run("MATCH (c:Carte {titlu: $titlu}) DETACH DELETE c",
+                    Map.of("titlu", titlu));
+            return "✅ Cartea a fost ștearsă.";
+        } catch (Exception e) {
+            return "❌ Eroare la ștergere.";
+        }
     }
 
-    // --- PAGINA FAVORITE ---
+    @PostMapping("/api/agent/scaneaza")
+    @ResponseBody
+    public String uploadPoza(@RequestBody Map<String, String> payload) {
+        String rawBase64 = payload.get("imagine").split(",")[1];
+        return bookAgent.recunoasteCarteDinPoza(rawBase64);
+    }
+
+    // --- 3. DETALII ---
+    @GetMapping("/detalii")
+    public String veziDetalii(@RequestParam("titlu") String titlu, Model model) {
+        Map<String, Object> carte = new HashMap<>();
+        try (Session session = driver.session()) {
+            var result = session.run(
+                    "MATCH (c:Carte {titlu: $titlu}) " +
+                            "OPTIONAL MATCH (c)-[:SCRISA_DE]->(a:Autor) " +
+                            "RETURN c, a.nume AS nume_autor",
+                    Map.of("titlu", titlu)
+            );
+
+            if (result.hasNext()) {
+                Record r = result.next();
+                org.neo4j.driver.types.Node n = r.get("c").asNode();
+
+                carte.put("titlu", n.get("titlu").asString("Titlu Necunoscut"));
+                carte.put("autor", r.get("nume_autor").isNull() ? n.get("autor").asString("Necunoscut") : r.get("nume_autor").asString());
+                carte.put("imagine", n.get("imagine").asString("https://placehold.co/300x450"));
+                carte.put("categoria", n.get("categoria").asString("General"));
+                carte.put("limba", n.get("limba").asString("Necunoscută"));
+                carte.put("editura", n.get("editura").asString("-"));
+                carte.put("an", n.get("an").asObject());
+
+                if (n.containsKey("nr_pagini")) {
+                    carte.put("nr_pagini", n.get("nr_pagini").asInt());
+                } else {
+                    carte.put("nr_pagini", 0);
+                }
+
+                carte.put("descriere_ampla", n.get("descriere_ampla").asString(""));
+            }
+        }
+        model.addAttribute("carte", carte);
+        return "detalii";
+    }
+
+    // --- 4. POPULARE & FAVORITE ---
     @GetMapping("/populare")
     public String paginaPopulare(Model model) {
         List<String> autori = List.of("Stephen King", "Colleen Hoover", "J.K. Rowling", "Agatha Christie", "Mircea Cărtărescu", "Haruki Murakami", "Irina Binder", "J.R.R. Tolkien", "Dan Brown");
@@ -59,7 +118,20 @@ public class BookController {
         return incarcaPagina(null, "Bestseller", model, "populare");
     }
 
-    // --- API-URI ---
+    // --- 5. ÎNVĂȚARE ---
+    @GetMapping("/invata")
+    public String paginaInvatare(@RequestParam(value = "domeniu", required = false) String domeniu, Model model) {
+        String categorieCautata = (domeniu != null) ? "Invatare: " + domeniu : "Invatare";
+        return incarcaPagina(null, categorieCautata, model, "invata");
+    }
+
+    @PostMapping("/api/agent/invata")
+    @ResponseBody
+    public String triggerLearningAgent(@RequestBody Map<String, String> payload) {
+        return bookAgent.genereazaDrumInvatare(payload.get("obiectiv"));
+    }
+
+    // --- 6. API-URI ADMINISTRATIVE & AI ---
     @PostMapping("/api/agent/rezumat")
     @ResponseBody
     public String genereazaRezumat(@RequestBody Map<String, String> payload) {
@@ -78,48 +150,16 @@ public class BookController {
         return bookAgent.genereazaPersonalizat(payload.get("sursa"), payload.get("autor"));
     }
 
-    // --- DETALII ---
-    @GetMapping("/detalii")
-    public String veziDetalii(@RequestParam("titlu") String titlu, Model model) {
-        Map<String, Object> carte = new HashMap<>(); // Schimbăm în Map<String, Object> pentru a păstra numerele ca numere
-        try (Session session = driver.session()) {
-            var result = session.run(
-                    "MATCH (c:Carte {titlu: $titlu}) " +
-                            "OPTIONAL MATCH (c)-[:SCRISA_DE]->(a:Autor) " +
-                            "RETURN c, a.nume AS nume_autor",
-                    Map.of("titlu", titlu)
-            );
-
-            if (result.hasNext()) {
-                Record r = result.next();
-                org.neo4j.driver.types.Node n = r.get("c").asNode();
-
-                carte.put("titlu", n.get("titlu").asString("Titlu Necunoscut"));
-                carte.put("autor", r.get("nume_autor").isNull() ? n.get("autor").asString("Necunoscut") : r.get("nume_autor").asString());
-                carte.put("imagine", n.get("imagine").asString("https://placehold.co/300x450"));
-                carte.put("categoria", n.get("categoria").asString("General"));
-
-                // --- ATENȚIE AICI: Citirea corectă a numerelor ---
-                carte.put("an", n.get("an").asObject());
-                carte.put("editura", n.get("editura").asString("-"));
-
-                // Verificăm dacă nr_pagini există și îl trimitem ca număr
-                if (n.containsKey("nr_pagini")) {
-                    carte.put("nr_pagini", n.get("nr_pagini").asInt());
-                } else {
-                    carte.put("nr_pagini", 0);
-                }
-
-                carte.put("descriere_ampla", n.get("descriere_ampla").asString(""));
-            }
-        }
-        model.addAttribute("carte", carte);
-        return "detalii";
+    @PostMapping("/api/admin/repara-pagini")
+    @ResponseBody
+    public String reparaPagini() {
+        return bookAgent.reparaDateLipsa();
     }
 
+    // --- METODA PRIVATĂ DE ÎNCĂRCARE (RECONSTRUITĂ) ---
     private String incarcaPagina(String query, String gen, Model model, String templateName) {
         List<Map<String, String>> listaCarti = new ArrayList<>();
-        List<String> listaGenuri = List.of("Bestseller", "Science Fiction", "Fantasy", "Horror", "Thriller", "Mister", "Romance", "Istorie", "Psihologie");
+        List<String> listaGenuri = List.of("Bestseller", "Science Fiction", "Fantasy", "Horror", "Thriller", "Mister", "Romance", "Istorie", "Psihologie", "Scanata");
 
         try (Session session = driver.session()) {
             StringBuilder cypher = new StringBuilder("MATCH (c:Carte)-[:SCRISA_DE]->(a:Autor) WHERE 1=1 ");
@@ -133,7 +173,7 @@ public class BookController {
                 cypher.append("AND toLower(c.categoria) CONTAINS toLower($gen) ");
                 params.put("gen", gen);
             }
-            cypher.append("RETURN c.titlu AS titlu, c.imagine AS imagine, c.categoria AS categorie, c.descriere AS desc, a.nume AS autor ORDER BY c.titlu ASC LIMIT 500");
+            cypher.append("RETURN c.titlu AS titlu, c.imagine AS imagine, c.categoria AS categorie, c.descriere AS desc, a.nume AS autor ORDER BY id(c) DESC LIMIT 500");
 
             var result = session.run(cypher.toString(), params);
             while (result.hasNext()) {
