@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Trasee de lectură | Biblioteca Mea</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f8f9fa;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+            --accent: #009485;
+            --accent-light: #e6f7f5;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 300px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.02);
+            z-index: 10;
+        }
+        .sidebar h2 { font-size: 1.1em; font-weight: 600; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px; color: #b2bec3;}
+        .sidebar p.sub { font-size: 0.85em; color: var(--text-muted); margin-top: 0; margin-bottom: 30px; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { font-size: 0.75em; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border-color);
+            color: var(--text-main); border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px;
+            outline: none; transition: 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--accent); background: white; }
+
+        .btn-generate {
+            width: 100%; padding: 14px; background: #1b4d3e; color: white; border: none;
+            border-radius: 30px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        .btn-generate:hover { background: #12352a; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(27, 77, 62, 0.2); }
+        .btn-generate:disabled { background: #b2bec3; cursor: not-allowed; transform: none; box-shadow: none;}
+
+        .history-list { list-style: none; padding: 0; margin: 0; }
+        .history-list li {
+            font-size: 0.9em; padding: 10px 15px; color: var(--text-main); cursor: pointer; transition: 0.2s;
+            border-radius: 8px; margin-bottom: 5px; font-weight: 500; text-transform: capitalize;
+        }
+        .history-list li:hover { background: var(--accent-light); color: var(--accent); }
+        .history-list li::before { content: '📚'; margin-right: 10px; opacity: 0.7;}
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex-grow: 1; padding: 40px 80px; overflow-y: auto; position: relative;
+        }
+
+        .empty-state {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            text-align: center; color: var(--text-muted);
+        }
+        .empty-state h3 { font-weight: 500; color: #2d3436; font-size: 1.5em; margin-bottom: 10px;}
+
+        .path-header { margin-bottom: 50px; display: none; }
+        .path-header .badge-top { background: var(--accent-light); color: var(--accent); padding: 5px 12px; border-radius: 20px; font-size: 0.75em; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;}
+        .path-header h1 { margin: 15px 0 10px 0; font-size: 2.5em; font-weight: 700; color: #111; text-transform: capitalize;}
+        .path-header p { color: var(--text-muted); font-size: 1.1em; max-width: 700px; line-height: 1.6;}
+
+        /* TIMELINE STEPS */
+        .timeline {
+            display: none; flex-direction: column; position: relative;
+            padding-left: 25px; border-left: 2px dashed #cbd5e1; margin-left: 20px; padding-bottom: 50px;
+        }
+
+        .step { position: relative; margin-bottom: 50px; }
+
+        .step-number {
+            position: absolute; left: -47px; top: 0;
+            width: 40px; height: 40px; border-radius: 50%; background: white; color: var(--text-main);
+            display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1em;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 2;
+        }
+
+        .step-content {
+            background: var(--bg-card); padding: 30px; border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid white;
+        }
+
+        .step-level { color: var(--accent); font-size: 0.7em; text-transform: uppercase; font-weight: 700; letter-spacing: 1.5px; display: block; margin-bottom: 8px;}
+        .step-content h3 { margin: 0 0 15px 0; font-size: 1.4em; color: #111; font-weight: 600;}
+        .step-content > p { color: var(--text-muted); font-size: 1em; line-height: 1.6; margin-bottom: 25px; }
+
+        .tags { display: flex; gap: 8px; margin-bottom: 30px; flex-wrap: wrap; }
+        .tag { background: #f1f5f9; color: #475569; padding: 6px 14px; border-radius: 20px; font-size: 0.8em; font-weight: 500;}
+
+        /* BOOK CARD (Fără poze, text curat) */
+        .book-list-title { font-size: 0.8em; color: #111; margin-bottom: 15px; font-weight: 600; border-bottom: 1px solid #eee; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;}
+        .books-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        .book-item {
+            background: var(--bg-main); padding: 15px 20px; border-radius: 10px;
+            border-left: 4px solid var(--accent); text-decoration: none; display: flex; flex-direction: column; transition: 0.2s;
+        }
+        .book-item:hover { background: var(--accent-light); transform: translateY(-2px); }
+        .book-item strong { color: #111; font-size: 1.05em; margin-bottom: 5px; }
+        .book-item span { color: var(--text-muted); font-size: 0.9em; }
+        .book-meta { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.8em; color: #94a3b8; }
+
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 40px auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .back-nav { position: absolute; top: 30px; right: 40px; font-weight: 500; }
+        .back-nav a { color: var(--text-muted); text-decoration: none; font-size: 0.9em; padding: 10px 20px; border: 1px solid #ddd; border-radius: 30px; transition: 0.2s;}
+        .back-nav a:hover { background: #eee; color: #111; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <a href="/" style="text-decoration: none; color: #111;">
+        <h2>Biblioteca Mea</h2>
+    </a>
+    <p class="sub">Mentor AI de Învățare</p>
+
+    <div class="form-group" style="margin-top: 20px;">
+        <label>Ce domeniu vrei să explorezi?</label>
+        <input type="text" id="subiect" placeholder="ex: Filosofie stoică, Blockchain...">
+    </div>
+
+    <div class="form-group">
+        <label>Complexitatea traseului</label>
+        <select id="nrEtape">
+            <option value="3">3 etape (Nivel de Bază)</option>
+            <option value="4" selected>4 etape (Standard)</option>
+            <option value="5">5 etape (Aprofundat)</option>
+        </select>
+    </div>
+
+    <button class="btn-generate" id="btn-gen" onclick="genereazaTraseu()">Generează traseu nou</button>
+
+    <div style="margin-top: 50px;">
+        <div class="form-group">
+            <label>Trasee salvate în Memgraph</label>
+            <ul class="history-list">
+                <li th:each="traseu : ${traseeSalvate}"
+                    th:text="${traseu}"
+                    th:attr="onclick=|incarcaTraseuSalvat('${traseu}')|"></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="back-nav"><a href="/">Întoarce-te la Galerie</a></div>
+
+    <div class="empty-state" id="empty-state">
+        <div style="font-size: 3em; margin-bottom: 10px;">🧭</div>
+        <h3>Alege un domeniu de explorat</h3>
+        <p>Selectează un traseu din meniul din stânga sau<br>introdu un subiect nou pentru a genera o hartă de învățare.</p>
+    </div>
+
+    <div id="loader" class="loader"></div>
+
+    <div class="path-header" id="path-header">
+        <span class="badge-top">Traseu Generat de AI</span>
+        <h1 id="path-title">Titlu</h1>
+        <p>Înțelegerea evoluției subiectului, pas cu pas. Un sanctuar digital pentru explorarea conștientă a acestui domeniu.</p>
+    </div>
+
+    <div class="timeline" id="timeline"></div>
+</div>
+
+<script>
+    // Funcția care încarcă traseul INSTANTANEU din Memgraph
+    function incarcaTraseuSalvat(subiect) {
+        document.getElementById('empty-state').style.display = 'none';
+        document.getElementById('path-header').style.display = 'none';
+        document.getElementById('timeline').style.display = 'none';
+        document.getElementById('loader').style.display = 'block';
+
+        // Cerem datele din API-ul nostru care citește direct nodul Traseu
+        fetch('/api/agent/traseu-salvat?subiect=' + encodeURIComponent(subiect))
+            .then(res => res.json())
+            .then(data => {
+                renderTimeline(subiect, data);
+            })
+            .catch(err => {
+                alert("Eroare la încărcarea traseului din memorie.");
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('empty-state').style.display = 'block';
+            });
+    }
+
+    // Funcția care cere un traseu NOU de la Gemini
+    function genereazaTraseu() {
+        const subiect = document.getElementById('subiect').value.trim();
+        const nrEtape = document.getElementById('nrEtape').value;
+        if(!subiect) return;
+
+        document.getElementById('empty-state').style.display = 'none';
+        document.getElementById('path-header').style.display = 'none';
+        document.getElementById('timeline').style.display = 'none';
+        document.getElementById('loader').style.display = 'block';
+
+        const btn = document.getElementById('btn-gen');
+        btn.disabled = true;
+        btn.innerText = "Se generează...";
+
+        fetch('/api/agent/traseu-nou', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ subiect: subiect, etape: nrEtape })
+        })
+            .then(res => res.json())
+            .then(data => {
+                renderTimeline(subiect, data);
+                btn.disabled = false;
+                btn.innerText = "Generează traseu nou";
+
+                // Reîncărcăm pagina ușor pentru a updata meniul din stânga cu noul subiect adăugat
+                setTimeout(() => { window.location.reload(); }, 1500);
+            })
+            .catch(err => {
+                alert("Eroare la generare. Verifică consola de la Spring Boot.");
+                btn.disabled = false;
+                btn.innerText = "Generează traseu nou";
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('empty-state').style.display = 'block';
+            });
+    }
+
+    // Funcția care desenează efectiv elementele pe ecran
+    function renderTimeline(subiect, etape) {
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('path-header').style.display = 'block';
+        document.getElementById('path-title').innerText = subiect;
+
+        const timeline = document.getElementById('timeline');
+        timeline.innerHTML = '';
+        timeline.style.display = 'flex';
+
+        etape.forEach((etapa, index) => {
+            let concepteHtml = etapa.concepte.map(c => `<span class="tag">${c}</span>`).join('');
+
+            // Afișăm cărțile sub formă de casete text curate, pe 2 coloane
+            let cartiHtml = '';
+            if(etapa.carti && etapa.carti.length > 0) {
+                let cartiList = etapa.carti.map(carte => `
+                    <a href="/detalii?titlu=${encodeURIComponent(carte.titlu)}" class="book-item">
+                        <strong>${carte.titlu}</strong>
+                        <span>de ${carte.autor}</span>
+                        <div class="book-meta">
+                            <span>An: ${carte.an || '-'}</span>
+                            <span>Pag: ${carte.nr_pagini || '-'}</span>
+                        </div>
+                    </a>
+                `).join('');
+
+                cartiHtml = `<div class="books-grid">${cartiList}</div>`;
+            }
+
+            timeline.innerHTML += `
+                <div class="step">
+                    <div class="step-number">${index + 1}</div>
+                    <div class="step-content">
+                        <span class="step-level">${etapa.nivel}</span>
+                        <h3>${etapa.titlu_etapa}</h3>
+                        <p>${etapa.descriere}</p>
+                        <div class="tags">${concepteHtml}</div>
+
+                        <div class="book-list-title">Resurse recomandate pentru acest nivel:</div>
+                        ${cartiHtml}
+                    </div>
+                </div>
+            `;
+        });
+    }
+</script>
+</body>
+</html>

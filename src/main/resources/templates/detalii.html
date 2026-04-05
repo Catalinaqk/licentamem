@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="[http://www.thymeleaf.org](http://www.thymeleaf.org)">
 <head>
     <title>Detalii Carte</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="[https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap](https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap)" rel="stylesheet">
     <style>
         body { font-family: 'Poppins', sans-serif; background: #f4f7f6; color: #333; margin: 0; padding: 40px; }
         .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 40px; display: flex; gap: 40px; flex-wrap: wrap; }
@@ -52,6 +52,14 @@
             <tr><td class="specs-label">Nr. Pagini:</td><td th:text="${carte.nr_pagini != null and carte.nr_pagini > 0 ? carte.nr_pagini : 'Informație indisponibilă'}">-</td></tr>
             <tr><td class="specs-label">Limba:</td><td th:text="${carte.limba}">-</td></tr>
         </table>
+
+        <div th:if="${carte.titlu_urmator != null}" style="margin-bottom: 30px; padding: 20px; background: #e0f7fa; border-radius: 12px; border-left: 6px solid #00acc1;">
+            <h3 style="margin-top: 0; color: #00838f; font-size: 1.1em;">🎓 Pasul următor în învățare</h3>
+            <p style="margin-bottom: 10px; color: #006064; font-size: 0.9em;">Dacă ai terminat această carte, îți recomandăm să continui cu nivelul următor:</p>
+            <a th:href="@{/detalii(titlu=${carte.titlu_urmator})}" style="font-weight: bold; color: #00838f; text-decoration: none; font-size: 1em; display: inline-block; padding: 10px 20px; background: white; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                ➡️ <span th:text="${carte.titlu_urmator}">Titlul următor</span>
+            </a>
+        </div>
 
         <h3 style="color:#2d3436;">📖 Despre această carte</h3>
 

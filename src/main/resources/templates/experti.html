@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sfatul Experților</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; color: #333; }
+        .navbar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .navbar a { text-decoration: none; color: #636e72; font-weight: 600; margin-left: 20px; transition: 0.3s; }
+        .navbar a:hover { color: #6c5ce7; }
+        .navbar .logo { font-size: 1.5em; color: #6c5ce7; margin-left: 0; font-weight: bold; }
+
+        .container { max-width: 800px; margin: 50px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        h1 { color: #2d3436; text-align: center; margin-top: 0; }
+        p.subtitle { text-align: center; color: #636e72; margin-bottom: 40px; }
+
+        .form-group { margin-bottom: 25px; }
+        label { font-weight: bold; color: #2d3436; display: block; margin-bottom: 10px; }
+
+        select, .input-text { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-family: inherit; font-size: 16px; outline: none; box-sizing: border-box; }
+        .input-text:focus { border-color: #6c5ce7; }
+
+        .tags-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+        .tag-checkbox { display: none; }
+        .tag-label { padding: 8px 15px; background: #eee; border-radius: 20px; cursor: pointer; transition: 0.3s; font-size: 14px; user-select: none; }
+        .tag-checkbox:checked + .tag-label { background: #6c5ce7; color: white; }
+
+        .btn-cere { width: 100%; background: #fdcb6e; color: #d35400; border: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; margin-top: 20px; }
+        .btn-cere:hover { background: #ffeaa7; transform: scale(1.02); }
+        .btn-cere:disabled { background: #dfe6e9; color: #b2bec3; cursor: not-allowed; transform: none; }
+
+        #rezultat-ai { margin-top: 30px; padding: 25px; background: #f8f9fa; border-left: 5px solid #6c5ce7; border-radius: 10px; display: none; line-height: 1.6; font-size: 15px; }
+
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #6c5ce7; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/" class="logo">📚 Biblioteca Mea</a>
+    <div>
+        <a href="/">Acasă</a>
+        <a href="/trasee">Trasee Învățare</a>
+        <a href="/sfatul-expertilor" style="color: #6c5ce7;">Sfatul Experților</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h1>🧠 Sfatul Experților</h1>
+    <p class="subtitle">Alege profilul tău și combină subiectele de interes. AI-ul va interoga baza noastră de date cu experți pentru a-ți oferi recomandarea perfectă.</p>
+
+    <div class="form-group">
+        <label>Cum te-ai descrie ca cititor? (Profilul tău)</label>
+        <select id="profil">
+            <option value="Sunt un cititor matur, care apreciază detaliile istorice și ritmul lent.">Apreciez detaliile și ritmul lent</option>
+            <option value="Sunt un cititor tânăr care vrea acțiune rapidă și răsturnări de situație.">Vreau acțiune rapidă și suspans</option>
+            <option value="Sunt interesat de filosofie, profunzime psihologică și world-building.">Caut profunzime psihologică</option>
+            <option value="Vreau o lectură ușoară, relaxantă, de weekend.">Vreau o lectură relaxantă</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Subiectele care te interesează</label>
+        <div class="tags-grid">
+            <input type="checkbox" id="t1" class="tag-checkbox" value="cal"><label for="t1" class="tag-label">Cai</label>
+            <input type="checkbox" id="t2" class="tag-checkbox" value="extraterestri"><label for="t2" class="tag-label">Extratereștri</label>
+            <input type="checkbox" id="t3" class="tag-checkbox" value="razboi"><label for="t3" class="tag-label">Război</label>
+            <input type="checkbox" id="t4" class="tag-checkbox" value="interstelar"><label for="t4" class="tag-label">Interstelar</label>
+            <input type="checkbox" id="t5" class="tag-checkbox" value="magie"><label for="t5" class="tag-label">Magie</label>
+            <input type="checkbox" id="t6" class="tag-checkbox" value="istorie"><label for="t6" class="tag-label">Istorie</label>
+        </div>
+        <input type="text" id="topic-custom" class="input-text" placeholder="Sau scrie propriile domenii (ex: fizică cuantică, psihologie, jazz)... separate prin virgulă">
+    </div>
+
+    <button id="btn-submit" class="btn-cere" onclick="cereRecomandare()">Obține Recomandarea</button>
+
+    <div id="rezultat-ai"></div>
+</div>
+
+<script>
+    function cereRecomandare() {
+        const profil = document.getElementById('profil').value;
+
+        // Luăm valorile din checkbox-uri
+        const checkboxes = document.querySelectorAll('.tag-checkbox:checked');
+        let topicuri = Array.from(checkboxes).map(cb => cb.value);
+
+        // Luăm valorile din câmpul text și le adăugăm în listă
+        const customTopicInput = document.getElementById('topic-custom').value.trim();
+        if (customTopicInput) {
+            const customTopics = customTopicInput.split(',').map(t => t.trim()).filter(t => t.length > 0);
+            topicuri = topicuri.concat(customTopics);
+        }
+
+        if (topicuri.length === 0) {
+            alert("Te rog selectează sau scrie măcar un subiect!");
+            return;
+        }
+
+        const btn = document.getElementById('btn-submit');
+        const rezultatDiv = document.getElementById('rezultat-ai');
+
+        btn.disabled = true;
+        btn.innerHTML = '<div class="loader"></div> Consultăm experții...';
+        rezultatDiv.style.display = 'none';
+
+        fetch('/api/agent/experti', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ profil: profil, topicuri: topicuri })
+        })
+            .then(response => response.text())
+            .then(htmlText => {
+                rezultatDiv.innerHTML = htmlText;
+                rezultatDiv.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = 'Obține o nouă recomandare';
+            })
+            .catch(err => {
+                alert("Eroare de rețea.");
+                btn.disabled = false;
+                btn.innerHTML = 'Obține Recomandarea';
+            });
+    }
+</script>
+
+</body>
+</html>
