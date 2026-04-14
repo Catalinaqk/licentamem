@@ -2,37 +2,30 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Sfatul Experților</title>
+    <title>Sfatul Experților | Biblioteca Mea</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; color: #333; }
+
+        /* Navbar */
         .navbar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .navbar a { text-decoration: none; color: #636e72; font-weight: 600; margin-left: 20px; transition: 0.3s; }
+        .navbar .nav-links { display: flex; gap: 20px; align-items: center; }
+        .navbar a { text-decoration: none; color: #636e72; font-weight: 600; transition: 0.3s; }
         .navbar a:hover { color: #6c5ce7; }
-        .navbar .logo { font-size: 1.5em; color: #6c5ce7; margin-left: 0; font-weight: bold; }
+        .navbar .logo { font-size: 1.5em; color: #6c5ce7; font-weight: bold; }
 
-        .container { max-width: 800px; margin: 50px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        h1 { color: #2d3436; text-align: center; margin-top: 0; }
-        p.subtitle { text-align: center; color: #636e72; margin-bottom: 40px; }
+        .container { max-width: 800px; margin: 50px auto; background: white; padding: 50px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; }
+        h1 { color: #2d3436; margin-top: 0; font-size: 2.2em;}
+        p.subtitle { color: #636e72; margin-bottom: 40px; font-size: 1.1em; line-height: 1.5;}
 
-        .form-group { margin-bottom: 25px; }
-        label { font-weight: bold; color: #2d3436; display: block; margin-bottom: 10px; }
+        .btn-cere { background: #fdcb6e; color: #d35400; border: none; padding: 18px 40px; border-radius: 30px; font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(253, 203, 110, 0.3); }
+        .btn-cere:hover { background: #ffeaa7; transform: translateY(-3px); box-shadow: 0 15px 25px rgba(253, 203, 110, 0.4); }
+        .btn-cere:disabled { background: #dfe6e9; color: #b2bec3; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        select, .input-text { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-family: inherit; font-size: 16px; outline: none; box-sizing: border-box; }
-        .input-text:focus { border-color: #6c5ce7; }
+        #rezultat-ai { margin-top: 40px; padding: 30px; background: #f8f9fa; border-left: 5px solid #6c5ce7; border-radius: 10px; display: none; line-height: 1.8; font-size: 16px; text-align: left; color: #2d3436;}
 
-        .tags-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
-        .tag-checkbox { display: none; }
-        .tag-label { padding: 8px 15px; background: #eee; border-radius: 20px; cursor: pointer; transition: 0.3s; font-size: 14px; user-select: none; }
-        .tag-checkbox:checked + .tag-label { background: #6c5ce7; color: white; }
-
-        .btn-cere { width: 100%; background: #fdcb6e; color: #d35400; border: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; margin-top: 20px; }
-        .btn-cere:hover { background: #ffeaa7; transform: scale(1.02); }
-        .btn-cere:disabled { background: #dfe6e9; color: #b2bec3; cursor: not-allowed; transform: none; }
-
-        #rezultat-ai { margin-top: 30px; padding: 25px; background: #f8f9fa; border-left: 5px solid #6c5ce7; border-radius: 10px; display: none; line-height: 1.6; font-size: 15px; }
-
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #6c5ce7; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 10px; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #6c5ce7; border-radius: 50%; width: 25px; height: 25px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -40,89 +33,91 @@
 
 <nav class="navbar">
     <a href="/" class="logo">📚 Biblioteca Mea</a>
-    <div>
+    <div class="nav-links">
         <a href="/">Acasă</a>
-        <a href="/trasee">Trasee Învățare</a>
-        <a href="/sfatul-expertilor" style="color: #6c5ce7;">Sfatul Experților</a>
+        <a href="/trasee">Trasee de Lectură</a>
+        <a href="/invata">Mentor AI</a>
+        <a href="/populare">Topuri</a>
+        <a href="/recomandari">Învățare</a>
+        <a href="/sfatul-expertilor">Sfatul Experților</a>
+
+        <div id="user-menu" style="display: flex; gap: 10px; margin-left: 15px; align-items: center; border-left: 2px solid #eee; padding-left: 15px;">
+            <a href="/login" id="btn-login" style="padding: 8px 20px; background-color: #009485; color: white !important; border-radius: 20px; font-weight: 700;">
+                Intră în cont
+            </a>
+            <a href="/profil" id="btn-profil" style="display: none; padding: 8px 16px; background-color: #e6f7f5; color: #009485 !important; border-radius: 20px; font-weight: 700;">
+                👤 Profil
+            </a>
+            <a href="#" id="btn-logout" onclick="delogare()" style="display: none; color: #94a3b8 !important; font-size: 14px; font-weight: 600;">
+                Ieșire
+            </a>
+        </div>
     </div>
 </nav>
 
 <div class="container">
-    <h1>🧠 Sfatul Experților</h1>
-    <p class="subtitle">Alege profilul tău și combină subiectele de interes. AI-ul va interoga baza noastră de date cu experți pentru a-ți oferi recomandarea perfectă.</p>
+    <h1 id="titluSalut">🧠 Sfatul Experților</h1>
+    <p class="subtitle">AI-ul nostru folosește tehnologia <strong>GraphRAG</strong>. Va interoga graful tău de lectură din Memgraph, va calcula un scor de similaritate pe baza intereselor tale și îți va explica matematic și logic de ce a făcut aceste alegeri.</p>
 
-    <div class="form-group">
-        <label>Cum te-ai descrie ca cititor? (Profilul tău)</label>
-        <select id="profil">
-            <option value="Sunt un cititor matur, care apreciază detaliile istorice și ritmul lent.">Apreciez detaliile și ritmul lent</option>
-            <option value="Sunt un cititor tânăr care vrea acțiune rapidă și răsturnări de situație.">Vreau acțiune rapidă și suspans</option>
-            <option value="Sunt interesat de filosofie, profunzime psihologică și world-building.">Caut profunzime psihologică</option>
-            <option value="Vreau o lectură ușoară, relaxantă, de weekend.">Vreau o lectură relaxantă</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Subiectele care te interesează</label>
-        <div class="tags-grid">
-            <input type="checkbox" id="t1" class="tag-checkbox" value="cal"><label for="t1" class="tag-label">Cai</label>
-            <input type="checkbox" id="t2" class="tag-checkbox" value="extraterestri"><label for="t2" class="tag-label">Extratereștri</label>
-            <input type="checkbox" id="t3" class="tag-checkbox" value="razboi"><label for="t3" class="tag-label">Război</label>
-            <input type="checkbox" id="t4" class="tag-checkbox" value="interstelar"><label for="t4" class="tag-label">Interstelar</label>
-            <input type="checkbox" id="t5" class="tag-checkbox" value="magie"><label for="t5" class="tag-label">Magie</label>
-            <input type="checkbox" id="t6" class="tag-checkbox" value="istorie"><label for="t6" class="tag-label">Istorie</label>
-        </div>
-        <input type="text" id="topic-custom" class="input-text" placeholder="Sau scrie propriile domenii (ex: fizică cuantică, psihologie, jazz)... separate prin virgulă">
-    </div>
-
-    <button id="btn-submit" class="btn-cere" onclick="cereRecomandare()">Obține Recomandarea</button>
+    <button id="btn-submit" class="btn-cere" onclick="cereRecomandare()">✨ Generează Analiza Personalizată</button>
 
     <div id="rezultat-ai"></div>
 </div>
 
 <script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedUser = sessionStorage.getItem('currentUser');
+
+        if (savedUser) {
+            document.getElementById('btn-login').style.display = 'none';
+
+            const btnProfil = document.getElementById('btn-profil');
+            btnProfil.style.display = 'inline-block';
+            btnProfil.innerHTML = "👤 " + savedUser;
+
+            document.getElementById('btn-logout').style.display = 'inline-block';
+
+            document.getElementById('titluSalut').innerHTML = "🧠 Salut, " + savedUser + "!";
+        } else {
+            alert("Trebuie să intri în cont pentru a primi o analiză personalizată a intereselor tale!");
+            window.location.href = '/login';
+        }
+    });
+
     function cereRecomandare() {
-        const profil = document.getElementById('profil').value;
-
-        // Luăm valorile din checkbox-uri
-        const checkboxes = document.querySelectorAll('.tag-checkbox:checked');
-        let topicuri = Array.from(checkboxes).map(cb => cb.value);
-
-        // Luăm valorile din câmpul text și le adăugăm în listă
-        const customTopicInput = document.getElementById('topic-custom').value.trim();
-        if (customTopicInput) {
-            const customTopics = customTopicInput.split(',').map(t => t.trim()).filter(t => t.length > 0);
-            topicuri = topicuri.concat(customTopics);
-        }
-
-        if (topicuri.length === 0) {
-            alert("Te rog selectează sau scrie măcar un subiect!");
-            return;
-        }
+        const user = sessionStorage.getItem('currentUser');
+        if(!user) return;
 
         const btn = document.getElementById('btn-submit');
         const rezultatDiv = document.getElementById('rezultat-ai');
 
         btn.disabled = true;
-        btn.innerHTML = '<div class="loader"></div> Consultăm experții...';
+        btn.innerHTML = '<div class="loader"></div> AI-ul analizează Graful...';
         rezultatDiv.style.display = 'none';
 
-        fetch('/api/agent/experti', {
+        fetch('/api/agent/experti-smart', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ profil: profil, topicuri: topicuri })
+            body: JSON.stringify({ username: user })
         })
             .then(response => response.text())
-            .then(htmlText => {
-                rezultatDiv.innerHTML = htmlText;
+            .then(text => {
+                rezultatDiv.innerHTML = marked.parse(text);
                 rezultatDiv.style.display = 'block';
+
                 btn.disabled = false;
-                btn.innerHTML = 'Obține o nouă recomandare';
+                btn.innerHTML = '🔄 Reface Analiza';
             })
             .catch(err => {
-                alert("Eroare de rețea.");
+                alert("A apărut o eroare la conexiunea cu AI-ul.");
                 btn.disabled = false;
-                btn.innerHTML = 'Obține Recomandarea';
+                btn.innerHTML = '✨ Generează Analiza Personalizată';
             });
+    }
+
+    function delogare() {
+        sessionStorage.removeItem('currentUser');
+        window.location.href = '/';
     }
 </script>
 

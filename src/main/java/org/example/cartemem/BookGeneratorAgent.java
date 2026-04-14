@@ -25,7 +25,7 @@ public class BookGeneratorAgent {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(60)).build();
 
-    private final String GEMINI_API_KEY = "AIzaSyA1YvNSMO8WriR8Q3BvCcRoFqNcYfdeilg";
+    private final String GEMINI_API_KEY = "AIzaSyCcVmjSXXYmBPEd5hJQCyws5ldM0GMTA-Q";
     private final String MODEL_NAME = "gemini-2.5-flash";
     private final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL_NAME + ":generateContent?key=" + GEMINI_API_KEY;
 
@@ -121,6 +121,53 @@ public class BookGeneratorAgent {
             e.printStackTrace();
             return "Eroare Critică Agent: " + e.getMessage();
         }
+    }
+
+    // Noul motor GraphRAG (Scoring + Explainable AI)
+    public String genereazaRecomandareGraphRAG(String username) {
+        StringBuilder dateGraf = new StringBuilder();
+
+        try (Session session = driver.session()) {
+            // QUERY-UL MAGIC: Caută interesele tale -> găsește cărți -> calculează SCORUL (câte tag-uri se potrivesc)
+            String query = "MATCH (u:Utilizator {username: $user})-[:INTERESAT_DE]->(t:Tag) " +
+                    "MATCH (t)<-[:ARE_TAG]-(c:Carte)-[:SCRISA_DE]->(a:Autor) " +
+                    "RETURN c.titlu AS titlu, a.nume AS autor, count(t) AS scor, collect(t.nume) AS motive " +
+                    "ORDER BY scor DESC LIMIT 5";
+
+            var result = session.run(query, Map.of("user", username));
+
+            if (!result.hasNext()) {
+                return "Nu am găsit suficiente date despre interesele tale în graf. Te rog să îți actualizezi profilul!";
+            }
+
+            dateGraf.append("DATE EXTRASE DIN GRAF (Context RAG):\n");
+            while (result.hasNext()) {
+                var r = result.next();
+                dateGraf.append("- Cartea '").append(r.get("titlu").asString())
+                        .append("' scrisă de ").append(r.get("autor").asString())
+                        .append(" | Scor Relevanță: ").append(r.get("scor").asInt()).append(" puncte")
+                        .append(" | Motive (Tag-uri comune): ").append(r.get("motive").asList()).append("\n");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Eroare la conectarea cu Graful Memgraph.";
+        }
+
+        // Construim super-prompt-ul pentru Gemini
+        String promptPentruGemini =
+                "Ești un Mentor Literar AI avansat. Utilizatorul '" + username + "' cere o recomandare.\n\n" +
+                        "Sistemul nostru GraphRAG a extras deja matematic cele mai bune 5 cărți pentru el, " +
+                        "calculând un 'Scor de Relevanță' și 'Motivele' pentru care se potrivesc.\n\n" +
+                        dateGraf.toString() + "\n\n" +
+                        "SARCINA TA:\n" +
+                        "1. Salută utilizatorul pe nume.\n" +
+                        "2. Prezintă-i topul cărților recomandate de graf.\n" +
+                        "3. EXPLAINABLE AI: Pentru fiecare carte, explică-i DE CE i-o recomanzi, integrând în text motivele și scorul extras din graf (ex: 'Îți recomand această carte pentru că are un scor maxim de relevanță, îmbinând perfect pasiunea ta pentru SF și Filosofie').\n" +
+                        "4. Folosește formatare frumoasă (Markdown, bold, emoji-uri). Fii cald, inteligent și la obiect. NU recomanda alte cărți care nu sunt în listă.";
+
+        // AICI TREBUIE SĂ APELEZI METODA TA EXISTENTĂ DE GEMINI
+        // Înlocuiește "trimitePromptLaGemini" cu metoda pe care o foloseai deja în clasa ta pentru a apela AI-ul
+        return trimitePromptLaGemini(promptPentruGemini);
     }
 
     // --- TRASEU DE LECTURĂ FOLOSIND GraphRAG + SALVARE STRUCTURĂ ---
@@ -410,9 +457,9 @@ public class BookGeneratorAgent {
         } catch (Exception e) {}
 
         try {
-            return "[https://placehold.co/400x600/e0e0e0/333333?text=](https://placehold.co/400x600/e0e0e0/333333?text=)" + URLEncoder.encode(t, StandardCharsets.UTF_8);
+            return "https://placehold.co/400x600/e0e0e0/333333?text=" + URLEncoder.encode(t, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            return "[https://placehold.co/400x600?text=Fara+Coperta](https://placehold.co/400x600?text=Fara+Coperta)";
+            return "https://placehold.co/400x600?text=Fara+Coperta";
         }
     }
 
@@ -462,7 +509,7 @@ public class BookGeneratorAgent {
             params.put("t", titlu);
             params.put("autor", autor);
             params.put("gen", gen);
-            params.put("img", img != null ? img : "[https://placehold.co/300x450](https://placehold.co/300x450)");
+            params.put("img", img != null ? img : "https://placehold.co/300x450");
             params.put("desc", detalii.getOrDefault("descriere", "Fără descriere"));
             params.put("an", detalii.getOrDefault("an", 0));
             params.put("editura", detalii.getOrDefault("editura", "-"));
@@ -493,7 +540,7 @@ public class BookGeneratorAgent {
         date.put("pagini", 0);
         date.put("editura", "Necunoscută");
         date.put("an", 2024);
-        date.put("imagine", "[https://placehold.co/300x450](https://placehold.co/300x450)");
+        date.put("imagine", "https://placehold.co/300x450");
         try {
             String query = URLEncoder.encode("intitle:\"" + t + "\" inauthor:\"" + a + "\"", StandardCharsets.UTF_8);
             String url = "[https://www.googleapis.com/books/v1/volumes?q=](https://www.googleapis.com/books/v1/volumes?q=)" + query + "&maxResults=1";
@@ -572,5 +619,36 @@ public class BookGeneratorAgent {
             rezultateNoi.add(carteMap);
         }
         return rezultateNoi;
+    }
+    // --- METODĂ AJUTĂTOARE PENTRU TRIMITEREA UNUI PROMPT SIMPLU CĂTRE GEMINI ---
+    private String trimitePromptLaGemini(String prompt) {
+        try {
+            // Împachetăm textul în formatul cerut de Google Gemini
+            String jsonBody = objectMapper.writeValueAsString(Map.of(
+                    "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt))))
+            ));
+
+            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(GEMINI_URL))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody)).build();
+
+            HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+
+            if (resp.statusCode() != 200) {
+                return "Eroare API (" + resp.statusCode() + "): " + resp.body();
+            }
+
+            JsonNode root = objectMapper.readTree(resp.body());
+            if (root.path("candidates").isEmpty()) {
+                return "AI-ul nu a generat niciun răspuns.";
+            }
+
+            // Extragem textul efectiv din JSON-ul primit de la Google
+            return root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Eroare internă la comunicarea cu Gemini: " + e.getMessage();
+        }
     }
 }

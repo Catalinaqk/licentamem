@@ -28,11 +28,75 @@ public class BookController {
     @GetMapping({"/", "/carti"})
     public String arataCartile(@RequestParam(value = "q", required = false) String query,
                                @RequestParam(value = "gen", required = false) String gen,
+                               @RequestParam(value = "user", required = false) String username,
                                Model model) {
-        return incarcaPagina(query, gen, model, "galerie");
+
+        // Dacă utilizatorul caută manual ceva, lăsăm codul tău existent să funcționeze
+        if ((query != null && !query.isEmpty()) || (gen != null && !gen.isEmpty())) {
+            return incarcaPagina(query, gen, model, "galerie");
+        }
+
+        List<Map<String, String>> listaCartiPersonalizate = new ArrayList<>();
+        List<String> listaGenuri = List.of("Bestseller", "Science Fiction", "Fantasy", "Horror", "Thriller", "Mister", "Romance", "Istorie", "Psihologie", "Scanata");
+
+        try (Session session = driver.session()) {
+            // Dacă avem un utilizator logat, căutăm cărți pe baza intereselor LUI salvate în Memgraph
+            if (username != null && !username.isEmpty()) {
+                String queryPersonalizat =
+                        "MATCH (u:Utilizator {username: $user}) " +
+                                "OPTIONAL MATCH (u)-[:INTERESAT_DE]->(t:Tag)<-[:ARE_TAG]-(c1:Carte) " +
+                                "OPTIONAL MATCH (u)-[:A_CITIT]->(citita:Carte)-[:ARE_TAG]->(:Tag)<-[:ARE_TAG]-(c2:Carte) " +
+                                "WITH collect(c1) + collect(c2) AS toate " +
+                                "UNWIND toate AS c " +
+                                "MATCH (c)-[:SCRISA_DE]->(a:Autor) " +
+                                "RETURN DISTINCT c.titlu AS titlu, c.imagine AS imagine, c.categoria AS categorie, c.descriere AS desc, a.nume AS autor " +
+                                "LIMIT 12";
+
+                var result = session.run(queryPersonalizat, Map.of("user", username));
+
+                while(result.hasNext()) {
+                    Record r = result.next();
+                    Map<String, String> carte = new HashMap<>();
+                    carte.put("titlu", r.get("titlu").asString());
+                    carte.put("autor", r.get("autor").asString());
+                    carte.put("categorie", r.get("categorie").asString());
+                    carte.put("imagine", r.get("imagine").asString());
+                    carte.put("descriere", r.get("desc").isNull() ? "..." : r.get("desc").asString());
+                    listaCartiPersonalizate.add(carte);
+                }
+            }
+
+            // Dacă lista e goală (nu e logat sau nu am găsit cărți pentru interese), arătăm cărțile tale standard
+            if (listaCartiPersonalizate.isEmpty()) {
+                return incarcaPagina(null, null, model, "galerie");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return incarcaPagina(null, null, model, "galerie");
+        }
+
+        // Punem datele în model pentru pagina galerie.html
+        model.addAttribute("carti", listaCartiPersonalizate);
+        model.addAttribute("genuri", listaGenuri);
+        model.addAttribute("selectatGen", "");
+        model.addAttribute("cautare", "");
+        model.addAttribute("esteCautare", false);
+
+        return "galerie";
     }
 
-
+    // --- Noul Endpoint pentru Sfatul Experților (GraphRAG) ---
+    @PostMapping("/api/agent/experti-smart")
+    @ResponseBody
+    public String cereSfatulExpertilorSmart(@RequestBody Map<String, String> payload) {
+        String username = payload.get("username");
+        if (username == null || username.isEmpty()) {
+            return "Te rog să te loghezi pentru a primi sfaturi personalizate!";
+        }
+        // Apelăm noua metodă din agent
+        return bookAgent.genereazaRecomandareGraphRAG(username);
+    }
 
     @PostMapping("/api/delete-book")
     @ResponseBody

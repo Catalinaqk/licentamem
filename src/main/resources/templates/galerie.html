@@ -16,8 +16,6 @@
         .navbar .nav-links { display: flex; gap: 20px; align-items: center; }
         .navbar a { text-decoration: none; color: #636e72; font-weight: 600; transition: 0.3s; }
         .navbar a:hover { color: #6c5ce7; }
-        .btn-scan { background: #e17055; color: white !important; padding: 8px 15px; border-radius: 20px; }
-        .btn-scan:hover { background: #d63031; transform: scale(1.05); }
 
         /* Hero / Căutare */
         .hero {
@@ -67,10 +65,23 @@
     <a href="/" class="logo">📚 Biblioteca Mea</a>
     <div class="nav-links">
         <a href="/">Acasă</a>
+        <a href="/trasee">Trasee de Lectură</a>
         <a href="/invata">Mentor AI</a>
         <a href="/populare">Topuri</a>
         <a href="/recomandari">Învățare</a>
         <a href="/sfatul-expertilor">Sfatul Experților</a>
+
+        <div id="user-menu" style="display: flex; gap: 10px; margin-left: 15px; align-items: center; border-left: 2px solid #eee; padding-left: 15px;">
+            <a href="/login" id="btn-login" style="padding: 8px 20px; background-color: #009485; color: white !important; border-radius: 20px; font-weight: 700;">
+                Intră în cont
+            </a>
+            <a href="/profil" id="btn-profil" style="display: none; padding: 8px 16px; background-color: #e6f7f5; color: #009485 !important; border-radius: 20px; font-weight: 700;">
+                👤 Profil
+            </a>
+            <a href="#" id="btn-logout" onclick="delogare()" style="display: none; color: #94a3b8 !important; font-size: 14px; font-weight: 600;">
+                Ieșire
+            </a>
+        </div>
     </div>
 </nav>
 
@@ -151,7 +162,7 @@
                 } else {
                     status.innerText = "✅ Cărți adăugate cu succes!";
                     status.style.color = "#00b894";
-                    setTimeout(() => location.assign("/"), 1000); // Întoarcere forțată la pagina principală
+                    setTimeout(() => location.assign("/"), 1000);
                 }
                 btn.disabled = false;
                 btn.innerHTML = "✨ Generează cu AI";
@@ -163,7 +174,32 @@
                 btn.innerHTML = "✨ Generează cu AI";
             });
     }
-</script>
 
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedUser = sessionStorage.getItem('currentUser');
+
+        if (savedUser) {
+            document.getElementById('btn-login').style.display = 'none';
+
+            const btnProfil = document.getElementById('btn-profil');
+            btnProfil.style.display = 'inline-block';
+            btnProfil.innerHTML = "👤 Salut, " + savedUser;
+
+            document.getElementById('btn-logout').style.display = 'inline-block';
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const isSearching = urlParams.has('q') || urlParams.has('gen');
+
+            if (!isSearching && urlParams.get('user') !== savedUser && (window.location.pathname === '/' || window.location.pathname === '/carti')) {
+                window.location.href = "/?user=" + encodeURIComponent(savedUser);
+            }
+        }
+    });
+
+    function delogare() {
+        sessionStorage.removeItem('currentUser');
+        window.location.href = '/';
+    }
+</script>
 </body>
 </html>

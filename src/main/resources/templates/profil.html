@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Profilul Meu | Biblioteca Mea</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 40px 0; }
+        .container { background: white; padding: 50px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); max-width: 750px; width: 90%; text-align: center; position: relative;}
+
+        h1 { margin-bottom: 10px; color: #111; font-size: 2.2em;}
+        h2 { color: #2d3436; font-size: 1.5em; margin-top: 30px; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; text-align: left;}
+        p.desc { color: #636e72; margin-bottom: 30px; font-size: 1.1em;}
+
+        .input-group { display: flex; gap: 10px; margin-bottom: 25px; justify-content: center; }
+        .input-group input { padding: 14px; font-size: 16px; flex: 1; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; transition: 0.3s; }
+        .input-group input:focus { border-color: #009485; }
+        .btn-add { background: #009485; color: white; border: none; border-radius: 12px; padding: 0 25px; font-size: 24px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-add:hover { background: #007b6e; transform: scale(1.05); }
+
+        /* Bule interese */
+        .tags-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 30px; }
+        .tag-bubble {
+            padding: 10px 20px; border-radius: 30px; background: #f1f5f9; color: #475569;
+            font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+            border: 2px solid transparent; user-select: none; font-size: 0.95em;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .tag-bubble.selected { background: #009485; color: white; border-color: #007b6e; }
+        .delete-btn { background: rgba(255, 255, 255, 0.3); color: white; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; font-size: 12px; }
+
+        /* Lista carti citite */
+        .read-books-list { text-align: left; margin-bottom: 40px; background: #f8fafc; border-radius: 12px; padding: 15px; max-height: 250px; overflow-y: auto; }
+        .book-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 500;
+        }
+        .book-item:last-child { border-bottom: none; }
+        .book-item span.check { color: #00b894; font-weight: bold; }
+
+        .btn-save { background: #1b4d3e; color: white; padding: 18px 40px; border: none; border-radius: 30px; font-size: 18px; font-weight: 600; cursor: pointer; transition: 0.3s; width: 100%; box-shadow: 0 10px 20px rgba(27, 77, 62, 0.2);}
+        .btn-save:hover { background: #12352a; transform: translateY(-2px); }
+
+        .back-nav { position: absolute; top: 30px; left: 40px; }
+        .back-nav a { color: #94a3b8; text-decoration: none; font-weight: 600; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="back-nav"><a href="/">← Întoarce-te la aplicație</a></div>
+
+    <h1 id="titluSalut">Salut! 👋</h1>
+    <p class="desc">Actualizează-ți profilul pentru a primi recomandări ultra-personalizate.</p>
+
+    <h2>🎯 Ce genuri te pasionează?</h2>
+    <div class="input-group">
+        <input type="text" id="customTagInput" placeholder="Adaugă un subiect nou (ex: Jazz, Fizică)">
+        <button class="btn-add" onclick="adaugaTagCustom()">+</button>
+    </div>
+    <div class="tags-grid" id="tagsContainer"></div>
+
+    <h2>📖 Cărți pe care le-ai citit</h2>
+    <div class="input-group" style="flex-direction: column;">
+        <input type="text" id="readBookInput" placeholder="Titlul cărții...">
+        <input type="text" id="readAuthorInput" placeholder="Autorul cărții..." style="margin-top: 10px;">
+        <button class="btn-add" onclick="adaugaCarteCitita()" style="margin-top: 10px; width: 100%; border-radius: 12px; height: 50px;">
+            + Adaugă în bibliotecă
+        </button>
+    </div>
+    <div class="read-books-list" id="booksReadContainer">
+    </div>
+
+    <button class="btn-save" id="btnSave" onclick="salveazaProfil()">Salvează Toate Modificările</button>
+</div>
+
+<script>
+    const categoriiStandard = ["Dezvoltare Personala", "SF", "Istorie", "Psihologie", "Tehnologie", "Fictiune", "Business", "Filosofie", "Arta", "Medicina", "Biografie", "Fantasy", "Programare"];
+    let selectiiInterese = new Set();
+    const user = sessionStorage.getItem('currentUser');
+
+    window.onload = () => {
+        if(!user) { window.location.href = '/login'; return; }
+        document.getElementById('titluSalut').innerText = "Salut, " + user + "!";
+
+        // 1. Incarca Interese
+        fetch('/api/utilizator/interese?username=' + encodeURIComponent(user))
+            .then(res => res.json())
+            .then(intereseDB => {
+                intereseDB.forEach(i => selectiiInterese.add(i));
+                categoriiStandard.forEach(cat => adaugaBulaInDOM(cat, false));
+                intereseDB.forEach(i => { if(!categoriiStandard.includes(i)) adaugaBulaInDOM(i, true); });
+            });
+
+        // 2. Incarca Carti Citite
+        incarcaCartiCitite();
+    }
+
+    // --- LOGICA INTERESE ---
+    function adaugaBulaInDOM(nume, esteCustom) {
+        const div = document.createElement('div');
+        div.className = 'tag-bubble' + (selectiiInterese.has(nume) ? ' selected' : '');
+        div.innerHTML = `<span>${nume}</span>`;
+        if(esteCustom) {
+            const del = document.createElement('span');
+            del.className = 'delete-btn'; del.innerText = '✕';
+            del.onclick = (e) => { e.stopPropagation(); selectiiInterese.delete(nume); div.remove(); };
+            div.appendChild(del);
+        }
+        div.onclick = () => {
+            if(selectiiInterese.has(nume)) { selectiiInterese.delete(nume); div.classList.remove('selected'); }
+            else { selectiiInterese.add(nume); div.classList.add('selected'); }
+        };
+        document.getElementById('tagsContainer').appendChild(div);
+    }
+
+    function adaugaTagCustom() {
+        const input = document.getElementById('customTagInput');
+        let tag = input.value.trim();
+        if(tag) {
+            tag = tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
+            if(!selectiiInterese.has(tag)) {
+                selectiiInterese.add(tag);
+                adaugaBulaInDOM(tag, true);
+            }
+            input.value = '';
+        }
+    }
+
+    // --- LOGICA CARTI CITITE ---
+    function adaugaCarteCitita() {
+        const titluInput = document.getElementById('readBookInput');
+        const autorInput = document.getElementById('readAuthorInput');
+
+        const titlu = titluInput.value.trim();
+        const autor = autorInput.value.trim();
+
+        if(!titlu || !autor) {
+            alert("Te rugăm să introduci și titlul și autorul!");
+            return;
+        }
+
+        fetch('/api/utilizator/adauga-lectura', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username: user,
+                titlu: titlu,
+                autor: autor
+            })
+        }).then(res => res.json())
+            .then(data => {
+                titluInput.value = '';
+                autorInput.value = '';
+                incarcaCartiCitite();
+            });
+    }
+
+    function incarcaCartiCitite() {
+        fetch('/api/utilizator/carti-citite?username=' + encodeURIComponent(user))
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('booksReadContainer');
+                container.innerHTML = data.length ? data.map(t => `
+                <div class="book-item">
+                    <span>${t}</span>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <span class="check">✓ Citită</span>
+                        <button onclick="stergeCarte('${t.replace(/'/g, "\\'")}')"
+                                style="background:none; border:none; color:#ff7675; cursor:pointer; font-weight:bold; font-size:1.2em;">
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            `).join('') : '<p style="text-align:center; color:#94a3b8;">Nu ai adăugat nicio carte încă.</p>';
+            });
+    }
+
+    function stergeCarte(titlu) {
+        if(!confirm("Ești sigur că vrei să ștergi '" + titlu + "' din lista de lecturi?")) return;
+
+        fetch('/api/utilizator/sterge-lectura', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ username: user, titlu: titlu })
+        }).then(res => res.json())
+            .then(data => {
+                if(data.status === 'succes') {
+                    incarcaCartiCitite(); // Reîmprospătăm lista
+                } else {
+                    alert("Eroare la ștergere!");
+                }
+            });
+    }
+
+    function salveazaProfil() {
+        adaugaTagCustom(); // Adauga daca a ramas text in input
+        const btn = document.getElementById('btnSave');
+        btn.disabled = true; btn.innerText = "Se salvează...";
+
+        fetch('/api/utilizator/salveaza-interese', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, interese: Array.from(selectiiInterese) })
+        }).then(() => {
+            btn.innerText = "Modificări Salvate! ✅";
+            setTimeout(() => { window.location.href = '/?user=' + encodeURIComponent(user); }, 1000);
+        });
+    }
+
+    // Enter listeners
+    document.getElementById('customTagInput').addEventListener('keypress', e => { if(e.key === 'Enter') adaugaTagCustom(); });
+    document.getElementById('readBookInput').addEventListener('keypress', e => { if(e.key === 'Enter') adaugaCarteCitita(); });
+</script>
+</body>
+</html>

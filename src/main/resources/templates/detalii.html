@@ -73,6 +73,13 @@
                 <button id="btn-rezumat" class="btn-gen-rezumat" onclick="cereRezumat()">
                     ✨ Generează Rezumatul cu AI
                 </button>
+
+                <a th:href="@{'https://www.google.com/search?tbm=bks&q=' + ${carte.titlu} + ' ' + ${carte.autor}}"
+                   target="_blank"
+                   style="background-color: #f1f5f9; color: #475569; padding: 12px 24px; text-decoration: none; border-radius: 30px; font-weight: 600; transition: 0.3s; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; gap: 8px;">
+                    🔍 Găsește cartea online
+                </a>
+                
             </div>
         </div>
 

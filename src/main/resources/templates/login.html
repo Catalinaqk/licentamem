@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Logare | Biblioteca Mea</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; }
+        h1 { margin-bottom: 10px; font-size: 2em; }
+        input { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; margin-bottom: 15px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: #009485; }
+        button { background: #009485; color: white; padding: 14px; width: 100%; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: #007b6e; }
+        .link { display: block; margin-top: 20px; color: #64748b; text-decoration: none; font-size: 0.9em; transition: 0.2s;}
+        .link:hover { color: #111; }
+
+        /* NOU: CSS pentru Parolă cu Ochișor */
+        .password-container { position: relative; width: 100%; margin-bottom: 15px; }
+        .password-container input { margin-bottom: 0; padding-right: 40px; } /* Spațiu pt ochișor */
+        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px; user-select: none; opacity: 0.7; transition: 0.2s; }
+        .toggle-password:hover { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>Bine ai revenit 👋</h1>
+    <p style="color: #64748b; margin-bottom: 30px;">Introdu email-ul și parola pentru a intra.</p>
+
+    <input type="email" id="email" placeholder="Email">
+
+    <div class="password-container">
+        <input type="password" id="parola" placeholder="Parola">
+        <span class="toggle-password" onclick="togglePassword('parola', this)">👁️</span>
+    </div>
+
+    <button onclick="logare()" id="btnLog">Intră în cont</button>
+
+    <a href="/register" class="link" style="color: #009485; font-weight: bold;">Nu ai cont? Creează unul</a>
+    <a href="/" class="link">Continua fără cont</a>
+</div>
+
+<script>
+    // NOU: Funcția care arată/ascunde parola
+    function togglePassword(inputId, iconElement) {
+        const input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+            iconElement.innerText = "🙈"; // Când parola e vizibilă
+        } else {
+            input.type = "password";
+            iconElement.innerText = "👁️"; // Când parola e ascunsă
+        }
+    }
+
+    function logare() {
+        const email = document.getElementById('email').value.trim();
+        const parola = document.getElementById('parola').value.trim();
+
+        if(!email || !parola) { alert("Introdu email și parolă!"); return; }
+
+        const btn = document.getElementById('btnLog');
+        btn.innerText = "Se verifică..."; btn.disabled = true;
+
+        fetch('/api/utilizator/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email: email, parola: parola})
+        })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'succes') {
+                    sessionStorage.setItem('currentUser', data.nume);
+                    window.location.href = '/?user=' + encodeURIComponent(data.nume);
+                } else {
+                    alert(data.mesaj);
+                    btn.innerText = "Intră în cont"; btn.disabled = false;
+                }
+            });
+    }
+</script>
+</body>
+</html>
