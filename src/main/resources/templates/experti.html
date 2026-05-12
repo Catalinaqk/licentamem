@@ -17,13 +17,34 @@
 
         .container { max-width: 800px; margin: 50px auto; background: white; padding: 50px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; }
         h1 { color: #2d3436; margin-top: 0; font-size: 2.2em;}
-        p.subtitle { color: #636e72; margin-bottom: 40px; font-size: 1.1em; line-height: 1.5;}
+        p.subtitle { color: #636e72; margin-bottom: 30px; font-size: 1.1em; line-height: 1.5;}
 
-        .btn-cere { background: #fdcb6e; color: #d35400; border: none; padding: 18px 40px; border-radius: 30px; font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(253, 203, 110, 0.3); }
+        /* Stil pentru Bara de Selectie */
+        .traseu-selector {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+        }
+        .traseu-selector label { font-weight: 600; color: #4834d4; display: block; margin-bottom: 8px; }
+        #tipTraseu {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #6c5ce7;
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .btn-cere { background: #fdcb6e; color: #d35400; border: none; padding: 18px 40px; border-radius: 30px; font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(253, 203, 110, 0.3); width: 100%; }
         .btn-cere:hover { background: #ffeaa7; transform: translateY(-3px); box-shadow: 0 15px 25px rgba(253, 203, 110, 0.4); }
         .btn-cere:disabled { background: #dfe6e9; color: #b2bec3; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        #rezultat-ai { margin-top: 40px; padding: 30px; background: #f8f9fa; border-left: 5px solid #6c5ce7; border-radius: 10px; display: none; line-height: 1.8; font-size: 16px; text-align: left; color: #2d3436;}
+        #rezultat-ai { margin-top: 40px; padding: 30px; background: #fff; border-left: 5px solid #6c5ce7; border-radius: 10px; display: none; line-height: 1.8; font-size: 16px; text-align: left; color: #2d3436; box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);}
 
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #6c5ce7; border-radius: 50%; width: 25px; height: 25px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -35,29 +56,28 @@
     <a href="/" class="logo">📚 Biblioteca Mea</a>
     <div class="nav-links">
         <a href="/">Acasă</a>
-        <a href="/trasee">Trasee de Lectură</a>
-        <a href="/invata">Mentor AI</a>
-        <a href="/populare">Topuri</a>
-        <a href="/recomandari">Învățare</a>
+        <a href="/trasee">Trasee</a>
         <a href="/sfatul-expertilor">Sfatul Experților</a>
-
         <div id="user-menu" style="display: flex; gap: 10px; margin-left: 15px; align-items: center; border-left: 2px solid #eee; padding-left: 15px;">
-            <a href="/login" id="btn-login" style="padding: 8px 20px; background-color: #009485; color: white !important; border-radius: 20px; font-weight: 700;">
-                Intră în cont
-            </a>
-            <a href="/profil" id="btn-profil" style="display: none; padding: 8px 16px; background-color: #e6f7f5; color: #009485 !important; border-radius: 20px; font-weight: 700;">
-                👤 Profil
-            </a>
-            <a href="#" id="btn-logout" onclick="delogare()" style="display: none; color: #94a3b8 !important; font-size: 14px; font-weight: 600;">
-                Ieșire
-            </a>
+            <a href="/login" id="btn-login" style="padding: 8px 20px; background-color: #009485; color: white !important; border-radius: 20px; font-weight: 700;">Intră în cont</a>
+            <a href="/profil" id="btn-profil" style="display: none; padding: 8px 16px; background-color: #e6f7f5; color: #009485 !important; border-radius: 20px; font-weight: 700;">👤 Profil</a>
         </div>
     </div>
 </nav>
 
 <div class="container">
     <h1 id="titluSalut">🧠 Sfatul Experților</h1>
-    <p class="subtitle">AI-ul nostru folosește tehnologia <strong>GraphRAG</strong>. Va interoga graful tău de lectură din Memgraph, va calcula un scor de similaritate pe baza intereselor tale și îți va explica matematic și logic de ce a făcut aceste alegeri.</p>
+    <p class="subtitle">AI-ul nostru folosește <strong>GraphRAG</strong> pentru a interoga baza de date Memgraph și a găsi recomandări validate de curatori de elită.</p>
+
+    <div class="traseu-selector">
+        <label for="tipTraseu">🎯 Alege un Traseu de Elită:</label>
+        <select id="tipTraseu">
+            <option value="GENERAL">🌐 General (Toți Experții)</option>
+            <option value="SISTEMIC">🚀 Gândire Sistemică & Tech (Naval, Gates, Musk)</option>
+            <option value="CANON">🏛️ Canon Literar (Dostoevsky, Kafka, Nobel)</option>
+            <option value="PSIHOLOGIE">🧠 Psihologie & Decizii (Peterson, Kahneman)</option>
+        </select>
+    </div>
 
     <button id="btn-submit" class="btn-cere" onclick="cereRecomandare()">✨ Generează Analiza Personalizată</button>
 
@@ -67,26 +87,21 @@
 <script>
     window.addEventListener('DOMContentLoaded', () => {
         const savedUser = sessionStorage.getItem('currentUser');
-
         if (savedUser) {
             document.getElementById('btn-login').style.display = 'none';
-
             const btnProfil = document.getElementById('btn-profil');
             btnProfil.style.display = 'inline-block';
             btnProfil.innerHTML = "👤 " + savedUser;
-
-            document.getElementById('btn-logout').style.display = 'inline-block';
-
             document.getElementById('titluSalut').innerHTML = "🧠 Salut, " + savedUser + "!";
         } else {
-            alert("Trebuie să intri în cont pentru a primi o analiză personalizată a intereselor tale!");
+            alert("Trebuie să intri în cont!");
             window.location.href = '/login';
         }
     });
 
     function cereRecomandare() {
         const user = sessionStorage.getItem('currentUser');
-        if(!user) return;
+        const traseuAles = document.getElementById('tipTraseu').value; // LUĂM VALOAREA DIN BARA
 
         const btn = document.getElementById('btn-submit');
         const rezultatDiv = document.getElementById('rezultat-ai');
@@ -98,28 +113,24 @@
         fetch('/api/agent/experti-smart', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: user })
+            body: JSON.stringify({
+                username: user,
+                traseu: traseuAles // TRIMITEM TRASEUL CĂTRE JAVA
+            })
         })
             .then(response => response.text())
             .then(text => {
                 rezultatDiv.innerHTML = marked.parse(text);
                 rezultatDiv.style.display = 'block';
-
                 btn.disabled = false;
                 btn.innerHTML = '🔄 Reface Analiza';
             })
             .catch(err => {
-                alert("A apărut o eroare la conexiunea cu AI-ul.");
+                alert("Eroare la AI.");
                 btn.disabled = false;
                 btn.innerHTML = '✨ Generează Analiza Personalizată';
             });
     }
-
-    function delogare() {
-        sessionStorage.removeItem('currentUser');
-        window.location.href = '/';
-    }
 </script>
-
 </body>
 </html>

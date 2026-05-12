@@ -86,16 +86,43 @@ public class BookController {
         return "galerie";
     }
 
-    // --- Noul Endpoint pentru Sfatul Experților (GraphRAG) ---
+    // --- Noul Endpoint Conversațional (GraphRAG) ---
     @PostMapping("/api/agent/experti-smart")
     @ResponseBody
-    public String cereSfatulExpertilorSmart(@RequestBody Map<String, String> payload) {
-        String username = payload.get("username");
+    public String cereSfatulExpertilorSmart(@RequestBody Map<String, Object> payload) {
+        String username = (String) payload.get("username");
+        String mesaj = (String) payload.get("mesaj");
+        @SuppressWarnings("unchecked")
+        List<Map<String, String>> istoric = (List<Map<String, String>>) payload.get("istoric");
+
         if (username == null || username.isEmpty()) {
             return "Te rog să te loghezi pentru a primi sfaturi personalizate!";
         }
-        // Apelăm noua metodă din agent
-        return bookAgent.genereazaRecomandareGraphRAG(username);
+
+        return bookAgent.genereazaRecomandareGraphRAG(username, mesaj, istoric);
+    }
+
+    // SALVAREA PROFILULUI (Prinde datele din Frontend)
+    @PostMapping("/api/utilizator/actualizeaza-profil")
+    @ResponseBody
+    public String actualizeazaProfil(@RequestBody Map<String, Object> payload) {
+        String username = (String) payload.get("username");
+        @SuppressWarnings("unchecked")
+        List<String> tags = (List<String>) payload.get("tags");
+        @SuppressWarnings("unchecked")
+        List<String> experts = (List<String>) payload.get("experts"); // Experții adăugați
+        @SuppressWarnings("unchecked")
+        List<Map<String, String>> books = (List<Map<String, String>>) payload.get("books");
+
+        bookAgent.salveazaProfilComplet(username, tags, experts, books);
+        return "Succes";
+    }
+
+    // ÎNCĂRCAREA PROFILULUI (Trimite datele înapoi când deschizi pagina)
+    @GetMapping("/api/utilizator/profil")
+    @ResponseBody
+    public Map<String, Object> incarcaProfil(@RequestParam String username) {
+        return bookAgent.incarcaProfil(username);
     }
 
     @PostMapping("/api/delete-book")
@@ -182,6 +209,7 @@ public class BookController {
     @PostMapping("/api/agent/experti")
     @ResponseBody
     public String cereSfatulExpertilor(@RequestBody Map<String, Object> payload) {
+        @SuppressWarnings("unchecked")
         List<String> topicuri = (List<String>) payload.get("topicuri");
         String profil = (String) payload.get("profil");
         return bookAgent.recomandaPrinExperti(topicuri, profil);

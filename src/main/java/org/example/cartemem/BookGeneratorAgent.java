@@ -25,7 +25,7 @@ public class BookGeneratorAgent {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(60)).build();
 
-    private final String GEMINI_API_KEY = "AIzaSyCcVmjSXXYmBPEd5hJQCyws5ldM0GMTA-Q";
+    private final String GEMINI_API_KEY = "AQ.Ab8RN6JeKlivOpowdVYOHyuzFHXj5PP8NkGLZg3ew-a9Ht6UhA";
     private final String MODEL_NAME = "gemini-2.5-flash";
     private final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL_NAME + ":generateContent?key=" + GEMINI_API_KEY;
 
@@ -123,50 +123,86 @@ public class BookGeneratorAgent {
         }
     }
 
-    // Noul motor GraphRAG (Scoring + Explainable AI)
-    public String genereazaRecomandareGraphRAG(String username) {
+    // Noul motor GraphRAG Conversațional (Cu Memorie)
+    public String genereazaRecomandareGraphRAG(String username, String mesajUtilizator, List<Map<String, String>> istoric) {
         StringBuilder dateGraf = new StringBuilder();
 
         try (Session session = driver.session()) {
-            // QUERY-UL MAGIC: Caută interesele tale -> găsește cărți -> calculează SCORUL (câte tag-uri se potrivesc)
-            String query = "MATCH (u:Utilizator {username: $user})-[:INTERESAT_DE]->(t:Tag) " +
-                    "MATCH (t)<-[:ARE_TAG]-(c:Carte)-[:SCRISA_DE]->(a:Autor) " +
-                    "RETURN c.titlu AS titlu, a.nume AS autor, count(t) AS scor, collect(t.nume) AS motive " +
-                    "ORDER BY scor DESC LIMIT 5";
+            // --- PARTEA 1: PROFILUL TĂU ---
+            var profilResult = session.run(
+                    "MATCH (u:Utilizator {username: $user}) " +
+                            "OPTIONAL MATCH (u)-[:INTERESAT_DE]->(t:Tag) " +
+                            "OPTIONAL MATCH (u)-[:A_CITIT]->(c:Carte) " +
+                            "RETURN collect(DISTINCT t.nume) AS interese, collect(DISTINCT c.titlu) AS citite",
+                    Map.of("user", username)
+            );
 
-            var result = session.run(query, Map.of("user", username));
+            if (profilResult.hasNext()) {
+                var rand = profilResult.next();
+                List<Object> interese = rand.get("interese").asList();
+                List<Object> citite = rand.get("citite").asList();
 
-            if (!result.hasNext()) {
-                return "Nu am găsit suficiente date despre interesele tale în graf. Te rog să îți actualizezi profilul!";
+                dateGraf.append("📚 PROFILUL UTILIZATORULUI:\n");
+                dateGraf.append("- Domenii de interes: ").append(interese.isEmpty() ? "Nespecificat" : interese.toString()).append("\n");
+                dateGraf.append("- Cărți deja citite: ").append(citite.isEmpty() ? "Niciuna salvată" : citite.toString()).append("\n\n");
             }
 
-            dateGraf.append("DATE EXTRASE DIN GRAF (Context RAG):\n");
-            while (result.hasNext()) {
-                var r = result.next();
-                dateGraf.append("- Cartea '").append(r.get("titlu").asString())
-                        .append("' scrisă de ").append(r.get("autor").asString())
-                        .append(" | Scor Relevanță: ").append(r.get("scor").asInt()).append(" puncte")
-                        .append(" | Motive (Tag-uri comune): ").append(r.get("motive").asList()).append("\n");
+            // --- PARTEA 2: RECOMANDĂRI DIN GRAF ---
+            var recomandariPersonalizate = session.run(
+                    "MATCH (u:Utilizator {username: $user}) " +
+                            "OPTIONAL MATCH (u)-[:INTERESAT_DE]->(t:Tag)<-[:ARE_TAG]-(c1:Carte) " +
+                            "OPTIONAL MATCH (u)-[:A_CITIT]->(:Carte)-[:ARE_TAG]->(t2:Tag)<-[:ARE_TAG]-(c2:Carte) " +
+                            "WITH u, collect(c1) + collect(c2) AS toate, collect(t.nume) + collect(t2.nume) as taguriInteres " +
+                            "UNWIND toate AS c " +
+                            "MATCH (c)-[:SCRISA_DE]->(a:Autor) " +
+                            "WHERE c IS NOT NULL AND NOT EXISTS((u)-[:A_CITIT]->(c)) " +
+                            "WITH DISTINCT c, a, taguriInteres " +
+                            "OPTIONAL MATCH (c)-[:ARE_TAG]->(t:Tag) " +
+                            "WITH c, a, count(t) AS scor, collect(t.nume) AS motive " +
+                            "ORDER BY scor DESC " +
+                            "RETURN c.titlu AS titlu, a.nume AS autor, scor, motive LIMIT 4",
+                    Map.of("user", username)
+            );
+
+            dateGraf.append("📖 RECOMANDĂRI POSIBILE DIN BAZA DE DATE (Pentru contextul tău):\n");
+            while (recomandariPersonalizate.hasNext()) {
+                var r = recomandariPersonalizate.next();
+                dateGraf.append("- '").append(r.get("titlu").asString())
+                        .append("' de ").append(r.get("autor").asString()).append("\n");
             }
+
         } catch (Exception e) {
             e.printStackTrace();
-            return "Eroare la conectarea cu Graful Memgraph.";
         }
 
-        // Construim super-prompt-ul pentru Gemini
-        String promptPentruGemini =
-                "Ești un Mentor Literar AI avansat. Utilizatorul '" + username + "' cere o recomandare.\n\n" +
-                        "Sistemul nostru GraphRAG a extras deja matematic cele mai bune 5 cărți pentru el, " +
-                        "calculând un 'Scor de Relevanță' și 'Motivele' pentru care se potrivesc.\n\n" +
-                        dateGraf.toString() + "\n\n" +
-                        "SARCINA TA:\n" +
-                        "1. Salută utilizatorul pe nume.\n" +
-                        "2. Prezintă-i topul cărților recomandate de graf.\n" +
-                        "3. EXPLAINABLE AI: Pentru fiecare carte, explică-i DE CE i-o recomanzi, integrând în text motivele și scorul extras din graf (ex: 'Îți recomand această carte pentru că are un scor maxim de relevanță, îmbinând perfect pasiunea ta pentru SF și Filosofie').\n" +
-                        "4. Folosește formatare frumoasă (Markdown, bold, emoji-uri). Fii cald, inteligent și la obiect. NU recomanda alte cărți care nu sunt în listă.";
+        // Construim istoricul conversației
+        StringBuilder historyStr = new StringBuilder();
+        if (istoric != null && !istoric.isEmpty()) {
+            historyStr.append("ISTORICUL CONVERSAȚIEI:\n");
+            // Luăm doar ultimele 6 mesaje ca să nu blocăm memoria AI-ului
+            int start = Math.max(0, istoric.size() - 6);
+            for (int i = start; i < istoric.size() - 1; i++) { // -1 ca să excludem ultimul mesaj care e cel curent
+                Map<String, String> msg = istoric.get(i);
+                String sender = msg.get("sender").equals("user") ? "Utilizatorul" : "Tu (AI)";
+                historyStr.append(sender).append(": ").append(msg.get("text")).append("\n");
+            }
+        }
 
-        // AICI TREBUIE SĂ APELEZI METODA TA EXISTENTĂ DE GEMINI
-        // Înlocuiește "trimitePromptLaGemini" cu metoda pe care o foloseai deja în clasa ta pentru a apela AI-ul
+        // --- PARTEA 4: INSTRUCȚIUNI PENTRU AI (Conversațional & Inteligent) ---
+        String promptPentruGemini =
+                "Ești Mentorul Literar personal al utilizatorului '" + username + "'. Ești un AI conversațional, prietenos și empatic.\n\n" +
+                        "ISTORICUL CONVERSAȚIEI (CITESTE-L ATENT CA SĂ NU REPEȚI CE AI ZIS DEJA!):\n" +
+                        historyStr.toString() + "\n\n" +
+                        "DATE EXTRASE DIN GRAFUL MEMGRAPH (Baza noastră de date):\n" +
+                        dateGraf.toString() + "\n\n" +
+                        "MESAJUL NOU DE LA UTILIZATOR: \"" + mesajUtilizator + "\"\n\n" +
+                        "REGULI CRITICE DE FUNCȚIONARE:\n" +
+                        "1. MEMORIE: NU recomanda NICIODATĂ o carte pe care ai mai recomandat-o în istoricul de mai sus sau pe care utilizatorul a spus că a citit-o/nu îi place.\n" +
+                        "2. LIBERTATE TOTALĂ: Dacă utilizatorul cere ceva specific (ex: 'mister cu puzzle') și nu ai cărți potrivite în 'Date Extrase', EȘTI LIBER să recomanzi orice carte din literatura mondială care se potrivește perfect.\n" +
+                        "3. STIL: Poartă un dialog natural, ca un prieten. Nu face monologuri lungi. Dacă e nehotărât, pune-i maxim o întrebare de ghidare.\n" +
+                        "4. COMENZI RAPIDE: Dacă utilizatorul îți cere 'Noutăți' sau 'New Releases', recomandă-i 2-3 cărți foarte bune apărute în ultimul an. Dacă cere o sugestie random, surprinde-l cu o capodoperă.\n" +
+                        "5. Formatează aerisit (folosește bold și emoji-uri).";
+
         return trimitePromptLaGemini(promptPentruGemini);
     }
 
@@ -175,10 +211,8 @@ public class BookGeneratorAgent {
         try {
             System.out.println("🤖 AGENT TRASEE (GraphRAG): Caut cărți în graf pentru: " + subiect);
 
-            // PASUL 1: RETRIEVAL (Extragem cărțile din Memgraph)
             StringBuilder contextBazaDeDate = new StringBuilder();
             try (Session session = driver.session()) {
-                // Căutăm cărți care au legătură cu subiectul în titlu, categorie sau tag-uri
                 String query = "MATCH (c:Carte) " +
                         "OPTIONAL MATCH (c)-[:ARE_TAG]->(t:Tag) " +
                         "WHERE toLower(c.categoria) CONTAINS toLower($subiect) " +
@@ -197,10 +231,8 @@ public class BookGeneratorAgent {
                 }
             }
 
-            // PASUL 2: AUGMENTAREA PROMPT-ULUI
             String prompt;
             if (contextBazaDeDate.length() > 0) {
-                // Dacă avem cărți în baza de date, le dăm lui Gemini
                 System.out.println("📚 Am găsit cărți în baza de date. Le trimit către Gemini...");
                 prompt = "Vreau să creezi un traseu de lectură de la zero la expert despre: '" + subiect + "'. " +
                         "Ai la dispoziție STRICT următoarele cărți din baza noastră de date:\n" +
@@ -208,13 +240,11 @@ public class BookGeneratorAgent {
                         "Alege cele mai potrivite cărți de mai sus și grupează-le logic în " + nrEtape + " etape. " +
                         "Dacă nu ai suficiente cărți pentru toate etapele, poți suplimenta cu 1-2 recomandări din cunoștințele tale generale.\n";
             } else {
-                // Fallback dacă nu avem cărți pe subiect
                 System.out.println("⚠️ Nu am găsit cărți în graf. Gemini va genera de la zero...");
                 prompt = "Vreau să creezi un traseu de lectură de la zero la expert despre: '" + subiect + "'. " +
                         "Avem nevoie de exact " + nrEtape + " etape logice.\n";
             }
 
-            // Cerem formatul JSON strict
             prompt += "Răspunde STRICT cu un Array JSON. Fiecare obiect din array reprezintă o etapă și trebuie să aibă structura: " +
                     "{ " +
                     "  \"nivel\": \"(ex: INTRODUCERE, FUNDAMENTE, INTERMEDIAR, AVANSAT, EXPERT)\", " +
@@ -227,7 +257,6 @@ public class BookGeneratorAgent {
                     "} " +
                     "Generează maxim 2 cărți pentru fiecare etapă. Fără formatare Markdown, doar array-ul JSON.";
 
-            // PASUL 3: GENERATION (Apelăm Gemini)
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))));
             requestBody.put("generationConfig", Map.of("responseMimeType", "application/json"));
@@ -240,51 +269,73 @@ public class BookGeneratorAgent {
 
             HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
 
+            if (resp.statusCode() == 429) {
+                System.err.println("❌ EROARE 429: Limita Gemini atinsă!");
+                return "[{\"titlu_etapa\": \"Limita de cereri atinsă\", \"descriere\": \"Te rog așteaptă un minut înainte de a genera un alt traseu.\"}]";
+            }
             if (resp.statusCode() != 200) {
-                return "[{\"titlu_etapa\": \"Eroare API\", \"descriere\": \"Eroare de la Gemini: " + resp.statusCode() + "\"}]";
+                System.err.println("❌ EROARE API (" + resp.statusCode() + "): " + resp.body());
+                return "[{\"titlu_etapa\": \"Eroare de conexiune\", \"descriere\": \"A apărut o problemă la comunicarea cu AI-ul.\"}]";
             }
 
             JsonNode root = objectMapper.readTree(resp.body());
             String aiJson = root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
 
-            // Salvarea cărților în graf
-            List<Map<String, Object>> etape = objectMapper.readValue(aiJson, new TypeReference<List<Map<String, Object>>>(){});
+            int start = aiJson.indexOf("[");
+            int end = aiJson.lastIndexOf("]");
+            if (start != -1 && end != -1) {
+                aiJson = aiJson.substring(start, end + 1);
+            } else {
+                System.err.println("❌ JSON INVALID: " + aiJson);
+                return "[{\"titlu_etapa\": \"Eroare de formatare\", \"descriere\": \"AI-ul a generat un răspuns care nu a putut fi citit.\"}]";
+            }
+
+            List<Map<String, Object>> etape;
+            try {
+                etape = objectMapper.readValue(aiJson, new TypeReference<List<Map<String, Object>>>(){});
+            } catch (Exception e) {
+                System.err.println("❌ EROARE PARSARE JSON: " + e.getMessage());
+                return "[{\"titlu_etapa\": \"Eroare de sintaxă AI\", \"descriere\": \"AI-ul a uitat o virgulă sau a stricat structura datelor.\"}]";
+            }
+
             String categorieSalvata = "Invatare: " + subiect;
 
             for (Map<String, Object> etapa : etape) {
-                List<Map<String, Object>> cartiEtapa = (List<Map<String, Object>>) etapa.get("carti");
+                if (etapa.containsKey("carti") && etapa.get("carti") != null) {
+                    try {
+                        @SuppressWarnings("unchecked")
+                        List<Map<String, Object>> cartiEtapa = (List<Map<String, Object>>) etapa.get("carti");
 
-                if (cartiEtapa != null) {
-                    for (Map<String, Object> detaliiCarte : cartiEtapa) {
-                        String titluCarte = (String) detaliiCarte.get("titlu");
-                        String autorCarte = (String) detaliiCarte.get("autor");
+                        for (Map<String, Object> detaliiCarte : cartiEtapa) {
+                            String titluCarte = (String) detaliiCarte.getOrDefault("titlu", "Titlu Necunoscut");
+                            String autorCarte = (String) detaliiCarte.getOrDefault("autor", "Autor Necunoscut");
 
-                        String img = getBookCoverUrl(titluCarte, autorCarte);
-                        detaliiCarte.put("imagine_generata", img);
+                            String img = getBookCoverUrl(titluCarte, autorCarte);
+                            detaliiCarte.put("imagine_generata", img);
 
-                        salveazaInMemgraph(titluCarte, autorCarte, categorieSalvata, img, detaliiCarte);
+                            salveazaInMemgraph(titluCarte, autorCarte, categorieSalvata, img, detaliiCarte);
+                        }
+                    } catch (Exception ex) {
+                        System.err.println("⚠️ Eroare minoră la citirea cărților dintr-o etapă: " + ex.getMessage());
                     }
                 }
             }
 
-            // PASUL 4: SALVAREA STRUCTURII COMPLETE A TRASEULUI (Pentru meniul din stânga)
             String finalJson = objectMapper.writeValueAsString(etape);
             try (Session session = driver.session()) {
-                // Creăm un nod dedicat pentru Traseu care conține tot JSON-ul generat
                 session.run("MERGE (tr:Traseu {subiect: $sub}) SET tr.json = $json",
                         Map.of("sub", subiect, "json", finalJson));
             }
 
-            // Returnăm AI JSON actualizat cu tot cu imagini
             return finalJson;
 
         } catch (Exception e) {
             e.printStackTrace();
-            return "[]";
+            System.err.println("❌ EROARE CRITICĂ AGENT TRASEE: " + e.getMessage());
+            return "[{\"titlu_etapa\": \"Eroare Internă\", \"descriere\": \"A apărut o problemă pe serverul Java.\"}]";
         }
     }
 
-    // --- GRAPHRAG: SFATUL EXPERȚILOR ---
     public String recomandaPrinExperti(List<String> topicuri, String profil) {
         try {
             StringBuilder contextGraf = new StringBuilder();
@@ -457,9 +508,9 @@ public class BookGeneratorAgent {
         } catch (Exception e) {}
 
         try {
-            return "https://placehold.co/400x600/e0e0e0/333333?text=" + URLEncoder.encode(t, StandardCharsets.UTF_8);
+            return "[https://placehold.co/400x600/e0e0e0/333333?text=](https://placehold.co/400x600/e0e0e0/333333?text=)" + URLEncoder.encode(t, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            return "https://placehold.co/400x600?text=Fara+Coperta";
+            return "[https://placehold.co/400x600?text=Fara+Coperta](https://placehold.co/400x600?text=Fara+Coperta)";
         }
     }
 
@@ -504,12 +555,13 @@ public class BookGeneratorAgent {
 
     private void salveazaInMemgraph(String titlu, String autor, String gen, String img, Map<String, Object> detalii) {
         try (Session s = driver.session()) {
+            @SuppressWarnings("unchecked")
             List<String> keywords = (List<String>) detalii.getOrDefault("cuvinte_cheie", new ArrayList<String>());
             Map<String, Object> params = new HashMap<>();
             params.put("t", titlu);
             params.put("autor", autor);
             params.put("gen", gen);
-            params.put("img", img != null ? img : "https://placehold.co/300x450");
+            params.put("img", img != null ? img : "[https://placehold.co/300x450](https://placehold.co/300x450)");
             params.put("desc", detalii.getOrDefault("descriere", "Fără descriere"));
             params.put("an", detalii.getOrDefault("an", 0));
             params.put("editura", detalii.getOrDefault("editura", "-"));
@@ -540,7 +592,7 @@ public class BookGeneratorAgent {
         date.put("pagini", 0);
         date.put("editura", "Necunoscută");
         date.put("an", 2024);
-        date.put("imagine", "https://placehold.co/300x450");
+        date.put("imagine", "[https://placehold.co/300x450](https://placehold.co/300x450)");
         try {
             String query = URLEncoder.encode("intitle:\"" + t + "\" inauthor:\"" + a + "\"", StandardCharsets.UTF_8);
             String url = "[https://www.googleapis.com/books/v1/volumes?q=](https://www.googleapis.com/books/v1/volumes?q=)" + query + "&maxResults=1";
@@ -623,7 +675,6 @@ public class BookGeneratorAgent {
     // --- METODĂ AJUTĂTOARE PENTRU TRIMITEREA UNUI PROMPT SIMPLU CĂTRE GEMINI ---
     private String trimitePromptLaGemini(String prompt) {
         try {
-            // Împachetăm textul în formatul cerut de Google Gemini
             String jsonBody = objectMapper.writeValueAsString(Map.of(
                     "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt))))
             ));
@@ -643,12 +694,87 @@ public class BookGeneratorAgent {
                 return "AI-ul nu a generat niciun răspuns.";
             }
 
-            // Extragem textul efectiv din JSON-ul primit de la Google
             return root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
 
         } catch (Exception e) {
             e.printStackTrace();
             return "Eroare internă la comunicarea cu Gemini: " + e.getMessage();
         }
+    }
+
+    // Șterge preferințele vechi și le pune pe cele noi (Actualizat pentru noul UI)
+    public void salveazaProfilComplet(String username, List<String> tags, List<String> experts, List<Map<String, String>> books) {
+        try (Session session = driver.session()) {
+            // NOU: Asigurăm forțat că nodul utilizatorului există în graf
+            session.run("MERGE (u:Utilizator {username: $u})", Map.of("u", username));
+
+            // 1. Curățăm vechile relații (și tag-uri și experți) ca să nu se adune dubluri
+            session.run("MATCH (u:Utilizator {username: $u})-[r:INTERESAT_DE|URMARESTE]->() DELETE r", Map.of("u", username));
+
+            // 2. Salvăm noile Tag-uri (Domeniile alese) cu scorul cerut de prof
+            if (tags != null) {
+                for (String t : tags) {
+                    if (t == null || t.trim().isEmpty()) continue;
+                    session.run("MATCH (u:Utilizator {username: $u}) " +
+                                    "MERGE (tag:Tag {nume: $t}) " +
+                                    "MERGE (u)-[r:INTERESAT_DE]->(tag) " +
+                                    "SET r.score = 5.0", // Adăugat scorul automat
+                            Map.of("u", username, "t", t.toLowerCase().trim()));
+                }
+            }
+
+            // 3. Salvăm Experții Urmăriți
+            if (experts != null) {
+                for (String e : experts) {
+                    if (e == null || e.trim().isEmpty()) continue;
+                    session.run("MATCH (u:Utilizator {username: $u}) " +
+                                    "MERGE (exp:Expert {nume: $e}) " +
+                                    "MERGE (u)-[:URMARESTE]->(exp)",
+                            Map.of("u", username, "e", e.trim()));
+                }
+            }
+
+            // 4. Salvăm Cărțile Citite (My Books)
+            if (books != null) {
+                for (Map<String, String> b : books) {
+                    String titlu = b.get("title");
+                    String autor = b.get("author");
+                    session.run("MATCH (u:Utilizator {username: $u}) " +
+                                    "MERGE (c:Carte {titlu: $titlu}) " +
+                                    "SET c.autor = $autor " +
+                                    "MERGE (u)-[r:A_CITIT]->(c) " +
+                                    "SET r.liked = true",
+                            Map.of("u", username, "titlu", titlu, "autor", autor));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Citește din graf ce ai bifat data trecută (Actualizat pentru noul UI)
+    public Map<String, Object> incarcaProfil(String username) {
+        Map<String, Object> rezultat = new HashMap<>();
+        try (Session session = driver.session()) {
+            var res = session.run(
+                    "MATCH (u:Utilizator {username: $u}) " +
+                            "OPTIONAL MATCH (u)-[:INTERESAT_DE]->(t:Tag) " +
+                            "WITH u, collect(DISTINCT t.nume) as tags " +
+                            "OPTIONAL MATCH (u)-[:URMARESTE]->(e:Expert) " +
+                            "WITH u, tags, collect(DISTINCT e.nume) as experts " +
+                            "OPTIONAL MATCH (u)-[:A_CITIT]->(c:Carte) " +
+                            "RETURN tags, experts, collect(DISTINCT {title: c.titlu, author: c.autor}) as books",
+                    Map.of("u", username)
+            );
+            if (res.hasNext()) {
+                var r = res.next();
+                rezultat.put("tags", r.get("tags").asList());
+                rezultat.put("experts", r.get("experts").asList());
+                rezultat.put("books", r.get("books").asList());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return rezultat;
     }
 }
