@@ -297,6 +297,30 @@ public class BookController {
         return "recomandari";
     }
 
+    // --- API NOU: Returnează lista cu subiectele traseelor deja salvate ---
+    @GetMapping("/api/trasee/salvate")
+    @ResponseBody
+    public List<String> getToateTraseeleSalvate() {
+        List<String> trasee = new ArrayList<>();
+        try (Session session = driver.session()) {
+            var result = session.run("MATCH (t:Traseu) RETURN t.subiect AS domeniu ORDER BY t.subiect ASC");
+            while(result.hasNext()) {
+                trasee.add(result.next().get("domeniu").asString());
+            }
+        } catch (Exception e) {}
+        return trasee;
+    }
+
+    @PostMapping("/api/carti/noutati-internet")
+    @ResponseBody
+    public String getNoutatiDePeInternet(@RequestBody Map<String, Object> payload) {
+        @SuppressWarnings("unchecked")
+        List<String> interese = (List<String>) payload.get("interese");
+
+        // Trimitem lista de interese către Agent ca să caute pe internet
+        return bookAgent.cautaNoutatiInternet(interese);
+    }
+
     // --- METODA PRIVATĂ DE ÎNCĂRCARE ---
     private String incarcaPagina(String query, String gen, Model model, String templateName) {
         List<Map<String, String>> listaCarti = new ArrayList<>();
@@ -349,4 +373,48 @@ public class BookController {
         model.addAttribute("cautare", query);
         return templateName;
     }
+
+    // --- API NOU: Trimite toate cărțile reale către interfață ---
+    @GetMapping("/api/carti/toate")
+    @ResponseBody
+    public List<Map<String, String>> getToateCartile() {
+        List<Map<String, String>> listaCarti = new ArrayList<>();
+        try (Session session = driver.session()) {
+            // AM MĂRIT LIMITA LA 1000 CA SĂ ADUCĂ ABSOLUT TOATE CĂRȚILE TALE!
+            var result = session.run("MATCH (c:Carte)-[:SCRISA_DE]->(a:Autor) " +
+                    "RETURN DISTINCT c.titlu AS titlu, c.imagine AS imagine, c.categoria AS categorie, c.descriere AS descriere, a.nume AS autor " +
+                    "ORDER BY id(c) DESC LIMIT 1000");
+            while (result.hasNext()) {
+                var r = result.next();
+                Map<String, String> carte = new HashMap<>();
+                carte.put("titlu", r.get("titlu").asString());
+                carte.put("autor", r.get("autor").asString());
+                carte.put("categorie", r.get("categorie").asString());
+                carte.put("imagine", r.get("imagine").asString());
+                var desc = r.get("descriere");
+                carte.put("descriere", (desc.isNull() || desc.asString().isEmpty()) ? "Fără descriere" : desc.asString());
+                listaCarti.add(carte);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return listaCarti;
+    }
+    @GetMapping("/api/carti/filtre-unice")
+    @ResponseBody
+    public Map<String, List<String>> getFiltreUnice() {
+        List<String> autori = new ArrayList<>();
+        List<String> genuri = new ArrayList<>();
+        try (Session session = driver.session()) {
+            // Luăm toți autorii unici
+            var resAutori = session.run("MATCH (a:Autor) RETURN DISTINCT a.nume AS nume ORDER BY a.nume");
+            while(resAutori.hasNext()) autori.add(resAutori.next().get("nume").asString());
+
+            // Luăm toate genurile (categoriile) unice
+            var resGenuri = session.run("MATCH (c:Carte) WHERE c.categoria IS NOT NULL RETURN DISTINCT c.categoria AS nume ORDER BY c.categoria");
+            while(resGenuri.hasNext()) genuri.add(resGenuri.next().get("nume").asString());
+        }
+        return Map.of("autori", autori, "genuri", genuri);
+    }
+
 }

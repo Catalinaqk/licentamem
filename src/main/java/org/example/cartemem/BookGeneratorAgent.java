@@ -7,6 +7,7 @@ import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Session;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -25,7 +26,8 @@ public class BookGeneratorAgent {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(60)).build();
 
-    private final String GEMINI_API_KEY = "AQ.Ab8RN6JeKlivOpowdVYOHyuzFHXj5PP8NkGLZg3ew-a9Ht6UhA";
+    @Value("${google.api.key}")
+    private String GEMINI_API_KEY;
     private final String MODEL_NAME = "gemini-2.5-flash";
     private final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL_NAME + ":generateContent?key=" + GEMINI_API_KEY;
 
@@ -777,4 +779,19 @@ public class BookGeneratorAgent {
         }
         return rezultat;
     }
+    public String cautaNoutatiInternet(List<String> interese) {
+        // Dacă utilizatorul nu are interese bifate, căutăm la general
+        String domenii = (interese != null && !interese.isEmpty()) ? String.join(", ", interese) : "literatură contemporană, bestsellers";
+
+        String prompt = "Acționează ca un critic literar conectat la internet. " +
+                "Găsește 6 cărți REALE și foarte populare, apărute RECENT (în ultimele 3-6 luni) la nivel internațional, " +
+                "care se potrivesc cu aceste genuri preferate de utilizator: " + domenii + ". " +
+                "Returnează STRICT un array JSON (fără formatare markdown, fără cuvântul json, doar array-ul) cu această structură pentru fiecare carte: " +
+                "[{\"titlu\": \"Nume\", \"autor\": \"Autor\", \"imagine\": \"https://placehold.co/300x450/e67e22/ffffff?text=Lansare+Noua\", \"descriere\": \"Descriere scurtă...\", \"motiv\": \"Motivul personalizat (ex: Pentru că ești pasionat de genul X, această nouă lansare...)\"}]";
+
+        // AICI folosești metoda ta existentă prin care trimiți textul către Gemini!
+        // (Înlocuiește "apeleazaGemini" cu funcția pe care o ai tu deja în clasă)
+        return trimitePromptLaGemini(prompt);
+    }
+
 }
