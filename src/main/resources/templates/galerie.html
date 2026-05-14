@@ -22,23 +22,18 @@
                 <span>Meniu Principal</span>
                 <span id="dropdown-arrow">▲</span>
             </div>
-
             <div id="dropdown-menu" class="flex flex-col gap-1 mt-2">
-                <button onclick="schimbaEcran('galerie')" id="btn-galerie" class="text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 bg-black text-white">📚 Galerie Cărți</button>
+                <button onclick="schimbaEcran('galerie')" id="btn-galerie" class="text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 bg-black text-white shadow-md">📚 Galerie Cărți</button>
                 <button onclick="schimbaEcran('trasee')" id="btn-trasee" class="text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-gray-600 hover:bg-gray-100">🗺️ Trasee de Lectură</button>
                 <button onclick="schimbaEcran('invatare')" id="btn-invatare" class="text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-gray-600 hover:bg-gray-100">🎓 Modul Învățare</button>
                 <button onclick="schimbaEcran('experti')" id="btn-experti" class="text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-gray-600 hover:bg-gray-100">🧠 Sfatul Experților</button>
-                <div class="border-t border-gray-100 my-1"></div>
                 <button onclick="schimbaEcran('profil')" id="btn-profil" class="text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-gray-600 hover:bg-gray-100">👤 Profil & Preferințe</button>
             </div>
         </div>
-
-        <div class="mb-4">
-            <div class="py-2 font-bold text-sm text-indigo-400 uppercase tracking-wider">Inteligență Artificială</div>
-            <div class="flex flex-col gap-1 mt-2">
-                <button onclick="schimbaEcran('chat')" id="btn-chat" class="text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-gray-600 hover:bg-gray-100">🤖 Agent Personalizat</button>
-                <button onclick="schimbaEcran('noutati')" id="btn-noutati" class="text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-gray-600 hover:bg-gray-100">🔥 Noutăți Internet</button>
-            </div>
+        <div class="mb-4 text-indigo-400 font-bold text-[10px] uppercase tracking-widest px-2">Inteligență Artificială</div>
+        <div class="flex flex-col gap-1 mt-2 px-1">
+            <button onclick="schimbaEcran('chat')" id="btn-chat" class="text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-gray-600 hover:bg-gray-100">🤖 Agent Personalizat</button>
+            <button onclick="schimbaEcran('noutati')" id="btn-noutati" class="text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-gray-600 hover:bg-gray-100">🔥 Noutăți Internet</button>
         </div>
     </nav>
 </div>
@@ -48,58 +43,115 @@
     <div id="ecran-galerie" class="flex-1 overflow-y-auto p-8 z-10 transition-opacity duration-300">
         <div class="max-w-6xl mx-auto">
             <h2 class="text-3xl font-bold mb-6 text-gray-900">Explorează Biblioteca</h2>
-
             <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-8 flex items-center gap-4 shadow-sm">
                 <span class="text-indigo-800 font-bold text-sm">🤖 Adaugă noutăți cu AI:</span>
                 <select id="select-gen-ai" class="border border-indigo-200 rounded-lg px-3 py-2 text-sm bg-white outline-none">
                     <option>Science Fiction</option><option>Thriller</option><option>Romance</option><option>Istorie</option>
                 </select>
-                <button onclick="genereazaCartiDinGalerie()" id="btn-genereaza-ai" class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">Generează acum</button>
+                <button onclick="genereazaCartiDinGalerie()" id="btn-genereaza-ai" class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700">Generează</button>
             </div>
-
             <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 mb-6 shadow-sm">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Genul cărții</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Gen</label>
                         <select id="filtru-gen" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-400 transition cursor-pointer">
                             <option value="">Toate Genurile</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Autorul</label>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Autor</label>
                         <select id="filtru-autor" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-400 transition cursor-pointer">
                             <option value="">Toți Autorii</option>
                         </select>
                     </div>
                 </div>
-
-                <div class="flex gap-3 items-center pt-2">
-                    <button onclick="filtreazaCarti()" class="bg-black text-white px-10 py-3 rounded-xl font-bold hover:bg-gray-800 transition flex items-center gap-2">
-                        🔍 Caută în Bibliotecă
-                    </button>
-                    <button onclick="reseteazaFiltre()" class="text-gray-500 text-sm font-medium hover:text-black transition px-4">
-                        Resetează filtrele
-                    </button>
-                </div>
+                <button onclick="filtreazaCarti()" class="bg-black text-white px-10 py-3 rounded-xl font-bold hover:bg-gray-800 transition flex items-center gap-2">🔍 Caută în Bibliotecă</button>
             </div>
-
-            <div class="flex items-center gap-3 mb-8 ml-2">
-                <span class="text-[10px] font-bold text-gray-300 uppercase">Sugestii rapide:</span>
-                <button onclick="aplicaAutorRapid('Stephen King')" class="px-3 py-1 bg-gray-100 hover:bg-indigo-100 rounded-full text-xs font-medium transition">Stephen King</button>
-                <button onclick="aplicaAutorRapid('Frank Herbert')" class="px-3 py-1 bg-gray-100 hover:bg-indigo-100 rounded-full text-xs font-medium transition">Frank Herbert</button>
-                <button onclick="aplicaAutorRapid('Agatha Christie')" class="px-3 py-1 bg-gray-100 hover:bg-indigo-100 rounded-full text-xs font-medium transition">Agatha Christie</button>
+            <div id="grila-carti" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-20">
+                <div class="col-span-4 py-20 text-center text-gray-400 border-2 border-dashed border-gray-100 rounded-3xl">Folosește filtrele pentru a explora colecția.</div>
             </div>
-
-            <div id="grila-carti" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-20"></div>
         </div>
     </div>
 
-    <div id="ecran-chat" class="hidden flex-col absolute inset-0 bg-white z-0 overflow-hidden">... (Chat)</div>
-    <div id="ecran-noutati" class="hidden absolute inset-0 bg-gray-50 overflow-y-auto p-8 z-0">... (Noutati)</div>
-    <div id="ecran-trasee" class="hidden absolute inset-0 bg-white z-0 flex flex-col p-8 overflow-hidden">... (Trasee)</div>
-    <div id="ecran-invatare" class="hidden absolute inset-0 bg-white p-8 z-0 overflow-y-auto">... (Invatare)</div>
-    <div id="ecran-experti" class="hidden absolute inset-0 bg-white p-8 z-0 overflow-y-auto">... (Experti)</div>
-    <div id="ecran-profil" class="hidden absolute inset-0 bg-white p-8 z-0 overflow-y-auto">... (Profil)</div>
+    <div id="ecran-chat" class="hidden flex-col absolute inset-0 bg-white z-0 overflow-hidden">
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
+            <div class="m-auto text-center text-gray-300">Vorbește cu Agentul tău Personalizat...</div>
+        </div>
+        <div class="p-4 border-t border-gray-200 bg-white">
+            <div class="flex gap-2 max-w-4xl mx-auto">
+                <input type="text" id="chat-input" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-black" placeholder="Scrie mesajul tău..." onkeypress="if(event.key==='Enter') trimiteMesajChat()">
+                <button onclick="trimiteMesajChat()" class="px-8 py-3 rounded-xl bg-black text-white font-medium hover:bg-gray-800">Trimite</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ecran-noutati" class="hidden absolute inset-0 bg-gray-50 overflow-y-auto p-8 z-0">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold mb-2">New Releases de pe Internet 🔥</h2>
+            <p class="text-gray-500 mb-8">Noutăți din ultimele luni găsite de AI special pentru tine.</p>
+            <div id="grila-noutati" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        </div>
+    </div>
+
+    <div id="ecran-trasee" class="hidden absolute inset-0 bg-white z-0 flex flex-col p-8 overflow-hidden">
+        <h2 class="text-3xl font-bold mb-6 text-gray-900">Trasee de Lectură</h2>
+        <div class="flex flex-1 gap-8 overflow-hidden">
+            <div class="w-1/3 border-r pr-6 overflow-y-auto">
+                <h3 class="font-bold text-xs text-gray-400 uppercase mb-4 tracking-widest">Trasee Salvate</h3>
+                <ul id="lista-trasee-salvate" class="space-y-2"></ul>
+            </div>
+            <div class="w-2/3 flex flex-col overflow-hidden">
+                <div class="flex gap-2 mb-6">
+                    <input type="text" id="input-traseu" class="flex-1 border p-3 rounded-xl outline-none focus:border-indigo-400" placeholder="Ex: Blockchain, Mitologie...">
+                    <button onclick="genereazaTraseu()" class="bg-black text-white px-8 rounded-xl font-bold">Creează</button>
+                </div>
+                <div id="rezultat-traseu" class="overflow-y-auto flex-1 space-y-4 pr-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="ecran-invatare" class="hidden absolute inset-0 bg-white p-8 z-0 overflow-y-auto">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold mb-6">Modul Învățare</h2>
+            <div class="flex gap-4 mb-8">
+                <input type="text" id="input-invatare" class="flex-1 border p-3 rounded-xl outline-none focus:border-indigo-400" placeholder="Ce vrei să înveți de la zero?">
+                <button onclick="genereazaInvatare()" class="bg-black text-white px-8 rounded-xl font-bold">Începe</button>
+            </div>
+            <div id="rezultat-invatare" class="bg-gray-50 border border-gray-200 p-8 rounded-2xl hidden whitespace-pre-wrap leading-relaxed shadow-inner"></div>
+        </div>
+    </div>
+
+    <div id="ecran-experti" class="hidden absolute inset-0 bg-white p-8 z-0 overflow-y-auto">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-4">Sfatul Experților</h2>
+            <p class="text-gray-500 mb-10">AI-ul combină viziunea experților cu preferințele tale.</p>
+            <button onclick="cereSfatExperti()" class="bg-indigo-600 text-white px-12 py-4 rounded-xl font-bold hover:bg-indigo-700 shadow-lg">Cere Sfatul Acum</button>
+            <div id="rezultat-experti" class="mt-12 text-left bg-gray-50 p-8 rounded-2xl border border-gray-200 hidden leading-relaxed"></div>
+        </div>
+    </div>
+
+    <div id="ecran-profil" class="hidden absolute inset-0 bg-white p-8 z-0 overflow-y-auto">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold mb-8">Profilul Meu</h2>
+            <div class="bg-gray-50 p-8 rounded-3xl border border-gray-100 mb-8 shadow-sm">
+                <h3 class="font-bold text-lg mb-4 text-indigo-900">Taxonomie (Interese)</h3>
+                <div id="lista-taxonomie" class="flex flex-wrap gap-2 mb-6"></div>
+                <div class="flex gap-2">
+                    <input type="text" id="input-domeniu-nou" placeholder="Adaugă alt domeniu..." class="border p-2 rounded-lg flex-1 outline-none">
+                    <button onclick="adaugaDomeniuNou()" class="bg-white border border-gray-300 px-4 rounded-lg font-medium">Adaugă</button>
+                    <button onclick="salveazaTaxonomie()" class="bg-black text-white px-8 rounded-lg font-bold ml-2">Salvează Interesele</button>
+                </div>
+            </div>
+            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+                <h3 class="font-bold text-lg mb-4 text-indigo-900">Istoric Cărți Citite</h3>
+                <div class="flex gap-2 mb-6">
+                    <input type="text" id="input-citita-titlu" placeholder="Titlul cărții..." class="flex-1 border p-2 rounded-lg outline-none">
+                    <button onclick="adaugaCarteCitita()" class="bg-black text-white px-6 rounded-lg font-bold">Adaugă în Istoric</button>
+                </div>
+                <ul id="lista-carti-citite" class="space-y-2"></ul>
+            </div>
+        </div>
+    </div>
 
     <div id="modal-carte" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 hidden">
         <div class="bg-white rounded-3xl w-full max-w-4xl flex flex-col md:flex-row overflow-hidden shadow-2xl">
@@ -109,42 +161,77 @@
                 <h2 id="modal-titlu" class="text-3xl font-bold text-gray-900 mb-2">Titlu</h2>
                 <p id="modal-autor" class="text-xl text-gray-500 mb-6">Autor</p>
                 <div class="overflow-y-auto max-h-48 mb-6"><p id="modal-desc" class="text-gray-700 leading-relaxed"></p></div>
-                <div class="mt-auto pt-6 border-t">
-                    <button id="btn-genereaza-rezumat" onclick="genereazaRezumatAI()" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold">✨ Generează Rezumat AI</button>
-                    <div id="modal-ai-rezumat" class="hidden bg-indigo-50 p-4 rounded-xl text-sm italic"></div>
+                <div class="mt-auto pt-6 border-t border-gray-100">
+                    <button id="btn-genereaza-rezumat" onclick="genereazaRezumatAI()" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition">✨ Generează Rezumat AI Complet</button>
+                    <div id="modal-ai-rezumat" class="hidden bg-indigo-50 p-4 rounded-xl text-sm text-indigo-900 leading-relaxed italic border border-indigo-100"></div>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
 
 <script>
     let toateCartile = [];
+    let chatIstoric = [];
     let currentUser = sessionStorage.getItem('currentUser') || "carla";
+    let myTags = [];
+    let myBooks = [];
+    let selectedBook = null;
+    let domeniiDisponibile = ["Science Fiction", "Fantasy", "Thriller", "Mister", "Romance", "Istorie", "Psihologie", "Dragoste"];
 
     window.onload = function() {
-        if (!sessionStorage.getItem('currentUser')) { window.location.href = "/login"; return; }
         document.getElementById('username-display').innerText = currentUser;
-        incarcaCartile();
         incarcaFiltre();
+        incarcaProfil();
     };
 
+    // --- FUNCȚIA DE SCHIMBARE ECRAN (Corectată) ---
+    function schimbaEcran(numeEcran) {
+        const ecrane = ['galerie', 'trasee', 'invatare', 'experti', 'profil', 'chat', 'noutati'];
+        ecrane.forEach(e => {
+            const div = document.getElementById('ecran-' + e);
+            const btn = document.getElementById('btn-' + e);
+            if (e === numeEcran) {
+                div.classList.remove('hidden');
+                div.classList.add('flex', 'opacity-100', 'z-10');
+                if(btn) btn.className = "text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 bg-black text-white shadow-md";
+            } else {
+                div.classList.add('hidden');
+                div.classList.remove('flex', 'opacity-100', 'z-10');
+                if(btn) btn.className = "text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-gray-600 hover:bg-gray-100";
+            }
+        });
+        if(numeEcran === 'noutati') incarcaNoutatiInternet();
+        if(numeEcran === 'trasee') incarcaTraseeSalvate();
+    }
+
+    // --- GALERIE ---
     function incarcaFiltre() {
         fetch('/api/carti/filtre-unice').then(r => r.json()).then(data => {
             const sg = document.getElementById('filtru-gen');
             const sa = document.getElementById('filtru-autor');
-            sg.innerHTML = '<option value="">Toate Genurile</option>';
-            sa.innerHTML = '<option value="">Toți Autorii</option>';
             data.genuri.forEach(g => sg.innerHTML += `<option value="${g}">${g}</option>`);
             data.autori.forEach(a => sa.innerHTML += `<option value="${a}">${a}</option>`);
         });
     }
 
-    function incarcaCartile() {
-        fetch('/api/carti/toate').then(r => r.json()).then(d => {
-            toateCartile = d;
-            deseneazaCarti(d);
+    async function filtreazaCarti() {
+        const container = document.getElementById('grila-carti');
+        const gen = document.getElementById('filtru-gen').value.toLowerCase();
+        const aut = document.getElementById('filtru-autor').value.toLowerCase();
+        container.innerHTML = "<div class='col-span-4 text-center py-20 animate-pulse text-indigo-600'>Se caută în Memgraph...</div>";
+        if (toateCartile.length === 0) {
+            const res = await fetch('/api/carti/toate');
+            toateCartile = await res.json();
+        }
+        const filtrate = toateCartile.filter(c => {
+            const mG = !gen || (c.categorie && c.categorie.toLowerCase().includes(gen));
+            const mA = !aut || (c.autor && c.autor.toLowerCase().includes(aut));
+            return mG && mA;
         });
+        if(filtrate.length === 0) container.innerHTML = "<div class='col-span-4 text-center py-20 text-gray-400'>Niciun rezultat.</div>";
+        else deseneazaCarti(filtrate);
     }
 
     function deseneazaCarti(lista) {
@@ -153,61 +240,122 @@
         lista.forEach(c => {
             g.innerHTML += `
                 <div onclick="deschideModalDinLista('${c.titlu.replace(/'/g, "\\'")}')" class="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group">
-                    <div class="h-64 overflow-hidden"><img src="${c.imagine}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" onerror="this.src='https://placehold.co/300x450?text=Coperta'"></div>
-                    <div class="p-4">
-                        <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-tighter">${c.categorie || 'General'}</span>
-                        <h3 class="font-bold text-gray-900 leading-tight truncate mt-1">${c.titlu}</h3>
-                        <p class="text-xs text-gray-500 mt-1">${c.autor}</p>
-                    </div>
+                    <div class="h-64 overflow-hidden bg-gray-50"><img src="${c.imagine}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" onerror="this.src='https://placehold.co/300x450?text=Coperta'"></div>
+                    <div class="p-4"><span class="text-[10px] font-bold text-indigo-500 uppercase">${c.categorie || 'General'}</span><h3 class="font-bold text-gray-900 leading-tight truncate mt-1">${c.titlu}</h3><p class="text-xs text-gray-500 mt-1">${c.autor}</p></div>
                 </div>`;
         });
-    }
-
-    function filtreazaCarti() {
-        const gen = document.getElementById('filtru-gen').value.toLowerCase();
-        const aut = document.getElementById('filtru-autor').value.toLowerCase();
-
-        const filtrate = toateCartile.filter(c => {
-            const mG = !gen || (c.categorie && c.categorie.toLowerCase().includes(gen));
-            const mA = !aut || (c.autor && c.autor.toLowerCase().includes(aut));
-            return mG && mA;
-        });
-
-        if(filtrate.length === 0) {
-            document.getElementById('grila-carti').innerHTML = "<div class='col-span-4 text-center py-20 text-gray-400'>Nicio carte găsită.</div>";
-        } else {
-            deseneazaCarti(filtrate);
-        }
-    }
-
-    function reseteazaFiltre() {
-        document.getElementById('filtru-gen').value = "";
-        document.getElementById('filtru-autor').value = "";
-        deseneazaCarti(toateCartile);
-    }
-
-    function aplicaAutorRapid(nume) {
-        document.getElementById('filtru-autor').value = nume;
-        document.getElementById('filtru-gen').value = "";
-        filtreazaCarti();
     }
 
     function deschideModalDinLista(titlu) {
         const c = toateCartile.find(x => x.titlu === titlu);
         if(!c) return;
+        selectedBook = c;
         document.getElementById('modal-img').src = c.imagine;
         document.getElementById('modal-titlu').innerText = c.titlu;
-        document.getElementById('modal-autor').innerText = c.autor;
+        document.getElementById('modal-autor').innerText = "de " + c.autor;
         document.getElementById('modal-desc').innerText = c.descriere;
         document.getElementById('modal-ai-rezumat').classList.add('hidden');
         document.getElementById('btn-genereaza-rezumat').classList.remove('hidden');
         document.getElementById('modal-carte').classList.remove('hidden');
     }
 
-    function inchideModal() { document.getElementById('modal-carte').classList.add('hidden'); }
+    // --- CHAT AGENT ---
+    async function trimiteMesajChat() {
+        const inp = document.getElementById('chat-input'); const t = inp.value.trim(); if(!t) return;
+        const box = document.getElementById('chat-messages');
+        box.innerHTML += `<div class="max-w-[80%] p-4 rounded-2xl bg-black text-white self-end mb-2">${t}</div>`;
+        chatIstoric.push({sender:'user', text:t}); inp.value = ""; box.scrollTop = box.scrollHeight;
+        const res = await fetch('/api/agent/experti-smart', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:currentUser, mesaj:t, istoric:chatIstoric})});
+        const ai = await res.text();
+        box.innerHTML += `<div class="max-w-[85%] p-4 rounded-2xl bg-gray-100 text-gray-800 self-start mb-4 border border-gray-200">${ai.replace(/\n/g, '<br>')}</div>`;
+        chatIstoric.push({sender:'ai', text:ai}); box.scrollTop = box.scrollHeight;
+    }
+
+    // --- NOUTĂȚI INTERNET ---
+    async function incarcaNoutatiInternet() {
+        const g = document.getElementById('grila-noutati');
+        g.innerHTML = "<div class='col-span-3 py-20 text-center animate-pulse text-gray-400'>Agentul caută lansări noi...</div>";
+        try {
+            const res = await fetch('/api/carti/noutati-internet', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({interese:myTags})});
+            const text = await res.text();
+            const data = JSON.parse(text.replace(/```json|```/g, '').trim());
+            g.innerHTML = "";
+            data.forEach(c => {
+                g.innerHTML += `<div class="bg-white border rounded-3xl overflow-hidden shadow-sm flex flex-col group"><div class="h-64 overflow-hidden relative"><img src="${c.imagine}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/300x450?text=New+Release'"><div class="absolute top-4 left-4 bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase">NEW</div></div><div class="p-6 flex flex-1 flex-col"><h3 class="font-bold text-xl leading-tight mb-1">${c.titlu}</h3><p class="text-sm text-gray-500 mb-4">${c.autor}</p><div class="mt-auto bg-indigo-50 p-4 rounded-2xl border border-indigo-100"><p class="text-[11px] font-bold text-indigo-700 mb-1">🤖 MOTIV RECOMANDARE:</p><p class="text-xs text-indigo-800 italic">${c.motiv}</p></div></div></div>`;
+            });
+        } catch(e) { g.innerHTML = "Nu am putut încărca noutățile."; }
+    }
+
+    // --- TRASEE ---
+    async function incarcaTraseeSalvate() {
+        const res = await fetch('/api/trasee/salvate');
+        const data = await res.json();
+        const l = document.getElementById('lista-trasee-salvate');
+        l.innerHTML = data.map(t => `<li onclick="incarcaTraseuExistent('${t}')" class="p-3 bg-gray-50 border rounded-xl text-sm font-medium hover:bg-indigo-50 cursor-pointer transition">📍 ${t}</li>`).join('');
+    }
+
+    async function incarcaTraseuExistent(s) {
+        document.getElementById('rezultat-traseu').innerHTML = "Se încarcă...";
+        const res = await fetch(`/api/agent/traseu-salvat?subiect=${encodeURIComponent(s)}`);
+        renderTraseu(JSON.parse(await res.text()));
+    }
+
+    async function genereazaTraseu() {
+        const s = document.getElementById('input-traseu').value.trim(); if(!s) return;
+        document.getElementById('rezultat-traseu').innerHTML = "AI generează etapele...";
+        const res = await fetch('/api/agent/traseu-new', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({subiect:s, etape:"3"})});
+        renderTraseu(await res.json()); incarcaTraseeSalvate();
+    }
+
+    function renderTraseu(data) {
+        document.getElementById('rezultat-traseu').innerHTML = data.map(e => `
+                <div class="p-6 border rounded-2xl bg-white shadow-sm border-gray-100"><h4 class="font-bold text-indigo-600 text-xs mb-1 uppercase">${e.nivel}:</h4><h5 class="text-xl font-bold mb-2">${e.titlu_etapa}</h5><p class="text-sm text-gray-600 mb-4">${e.descriere}</p>
+                <div class="space-y-2">${e.carti.map(c => `<div class="bg-gray-50 p-3 rounded-xl border flex items-center gap-3"><span class="text-xl">📚</span><div><b class="text-sm block text-gray-900">${c.titlu}</b><span class="text-xs text-gray-500">${c.autor}</span></div></div>`).join('')}</div></div>`).join('');
+    }
+
+    // --- ALTE FUNCȚII ---
+    function incarcaProfil() {
+        fetch(`/api/utilizator/profil?username=${currentUser}`).then(r => r.json()).then(data => {
+            myTags = data.tags || []; myBooks = data.books || [];
+            myTags.forEach(t => { if(!domeniiDisponibile.includes(t)) domeniiDisponibile.push(t); });
+            deseneazaTaxonomie(); deseneazaCartiCitite();
+        });
+    }
+    function deseneazaTaxonomie() {
+        const c = document.getElementById('lista-taxonomie'); c.innerHTML = domeniiDisponibile.map(d => `<button onclick="toggleTag('${d}')" class="px-4 py-2 rounded-full border text-xs font-medium transition ${myTags.includes(d) ? 'bg-black text-white' : 'bg-white text-gray-500 hover:border-gray-400'}">${d}</button>`).join('');
+    }
+    function toggleTag(d) { myTags.includes(d) ? myTags = myTags.filter(t => t!==d) : myTags.push(d); deseneazaTaxonomie(); }
+    function adaugaDomeniuNou() { const i = document.getElementById('input-domeniu-nou'); if(!i.value) return; domeniiDisponibile.push(i.value); myTags.push(i.value); deseneazaTaxonomie(); i.value = ""; }
+    async function salveazaTaxonomie() { await fetch('/api/utilizator/salveaza-interese', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:currentUser, interese:myTags})}); alert("Salvat!"); }
+    function deseneazaCartiCitite() { const l = document.getElementById('lista-carti-citite'); l.innerHTML = myBooks.map(b => `<li class="p-3 border rounded-xl flex justify-between bg-white text-sm"><span><b>${b.title || b.titlu}</b> - ${b.author || 'Autor'}</span><button onclick="stergeLectura('${b.title || b.titlu}')" class="text-red-500">X</button></li>`).join(''); }
+    async function adaugaCarteCitita() { const t = document.getElementById('input-citita-titlu').value; if(!t) return; await fetch('/api/utilizator/adauga-lectura', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:currentUser, titlu:t, autor:'Necunoscut'})}); myBooks.push({title:t}); deseneazaCartiCitite(); document.getElementById('input-citita-titlu').value = ""; }
+    async function stergeLectura(t) { await fetch('/api/utilizator/sterge-lectura', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:currentUser, titlu:t})}); myBooks = myBooks.filter(b => (b.title || b.titlu) !== t); deseneazaCartiCitite(); }
+
     function toggleDropdown() { document.getElementById('dropdown-menu').classList.toggle('hidden'); }
     function logout() { sessionStorage.clear(); window.location.href = "/login"; }
-    function schimbaEcran(n) { /* logica de ecrane */ }
+    function inchideModal() { document.getElementById('modal-carte').classList.add('hidden'); }
+
+    async function genereazaInvatare() {
+        const o = document.getElementById('input-invatare').value.trim(); if(!o) return;
+        const r = document.getElementById('rezultat-invatare'); r.classList.remove('hidden'); r.innerText = "AI construiește planul...";
+        const res = await fetch('/api/agent/invata', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({obiectiv:o})});
+        r.innerHTML = (await res.text()).replace(/\n/g, '<br>');
+    }
+
+    async function cereSfatExperti() {
+        const r = document.getElementById('rezultat-experti'); r.classList.remove('hidden'); r.innerText = "Experții deliberează...";
+        const res = await fetch('/api/agent/experti', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({topicuri:myTags, profil:"Utilizator pasionat"})});
+        r.innerHTML = await res.text();
+    }
+
+    async function genereazaRezumatAI() {
+        const btn = document.getElementById('btn-genereaza-rezumat');
+        const res = await fetch('/api/agent/rezumat', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({titlu: selectedBook.titlu, autor: selectedBook.autor}) });
+        btn.classList.add('hidden');
+        const box = document.getElementById('modal-ai-rezumat');
+        box.classList.remove('hidden');
+        box.innerHTML = (await res.text()).replace(/\n/g, '<br>');
+    }
 </script>
 </body>
 </html>

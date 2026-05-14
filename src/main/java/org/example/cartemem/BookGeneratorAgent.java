@@ -7,7 +7,6 @@ import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Session;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -26,8 +25,7 @@ public class BookGeneratorAgent {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(60)).build();
 
-    @Value("${google.api.key}")
-    private String GEMINI_API_KEY;
+    private final String GEMINI_API_KEY = "AQ.Ab8RN6JeKlivOpowdVYOHyuzFHXj5PP8NkGLZg3ew-a9Ht6UhA";
     private final String MODEL_NAME = "gemini-2.5-flash";
     private final String GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL_NAME + ":generateContent?key=" + GEMINI_API_KEY;
 
