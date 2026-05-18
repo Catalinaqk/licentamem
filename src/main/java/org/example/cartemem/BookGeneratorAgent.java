@@ -28,7 +28,7 @@ public class BookGeneratorAgent {
     // ==========================================
     // SETĂRI ANTHROPIC (CLAUDE)
     // ==========================================
-    private final String ANTHROPIC_API_KEY = "PUNE_AICI_CHEIA_TA_SK_ANT..."; // <-- PUNE CHEIA AICI
+    private final String ANTHROPIC_API_KEY = ""; // <-- PUNE CHEIA AICI
     private final String MODEL_NAME = "claude-opus-4-7"; // Cel mai bun și inteligent model curent
     private final String ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 
@@ -236,34 +236,19 @@ public class BookGeneratorAgent {
     }
 
     public String cautaNoutatiInternet(List<String> interese) {
-        String lunaSelectata = "luna curentă";
-        List<String> intereseCurate = new ArrayList<>();
-
-        if (interese != null) {
-            for (String interes : interese) {
-                if (interes.startsWith("LUNA:")) {
-                    lunaSelectata = interes.replace("LUNA:", "");
-                } else {
-                    intereseCurate.add(interes);
-                }
-            }
-        }
-
-        String intereseUser = intereseCurate.isEmpty() ? "Bestsellers" : String.join(", ", intereseCurate);
+        String intereseUser = (interese == null || interese.isEmpty()) ? "Bestsellers" : String.join(", ", interese);
         String dataCurenta = java.time.LocalDate.now().toString();
 
-        String prompt = "Astăzi este data de " + dataCurenta + ". Acționează ca secțiunea 'New Releases' a unei librării renumite. " +
-                "Vreau să îmi aduci lansări REALE de cărți care au apărut recent (în ultimele luni față de data de azi). " +
-                "REGULĂ CRITICĂ: NU inventa cărți! NU aduce cărți din viitor! Folosește doar cărți reale, bestseller-uri internaționale, care chiar există. " +
-                "Returnează EXACT un Array JSON cu 4 categorii. " +
-                "Primele 3 categorii trebuie să fie genuri literare DIFERITE alese la întâmplare (ex: 'Istorie', 'Thriller', 'Non-Ficțiune', 'Sci-Fi' etc.) cu câte 4 cărți noi fiecare. " +
-                "A patra categorie TREBUIE să se numească exact 'Recomandări pentru tine' și să conțină 4 cărți noi reale bazate pe aceste interese: " + intereseUser + ". " +
-                "Răspunde DOAR cu Array-ul JSON (fără block de markdown, direct textul JSON). Fără alte explicații. Format obligatoriu: " +
+        String prompt = "Astăzi este data de " + dataCurenta + ". Acționează ca secțiunea 'New Releases' a unei librării. " +
+                "Vreau să îmi aduci lansări REALE de cărți care au apărut în ULTIMA LUNĂ (față de data de azi). " +
+                "REGULĂ CRITICĂ: NU inventa cărți! Folosește doar cărți reale care chiar există. " +
+                "Returnează EXACT un Array JSON cu exact 4 categorii. " +
+                "Primele 3 categorii trebuie să fie genuri literare DIFERITE alese la întâmplare (ex: 'Istorie', 'Thriller', 'Sci-Fi' etc.) cu câte 4 cărți noi din ultima lună fiecare. " +
+                "A patra categorie TREBUIE să se numească exact 'Recomandări pentru tine' și să conțină 4 cărți noi reale apărute în ultima lună, alese special pe baza acestor interese ale utilizatorului: " + intereseUser + ". " +
+                "Răspunde DOAR cu Array-ul JSON (fără block de markdown, direct textul JSON). Format obligatoriu: " +
                 "[{\"gen\": \"Nume Gen\", \"carti\": [{\"titlu\": \"Titlu Real\", \"autor\": \"Autor Real\", \"imagine\": \"https://placehold.co/150x220?text=Cover\", \"descriere\": \"...\"}]}]";
 
         String raspunsClaude = trimitePromptLaClaude(prompt);
-        System.out.println("DEBUG CLAUDE NOUTĂȚI: " + raspunsClaude);
-
         try {
             int start = raspunsClaude.indexOf("[");
             int end = raspunsClaude.lastIndexOf("]");

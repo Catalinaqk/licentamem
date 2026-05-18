@@ -24,7 +24,7 @@ public class BookController {
         this.bookAgent = bookAgent;
     }
 
-    // --- 1. PAGINA PRINCIPALĂ (Singura pagină HTML returnată acum) ---
+    // --- 1. PAGINA PRINCIPALĂ ---
     @GetMapping({"/", "/carti"})
     public String arataCartile(@RequestParam(value = "q", required = false) String query,
                                @RequestParam(value = "gen", required = false) String gen,
@@ -42,8 +42,8 @@ public class BookController {
             if (username != null && !username.isEmpty()) {
                 String queryPersonalizat =
                         "MATCH (u:Utilizator {username: $user}) " +
-                                "OPTIONAL MATCH (u)-[:INTERESAT_DE]->(t:Tag)<-[:ARE_TAG]-(c1:Carte) " +
-                                "OPTIONAL MATCH (u)-[:A_CITIT]->(citita:Carte)-[:ARE_TAG]->(:Tag)<-[:ARE_TAG]-(c2:Carte) " +
+                                "OPTIONAL MATCH (u)-[:INTERESAT_DE]->(t:Tag鍵<-[:ARE_TAG]-(c1:Carte) " +
+                                "OPTIONAL MATCH (u)-[:A_CITIT]->(citita:Carte)-[:ARE_TAG]->(:Tag鍵<-[:ARE_TAG]-(c2:Carte) " +
                                 "WITH collect(c1) + collect(c2) AS toate " +
                                 "UNWIND toate AS c " +
                                 "MATCH (c)-[:SCRISA_DE]->(a:Autor) " +
@@ -114,6 +114,18 @@ public class BookController {
         return "Succes";
     }
 
+    // RUTA MODIFICATĂ AICI PENTRU A EVITA DUPLICATUL CU UTILIZATORCONTROLLER
+    @PostMapping("/api/carti/salveaza-interese")
+    @ResponseBody
+    public String salveazaInterese(@RequestBody Map<String, Object> payload) {
+        String username = (String) payload.get("username");
+        @SuppressWarnings("unchecked")
+        List<String> interese = (List<String>) payload.get("interese");
+
+        bookAgent.salveazaProfilComplet(username, interese, null, null);
+        return "Succes";
+    }
+
     @GetMapping("/api/utilizator/profil")
     @ResponseBody
     public Map<String, Object> incarcaProfil(@RequestParam String username) {
@@ -151,9 +163,9 @@ public class BookController {
     public String triggerNoulTraseuAgent(@RequestBody Map<String, String> payload) {
         String subiect = payload.get("subiect");
         int nrEtape = Integer.parseInt(payload.get("etape"));
-        boolean stieBaze = Boolean.parseBoolean(payload.getOrDefault("stieBaze", "false")); // Am adăugat citirea parametrului
+        boolean stieBaze = Boolean.parseBoolean(payload.getOrDefault("stieBaze", "false"));
 
-        return bookAgent.genereazaTraseuStructurat(subiect, nrEtape, stieBaze); // Acum are 3 parametri!
+        return bookAgent.genereazaTraseuStructurat(subiect, nrEtape, stieBaze);
     }
 
     @GetMapping("/api/trasee/salvate")
@@ -169,14 +181,13 @@ public class BookController {
         return trasee;
     }
 
-    // --- 5. ENDPOINT-URI GENERALE API (Galerie, Noutăți, etc.) ---
+    // --- 5. ENDPOINT-URI GENERALE API ---
     @PostMapping("/api/agent/rezumat")
     @ResponseBody
     public String genereazaRezumat(@RequestBody Map<String, String> payload) {
         return bookAgent.genereazaRezumat(payload.get("titlu"), payload.get("autor"));
     }
 
-    // Endpoint-ul NOU pentru detaliile complete ale cărții (Neo4j vs AI)
     @GetMapping("/api/carti/detalii-complete")
     @ResponseBody
     public String getDetaliiCompleteCarte(@RequestParam String titlu, @RequestParam String autor) {
@@ -231,7 +242,7 @@ public class BookController {
         return Map.of("autori", autori, "genuri", genuri);
     }
 
-    // --- 6. ENDPOINT-URI ADMINISTRATIVE (Opționale, le lăsăm pentru siguranță) ---
+    // --- 6. ENDPOINT-URI ADMINISTRATIVE ---
     @PostMapping("/api/agent/auto-populeaza")
     @ResponseBody
     public String triggerAgent(@RequestBody Map<String, String> payload) {
@@ -256,7 +267,6 @@ public class BookController {
         return bookAgent.recomandaDupaTag(query);
     }
 
-    // --- METODA PRIVATĂ DE ÎNCĂRCARE A PAGINII PRINCIPALE ---
     private String incarcaPagina(String query, String gen, Model model, String templateName) {
         List<Map<String, String>> listaCarti = new ArrayList<>();
         List<String> listaGenuri = List.of("Bestseller", "Science Fiction", "Fantasy", "Horror", "Thriller", "Mister", "Romance", "Istorie", "Psihologie", "Scanata");

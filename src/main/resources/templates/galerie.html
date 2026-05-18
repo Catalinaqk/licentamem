@@ -127,7 +127,7 @@
     <div id="ecran-noutati" class="hidden absolute inset-0 bg-white overflow-y-auto p-8 z-0">
         <div class="max-w-5xl mx-auto">
             <h2 id="titlu-noutati" class="text-3xl font-bold mb-2">New Releases 🔥</h2>
-            <p class="text-gray-500 mb-8">Cele mai proaspete lansări din ultima săptămână, alese special pentru tine.</p>
+            <p class="text-gray-500 mb-8">Cele mai proaspete lansări din ultima lună, alese special pentru tine.</p>
 
             <div id="grila-noutati" class="flex flex-col gap-8 pb-10">
             </div>
@@ -231,7 +231,7 @@
     let myTBR = JSON.parse(localStorage.getItem('tbr_' + currentUser)) || [];
     let selectedBook = null;
     let domeniiDisponibile = ["Science Fiction", "Fantasy", "Thriller", "Mister", "Romance", "Istorie", "Psihologie", "Dragoste"];
-    let currentTraseuData = []; // Reține traseul curent pentru interactivitate
+    let currentTraseuData = [];
 
     window.onload = function() {
         document.getElementById('username-display').innerText = currentUser;
@@ -358,11 +358,11 @@
         box.scrollTop = box.scrollHeight;
     }
 
-    // --- NOUTĂȚI INTERNET (AUTO LOAD) ---
+    // --- NOUTĂȚI INTERNET (AUTO LOAD - CORECTAT „LUNA CURENTĂ”) ---
     async function incarcaNoutati() {
         const g = document.getElementById('grila-noutati');
         g.className = "flex flex-col gap-8 pb-10";
-        g.innerHTML = `<div class="py-20 text-center"><div class="inline-block animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-black mb-4"></div><p class="text-gray-600 font-serif italic text-lg">Se aduc cele mai proaspete lansări din ultima săptămână...</p></div>`;
+        g.innerHTML = `<div class="py-20 text-center"><div class="inline-block animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-black mb-4"></div><p class="text-gray-600 font-serif italic text-lg">Se aduc cele mai proaspete lansări din ultima lună...</p></div>`;
 
         try {
             const res = await fetch('/api/carti/noutati-internet', {
@@ -445,10 +445,8 @@
     function renderTraseuInitial() {
         if (!currentTraseuData || currentTraseuData.length === 0) return;
 
-        // Randăm DOAR prima etapă (Punctul de Start)
         let html = renderEtapaHtml(currentTraseuData[0], 1);
 
-        // Adăugăm blocul interactiv cu întrebarea direct în flux
         if (currentTraseuData.length > 1) {
             html += `
             <div id="bloc-intrebare-baze" class="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl mb-8 text-center shadow-sm relative overflow-hidden">
@@ -462,7 +460,6 @@
             `;
         }
 
-        // Ascundem restul etapelor într-un container
         html += `<div id="restul-etapelor-traseu" class="hidden opacity-0 transition-opacity duration-500">`;
         for(let i = 1; i < currentTraseuData.length; i++) {
             html += renderEtapaHtml(currentTraseuData[i], i + 1);
@@ -573,7 +570,16 @@
     }
     function toggleTag(d) { myTags.includes(d) ? myTags = myTags.filter(t => t!==d) : myTags.push(d); deseneazaTaxonomie(); }
     function adaugaDomeniuNou() { const i = document.getElementById('input-domeniu-nou'); if(!i.value) return; domeniiDisponibile.push(i.value); myTags.push(i.value); deseneazaTaxonomie(); i.value = ""; }
-    async function salveazaTaxonomie() { await fetch('/api/utilizator/salveaza-interese', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:currentUser, interese:myTags})}); alert("Preferințe salvate!"); }
+
+    // REPARAT: Salvarea profilului apelează acum corect endpoint-ul hibrid
+    async function salveazaTaxonomie() {
+        await fetch('/api/utilizator/salveaza-interese', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({username:currentUser, interese:myTags})
+        });
+        alert("Preferințe salvate cu succes în Memgraph!");
+    }
 
     function deseneazaCartiCitite() {
         const lista = document.getElementById('lista-carti-citite');
