@@ -3,11 +3,12 @@ package org.example.cartemem;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
-import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Session;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -25,24 +26,20 @@ public class BookGeneratorAgent {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(60)).build();
 
-    // ==========================================
-    // SETĂRI ANTHROPIC (CLAUDE)
-    // ==========================================
-    private final String ANTHROPIC_API_KEY = ""; // <-- PUNE CHEIA AICI
-    private final String MODEL_NAME = "claude-opus-4-7"; // Cel mai bun și inteligent model curent
+    private final String ANTHROPIC_API_KEY =
+    private final String MODEL_NAME = "claude-opus-4-7";
     private final String ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 
     public BookGeneratorAgent(Driver driver) {
         this.driver = driver;
     }
 
-    // --- METODA CENTRALĂ DE COMUNICARE CU CLAUDE ---
     private String trimitePromptLaClaude(String prompt) {
         try {
             Map<String, Object> message = Map.of("role", "user", "content", prompt);
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("model", MODEL_NAME);
-            requestBody.put("max_tokens", 4000); // Claude are nevoie să știe limita maximă de cuvinte
+            requestBody.put("max_tokens", 4000);
             requestBody.put("messages", List.of(message));
 
             String jsonBody = objectMapper.writeValueAsString(requestBody);
@@ -56,7 +53,7 @@ public class BookGeneratorAgent {
             HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
 
             if (resp.statusCode() != 200) {
-                System.err.println("❌ Eroare API Anthropic (" + resp.statusCode() + "): " + resp.body());
+                System.err.println("Eroare API Anthropic (" + resp.statusCode() + "): " + resp.body());
                 return "Eroare API Anthropic (" + resp.statusCode() + ")";
             }
 
@@ -65,36 +62,9 @@ public class BookGeneratorAgent {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return "Eroare internă la comunicarea cu Claude: " + e.getMessage();
+            return "Eroare internă la comunicarea cu API-ul extern: " + e.getMessage();
         }
     }
-
-    // --- METODĂ AJUTĂTOARE PENTRU LISTE JSON ---
-    private List<Map<String, Object>> apelClaudeLista(String promptSpecific, Set<String> existingTitles) {
-        try {
-            String raspunsClaude = trimitePromptLaClaude(promptSpecific);
-
-            // Extragem doar partea de JSON (eliminăm dacă Claude zice "Iată lista:")
-            int start = raspunsClaude.indexOf("[");
-            int end = raspunsClaude.lastIndexOf("]");
-
-            if (start == -1 || end == -1) {
-                System.err.println("❌ Claude nu a returnat un Array JSON valid.");
-                return new ArrayList<>();
-            }
-
-            String jsonCurat = raspunsClaude.substring(start, end + 1);
-            return objectMapper.readValue(jsonCurat, new TypeReference<List<Map<String, Object>>>(){});
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ArrayList<>();
-        }
-    }
-
-    // ==========================================
-    // LOGICA APLICAȚIEI (Acum folosește Claude)
-    // ==========================================
 
     public String genereazaRezumat(String titlu, String autor) {
         try {
@@ -131,7 +101,7 @@ public class BookGeneratorAgent {
                 List<Object> interese = rand.get("interese").asList();
                 List<Object> citite = rand.get("citite").asList();
 
-                dateGraf.append("📚 PROFILUL UTILIZATORULUI:\n");
+                dateGraf.append("PROFILUL UTILIZATORULUI:\n");
                 dateGraf.append("- Domenii de interes: ").append(interese.isEmpty() ? "Nespecificat" : interese.toString()).append("\n");
                 dateGraf.append("- Cărți deja citite: ").append(citite.isEmpty() ? "Niciuna salvată" : citite.toString()).append("\n\n");
             }
@@ -152,7 +122,7 @@ public class BookGeneratorAgent {
                     Map.of("user", username)
             );
 
-            dateGraf.append("📖 RECOMANDĂRI POSIBILE DIN BAZA DE DATE (Pentru contextul tău):\n");
+            dateGraf.append("RECOMANDĂRI POSIBILE DIN AURADB:\n");
             while (recomandariPersonalizate.hasNext()) {
                 var r = recomandariPersonalizate.next();
                 dateGraf.append("- '").append(r.get("titlu").asString())
@@ -166,31 +136,29 @@ public class BookGeneratorAgent {
             int start = Math.max(0, istoric.size() - 6);
             for (int i = start; i < istoric.size() - 1; i++) {
                 Map<String, String> msg = istoric.get(i);
-                String sender = msg.get("sender").equals("user") ? "Utilizatorul" : "Tu (AI)";
+                String sender = msg.get("sender").equals("user") ? "Utilizatorul" : "Sistemul (AI)";
                 historyStr.append(sender).append(": ").append(msg.get("text")).append("\n");
             }
         }
 
         String promptPentruClaude =
-                "Ești Mentorul Literar personal al utilizatorului '" + username + "'. Ești un asistent conversațional, prietenos și empatic.\n\n" +
+                "Ești Mentorul Literar personal al utilizatorului '" + username + "'. Ești un asistent conversațional, profesionist și orientat spre studiu.\n\n" +
                         "ISTORICUL CONVERSAȚIEI:\n" + historyStr.toString() + "\n\n" +
                         "DATE EXTRASE DIN BAZA DE DATE:\n" + dateGraf.toString() + "\n\n" +
                         "MESAJUL NOU DE LA UTILIZATOR: \"" + mesajUtilizator + "\"\n\n" +
                         "REGULI CRITICE:\n" +
                         "1. MEMORIE: NU recomanda NICIODATĂ o carte deja menționată în istoric.\n" +
-                        "2. STIL: Poartă un dialog natural, fără liste prea lungi.\n" +
-                        "3. FORMAT OBLIGATORIU: Ori de câte ori recomanzi o carte specifică, ești OBLIGAT ABSOLUT să adaugi la sfârșitul mesajului acest format exact: [CARTE: Titlul Cărții | Nume Autor]. Exemplu: [CARTE: Dune | Frank Herbert]. Dacă sunt mai multe, pune mai multe tag-uri.";
+                        "2. STIL: Poartă un dialog natural.\n" +
+                        "3. FORMAT OBLIGATORIU: Ori de câte ori recomanzi o carte specifică, ești OBLIGAT ABSOLUT să adaugi la sfârșitul mesajului acest format exact: [CARTE: Titlul Cărții | Nume Autor]. Exemplu: [CARTE: Dune | Frank Herbert].";
 
         return trimitePromptLaClaude(promptPentruClaude);
     }
 
-    public String genereazaTraseuStructurat(String subiect, int nrEtape, boolean stieBaze) {
+    public String genereazaTraseuStructurat(String username, String subiect, int nrEtape, boolean stieBaze) {
         try {
-            System.out.println("🤖 AGENT TRASEE: Caut cărți pentru: " + subiect + " | Știe bazele? " + stieBaze);
-
             String nivelInstructiune = stieBaze ?
-                    "Utilizatorul a spus CĂ ȘTIE DEJA BAZELE acestui subiect. Sari peste cărțile pentru începători absolute. Începe direct cu nivelul INTERMEDIAR și continuă cu AVANSAT și EXPERT." :
-                    "Utilizatorul este ÎNCEPĂTOR și nu știe bazele. Începe cu nivelul INTRODUCERE/PUNCT DE START, explică conceptele de bază și abia apoi crește dificultatea treptat.";
+                    "Utilizatorul a confirmat cunoștințele de bază. Începe cu nivelul Intermediar și progresează spre Avansat." :
+                    "Utilizatorul nu deține cunoștințe prealabile. Începe cu fundamentele teoretice.";
 
             StringBuilder contextBazaDeDate = new StringBuilder();
             try (Session session = driver.session()) {
@@ -204,95 +172,99 @@ public class BookGeneratorAgent {
                 }
             }
 
-            String prompt = "Vreau să creezi un traseu de lectură despre: '" + subiect + "' în exact " + nrEtape + " etape logice. \n" +
+            StringBuilder cartiCitite = new StringBuilder();
+            if (username != null && !username.isEmpty()) {
+                try (Session session = driver.session()) {
+                    var res = session.run("MATCH (u:Utilizator {username: $u})-[:A_CITIT]->(c:Carte) RETURN c.titlu AS titlu", Map.of("u", username));
+                    while(res.hasNext()) {
+                        cartiCitite.append("- ").append(res.next().get("titlu").asString()).append("\n");
+                    }
+                }
+            }
+
+            String regulaCartiCitite = cartiCitite.length() > 0 ?
+                    "REGULĂ STRICTĂ: Utilizatorul a citit deja următoarele cărți. ESTE INTERZIS să le incluzi în acest traseu:\n" + cartiCitite.toString() + "\n" : "";
+
+            String prompt = "Elaborează un plan de studiu structurat pentru subiectul: '" + subiect + "' în exact " + nrEtape + " etape logice. \n" +
                     nivelInstructiune + "\n\n" +
-                    "Dacă e posibil, folosește și cărți din această listă: \n" + contextBazaDeDate.toString() + "\n" +
-                    "Răspunde STRICT cu un Array JSON valid. FĂRĂ EXPLICAȚII. Structura: " +
+                    regulaCartiCitite +
+                    "Integreză referințe din această listă dacă e relevant: \n" + contextBazaDeDate.toString() + "\n" +
+                    "Răspunde STRICT utilizând un Array JSON valid, fără explicații. Structura cerută: " +
                     "[ { \"nivel\": \"INTRODUCERE\", \"titlu_etapa\": \"...\", \"descriere\": \"...\", \"carti\": [ { \"titlu\": \"...\", \"autor\": \"...\", \"an\": 2024, \"descriere\": \"...\" } ] } ]";
 
             String raspunsClaude = trimitePromptLaClaude(prompt);
-
-            int start = raspunsClaude.indexOf("[");
-            int end = raspunsClaude.lastIndexOf("]");
+            String curatat = raspunsClaude.replace("```json", "").replace("```", "").trim();
+            int start = curatat.indexOf("[");
+            int end = curatat.lastIndexOf("]");
 
             if (start != -1 && end != -1) {
-                String finalJson = raspunsClaude.substring(start, end + 1);
-
-                // =========================================================================
-                // CORECTURĂ: SALVĂM TRASUUL ÎN MEMGRAPH CA SĂ APARĂ ÎN ISTORIC!
-                // =========================================================================
+                String finalJson = curatat.substring(start, end + 1);
                 try (Session session = driver.session()) {
-                    session.run("MERGE (tr:Traseu {subiect: $sub}) SET tr.json = $json",
-                            Map.of("sub", subiect, "json", finalJson));
+                    session.run("MERGE (tr:Traseu {subiect: $sub}) SET tr.json = $json", Map.of("sub", subiect, "json", finalJson));
                 }
-
                 return finalJson;
             }
-            return "[{\"titlu_etapa\": \"Eroare\", \"descriere\": \"Eroare la generare.\"}]";
+            return "[{\"titlu_etapa\": \"Eroare\", \"descriere\": \"Structura JSON invalidă.\"}]";
         } catch (Exception e) {
-            e.printStackTrace();
-            return "[{\"titlu_etapa\": \"Eroare\", \"descriere\": \"Problemă internă.\"}]";
+            return "[{\"titlu_etapa\": \"Eroare\", \"descriere\": \"Problemă tehnică.\"}]";
         }
     }
 
     public String cautaNoutatiInternet(List<String> interese) {
-        String intereseUser = (interese == null || interese.isEmpty()) ? "Bestsellers" : String.join(", ", interese);
+        String intereseUser = (interese == null || interese.isEmpty()) ? "Lucrări generale" : String.join(", ", interese);
         String dataCurenta = java.time.LocalDate.now().toString();
 
-        String prompt = "Astăzi este data de " + dataCurenta + ". Acționează ca secțiunea 'New Releases' a unei librării. " +
-                "Vreau să îmi aduci lansări REALE de cărți care au apărut în ULTIMA LUNĂ (față de data de azi). " +
-                "REGULĂ CRITICĂ: NU inventa cărți! Folosește doar cărți reale care chiar există. " +
-                "Returnează EXACT un Array JSON cu exact 4 categorii. " +
-                "Primele 3 categorii trebuie să fie genuri literare DIFERITE alese la întâmplare (ex: 'Istorie', 'Thriller', 'Sci-Fi' etc.) cu câte 4 cărți noi din ultima lună fiecare. " +
-                "A patra categorie TREBUIE să se numească exact 'Recomandări pentru tine' și să conțină 4 cărți noi reale apărute în ultima lună, alese special pe baza acestor interese ale utilizatorului: " + intereseUser + ". " +
-                "Răspunde DOAR cu Array-ul JSON (fără block de markdown, direct textul JSON). Format obligatoriu: " +
-                "[{\"gen\": \"Nume Gen\", \"carti\": [{\"titlu\": \"Titlu Real\", \"autor\": \"Autor Real\", \"imagine\": \"https://placehold.co/150x220?text=Cover\", \"descriere\": \"...\"}]}]";
+        String prompt = "Astăzi este data de " + dataCurenta + ". Acționează ca un curator de publicații recente. Extrage lansări REALE de cărți din ultima lună. " +
+                "Returnează EXACT un Array JSON cu 4 categorii distincte. A patra categorie se va numi 'Recomandări pentru tine' bazată pe: " + intereseUser + ". " +
+                "Format cerut: [{\"gen\": \"Nume Gen\", \"carti\": [{\"titlu\": \"Titlu Real\", \"autor\": \"Autor Real\", \"imagine\": \"\", \"descriere\": \"...\"}]}]";
 
         String raspunsClaude = trimitePromptLaClaude(prompt);
         try {
-            int start = raspunsClaude.indexOf("[");
-            int end = raspunsClaude.lastIndexOf("]");
-            if (start != -1 && end != -1) return raspunsClaude.substring(start, end + 1);
-        } catch (Exception e) {}
+            String curatat = raspunsClaude.replace("```json", "").replace("```", "").trim();
+            int start = curatat.indexOf("[");
+            int end = curatat.lastIndexOf("]");
+            if (start != -1 && end != -1) return curatat.substring(start, end + 1);
+        } catch (Exception e) { }
+        return "[]";
+    }
 
+    public String cautaNoutatiDupaSubiect(String subiect) {
+        String prompt = "Caută 4-8 cărți REALE și verificate despre: '" + subiect + "'. " +
+                "Returnează STRICT un Array JSON: [{\"gen\": \"Rezultate pentru: " + subiect + "\", \"carti\": [{\"titlu\": \"...\", \"autor\": \"...\", \"imagine\": \"\", \"descriere\": \"...\"}]}]";
+
+        String raspunsClaude = trimitePromptLaClaude(prompt);
+        try {
+            String curatat = raspunsClaude.replace("```json", "").replace("```", "").trim();
+            int start = curatat.indexOf("[");
+            int end = curatat.lastIndexOf("]");
+            if (start != -1 && end != -1) return curatat.substring(start, end + 1);
+        } catch (Exception e) { }
         return "[]";
     }
 
     public String obtineDetaliiCompleteCarte(String titlu, String autor) {
         try {
-            // 1. Verificăm dacă avem DEJA detaliile ample în Neo4j (Memgraph)
             try (Session session = driver.session()) {
                 String checkQuery = "MATCH (c:Carte {titlu: $t}) RETURN c.descriere_ampla AS desc, c.despre_autor AS autor_info, c.teme_principale AS teme";
                 var result = session.run(checkQuery, Map.of("t", titlu));
-
                 if (result.hasNext()) {
                     var r = result.next();
                     if (r.get("desc") != null && !r.get("desc").isNull()) {
-                        System.out.println("✅ Carte găsită în Neo4j! Returnez datele salvate.");
-                        // Pregătim răspunsul din baza de date
                         Map<String, Object> raspunsDB = new HashMap<>();
-                        raspunsDB.put("sursa_date", "DIN MEMGRAPH"); // Insigna pentru frontend
+                        raspunsDB.put("sursa_date", "AURADB");
                         raspunsDB.put("rezumat", r.get("desc").asString());
                         raspunsDB.put("despre_autor", r.get("autor_info") != null ? r.get("autor_info").asString() : "Informații indisponibile.");
                         raspunsDB.put("teme_principale", r.get("teme") != null ? r.get("teme").asList() : new ArrayList<>());
                         raspunsDB.put("link_google", "https://www.google.com/search?tbm=bks&q=" + URLEncoder.encode(titlu + " " + autor, StandardCharsets.UTF_8));
                         raspunsDB.put("link_amazon", "https://www.amazon.com/s?k=" + URLEncoder.encode(titlu + " " + autor, StandardCharsets.UTF_8));
                         raspunsDB.put("link_carturesti", "https://carturesti.ro/cautare?q=" + URLEncoder.encode(titlu + " " + autor, StandardCharsets.UTF_8));
-
                         return objectMapper.writeValueAsString(raspunsDB);
                     }
                 }
             }
 
-            // 2. Dacă nu o avem, o GENERĂM CU AI
-            System.out.println("🤖 Cartea nu are detalii. Generez cu Claude...");
-            String prompt = "Scrie detalii complexe pentru cartea '" + titlu + "' de " + autor + ". " +
-                    "Trebuie să returnezi EXACT un obiect JSON cu următoarea structură, fără text pe lângă: " +
-                    "{" +
-                    "\"rezumat\": \"Un rezumat detaliat și o analiză de minim 150 cuvinte.\", " +
-                    "\"despre_autor\": \"O scurtă biografie a autorului și expertiza sa.\", " +
-                    "\"teme_principale\": [\"Tema 1\", \"Tema 2\", \"Tema 3\", \"Tema 4\", \"Tema 5\"]" +
-                    "}";
+            String prompt = "Redactează o analiză aprofundată pentru '" + titlu + "' de " + autor + ". " +
+                    "Returnează EXACT JSON: {\"rezumat\": \"minim 150 cuvinte\", \"despre_autor\": \"...\", \"teme_principale\": [\"Tema 1\", \"Tema 2\"]}";
 
             String raspunsClaude = trimitePromptLaClaude(prompt);
             int start = raspunsClaude.indexOf("{");
@@ -307,15 +279,13 @@ public class BookGeneratorAgent {
                 List<String> teme = new ArrayList<>();
                 dateAI.path("teme_principale").forEach(node -> teme.add(node.asText()));
 
-                // Salvăm în Neo4j pentru click-ul viitor!
                 try (Session session = driver.session()) {
-                    String updateQuery = "MERGE (c:Carte {titlu: $t}) SET c.autor = $a, c.descriere_ampla = $desc, c.despre_autor = $autor_info, c.teme_principale = $teme";
-                    session.run(updateQuery, Map.of("t", titlu, "a", autor, "desc", rezumat, "autor_info", despreAutor, "teme", teme));
+                    session.run("MERGE (c:Carte {titlu: $t}) SET c.autor = $a, c.descriere_ampla = $desc, c.despre_autor = $autor_info, c.teme_principale = $teme",
+                            Map.of("t", titlu, "a", autor, "desc", rezumat, "autor_info", despreAutor, "teme", teme));
                 }
 
-                // Creăm răspunsul pentru Frontend
                 Map<String, Object> raspunsFinal = new HashMap<>();
-                raspunsFinal.put("sursa_date", "GENERAT DE AI"); // Insigna pentru frontend
+                raspunsFinal.put("sursa_date", "GENERAT DE AI");
                 raspunsFinal.put("rezumat", rezumat);
                 raspunsFinal.put("despre_autor", despreAutor);
                 raspunsFinal.put("teme_principale", teme);
@@ -325,74 +295,66 @@ public class BookGeneratorAgent {
 
                 return objectMapper.writeValueAsString(raspunsFinal);
             }
-            return "{\"eroare\": \"AI-ul nu a generat JSON-ul corect.\"}";
-
+            return "{\"eroare\": \"Eroare de formatare JSON.\"}";
         } catch (Exception e) {
-            e.printStackTrace();
-            return "{\"eroare\": \"A apărut o problemă la procesarea detaliilor.\"}";
+            return "{\"eroare\": \"Problemă tehnică.\"}";
         }
     }
-
-    // ==========================================
-    // METODE UTILITARE (Păstrate din varianta veche)
-    // ==========================================
 
     private String getBookCoverUrl(String titlu, String autor) {
         try {
-            // Curățăm termenii de căutare și combinăm simplu: "Titlu Autor"
-            // Este o căutare mult mai flexibilă pentru Google Books decât parametrii stricți
-            String interogare = titlu + " " + autor;
-            String urlEncoded = URLEncoder.encode(interogare, StandardCharsets.UTF_8);
-            String url = "https://www.googleapis.com/books/v1/volumes?q=" + urlEncoded + "&maxResults=1";
-
-            HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36") // <-- TRUCUL: Mascăm Java ca fiind Google Chrome
-                    .GET()
-                    .build();
-
+            String query = URLEncoder.encode(titlu + " " + autor, StandardCharsets.UTF_8);
+            String url = "https://openlibrary.org/search.json?q=" + query + "&limit=1&fields=cover_i,title";
+            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).header("User-Agent", "Mozilla/5.0").GET().build();
             HttpResponse<String> r = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            if (r.statusCode() == 200) {
+                JsonNode root = objectMapper.readTree(r.body());
+                JsonNode docs = root.path("docs");
+                if (docs.isArray() && docs.size() > 0 && !docs.get(0).path("cover_i").isMissingNode()) {
+                    return "https://covers.openlibrary.org/b/id/" + docs.get(0).path("cover_i").asText() + "-L.jpg";
+                }
+            }
+        } catch (Exception e) {}
 
+        try {
+            String url = "https://www.googleapis.com/books/v1/volumes?q=" + URLEncoder.encode(titlu + " " + autor, StandardCharsets.UTF_8) + "&maxResults=3";
+            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).header("User-Agent", "Mozilla/5.0").GET().build();
+            HttpResponse<String> r = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
             if (r.statusCode() == 200) {
                 JsonNode n = objectMapper.readTree(r.body());
-                if (n.has("items") && n.get("items").size() > 0) {
-                    JsonNode vol = n.get("items").get(0).path("volumeInfo");
-                    if (vol.has("imageLinks")) {
-                        String urlImagine = vol.path("imageLinks").path("thumbnail").asText();
-
-                        // Google Books trimite link-uri cu http://. Le forțăm pe https:// ca să nu le blocheze browserul
-                        urlImagine = urlImagine.replace("http://", "https://");
-
-                        // TRUC EXTRA: Google Books tinde să pună uneori restricții de zoom.
-                        // Ne asigurăm că link-ul este curat și valid pentru tag-ul <img>
-                        return urlImagine;
+                if (n.has("items")) {
+                    for (JsonNode item : n.get("items")) {
+                        JsonNode links = item.path("volumeInfo").path("imageLinks");
+                        if (!links.isMissingNode() && links.has("thumbnail")) {
+                            return links.path("thumbnail").asText().replace("http://", "https://").replace("&edge=curl", "").replace("zoom=1", "zoom=0");
+                        }
                     }
                 }
-            } else {
-                System.err.println("⚠️ Google Books a răspuns cu codul: " + r.statusCode() + " din cauza: " + r.body());
             }
-        } catch (Exception e) {
-            System.err.println("❌ Eroare la extragerea coperții pentru " + titlu + ": " + e.getMessage());
-        }
+        } catch (Exception e) {}
 
-        // Dacă Google totuși nu găsește cartea, generăm o copertă temporară elegantă cu un placeholder gri textat
-        return "https://placehold.co/400x600/2a2a2a/ffffff?text=" + URLEncoder.encode(titlu, StandardCharsets.UTF_8);
+        return "https://placehold.co/300x450/f7fafc/004c4c?text=" + URLEncoder.encode(titlu.length() > 25 ? titlu.substring(0, 25) + "..." : titlu, StandardCharsets.UTF_8);
     }
 
-    private void salveazaInMemgraph(String titlu, String autor, String gen, String img, Map<String, Object> detalii) {
-        try (Session s = driver.session()) {
-            List<String> keywords = (List<String>) detalii.getOrDefault("cuvinte_cheie", new ArrayList<String>());
-            Map<String, Object> params = new HashMap<>();
-            params.put("t", titlu); params.put("autor", autor); params.put("gen", gen);
-            params.put("img", img != null ? img : "https://placehold.co/300x450");
-            params.put("desc", detalii.getOrDefault("descriere", "Fără descriere"));
-            params.put("an", detalii.getOrDefault("an", 0)); params.put("editura", detalii.getOrDefault("editura", "-"));
-            params.put("nr_pagini", detalii.getOrDefault("nr_pagini", 0)); params.put("limba", detalii.getOrDefault("limba", "Română"));
-            params.put("kw", keywords);
-
-            String query = "MERGE (c:Carte {titlu: $t}) SET c.autor=$autor, c.categoria=$gen, c.imagine=$img, c.descriere=$desc, c.an=$an, c.editura=$editura, c.nr_pagini=$nr_pagini, c.limba=$limba MERGE (au:Autor {nume: $autor}) MERGE (c)-[:SCRISA_DE]->(au) WITH c UNWIND $kw AS cuvant MERGE (t:Tag {nume: toLower(cuvant)}) MERGE (c)-[:ARE_TAG]->(t)";
-            s.run(query, params);
+    public String gasesteSauCreeazaCoperta(String titlu, String autor) {
+        try (Session session = driver.session()) {
+            var res = session.run("MATCH (c:Carte {titlu: $t}) RETURN c.imagine AS img", Map.of("t", titlu));
+            if (res.hasNext()) {
+                var val = res.next().get("img");
+                if (!val.isNull()) {
+                    String dbImg = val.asString();
+                    if (dbImg != null && !dbImg.contains("placehold.co") && !dbImg.equals("null") && !dbImg.isEmpty()) {
+                        return dbImg;
+                    }
+                }
+            }
         } catch (Exception e) {}
+
+        String imgUrl = getBookCoverUrl(titlu, autor);
+        try (Session session = driver.session()) {
+            session.run("MERGE (c:Carte {titlu: $t}) SET c.imagine = $img", Map.of("t", titlu, "img", imgUrl));
+        } catch (Exception e) {}
+        return imgUrl;
     }
 
     public void salveazaProfilComplet(String username, List<String> tags, List<String> experts, List<Map<String, String>> books) {
@@ -409,8 +371,7 @@ public class BookGeneratorAgent {
 
             if (books != null) {
                 for (Map<String, String> b : books) {
-                    String titlu = b.get("title"); String autor = b.get("author");
-                    session.run("MATCH (u:Utilizator {username: $u}) MERGE (c:Carte {titlu: $titlu}) SET c.autor = $autor MERGE (u)-[r:A_CITIT]->(c) SET r.liked = true", Map.of("u", username, "titlu", titlu, "autor", autor));
+                    adaugaLectura(username, b.get("title"), b.get("author"));
                 }
             }
         } catch (Exception e) {}
@@ -428,6 +389,183 @@ public class BookGeneratorAgent {
             }
         } catch (Exception e) {}
         return rezultat;
+    }
+
+    // AICI ESTE FIX-UL CARE SUPRASCRIE "null"
+    public void adaugaLectura(String username, String titlu, String autor) {
+        String imgUrl = gasesteSauCreeazaCoperta(titlu, autor);
+        try (Session session = driver.session()) {
+            String query = "MERGE (u:Utilizator {username: $u}) " +
+                    "MERGE (c:Carte {titlu: $t}) " +
+                    "ON CREATE SET c.autor = $a, c.imagine = $img " +
+                    "MERGE (u)-[:A_CITIT]->(c)";
+            session.run(query, Map.of("u", username, "t", titlu, "a", autor, "img", imgUrl));
+
+            // Dacă autorul este introdus corect, curățăm din graf vechile "null"
+            if (autor != null && !autor.isEmpty() && !autor.equalsIgnoreCase("Necunoscut") && !autor.equalsIgnoreCase("null")) {
+                session.run("MATCH (c:Carte {titlu: $t}) WHERE c.autor IS NULL OR c.autor = 'null' OR c.autor = 'Necunoscut' SET c.autor = $a",
+                        Map.of("t", titlu, "a", autor));
+            }
+        } catch (Exception e) {}
+    }
+
+    public void stergeLectura(String username, String titlu) {
+        try (Session session = driver.session()) {
+            session.run("MATCH (u:Utilizator {username: $u})-[r:A_CITIT]->(c:Carte {titlu: $t}) DELETE r", Map.of("u", username, "t", titlu));
+        } catch (Exception e) {}
+    }
+
+    // ==========================================
+    // MODUL SOCIAL
+    // ==========================================
+
+    public List<String> cautaUtilizatori(String query, String currentUser) {
+        List<String> users = new ArrayList<>();
+        try (Session session = driver.session()) {
+            var res = session.run("MATCH (u:Utilizator) WHERE toLower(u.username) CONTAINS toLower($q) AND u.username <> $cu RETURN u.username AS nume LIMIT 10", Map.of("q", query, "cu", currentUser));
+            while(res.hasNext()) users.add(res.next().get("nume").asString());
+        } catch (Exception e) {}
+        return users;
+    }
+
+    public void trimiteCererePrietenie(String sender, String receiver) {
+        try (Session session = driver.session()) {
+            session.run("MATCH (u1:Utilizator {username: $s}), (u2:Utilizator {username: $r}) MERGE (u1)-[:CERERE_PRIETENIE]->(u2)", Map.of("s", sender, "r", receiver));
+        } catch (Exception e) {}
+    }
+
+    public List<String> getCereriPrietenie(String username) {
+        List<String> cereri = new ArrayList<>();
+        try (Session session = driver.session()) {
+            var res = session.run("MATCH (s:Utilizator)-[:CERERE_PRIETENIE]->(u:Utilizator {username: $u}) RETURN s.username AS nume", Map.of("u", username));
+            while(res.hasNext()) cereri.add(res.next().get("nume").asString());
+        } catch (Exception e) {}
+        return cereri;
+    }
+
+    public void raspundeCerere(String sender, String receiver, boolean acceptat) {
+        try (Session session = driver.session()) {
+            session.run("MATCH (u1:Utilizator {username: $s})-[r:CERERE_PRIETENIE]->(u2:Utilizator {username: $r}) DELETE r", Map.of("s", sender, "r", receiver));
+            if (acceptat) {
+                session.run("MATCH (u1:Utilizator {username: $s}), (u2:Utilizator {username: $r}) MERGE (u1)-[:PRIETEN_CU]-(u2)", Map.of("s", sender, "r", receiver));
+            }
+        } catch (Exception e) {}
+    }
+
+    public List<String> getPrieteni(String username) {
+        List<String> prieteni = new ArrayList<>();
+        try (Session session = driver.session()) {
+            var res = session.run("MATCH (u:Utilizator {username: $u})-[:PRIETEN_CU]-(p:Utilizator) RETURN DISTINCT p.username AS nume", Map.of("u", username));
+            while(res.hasNext()) prieteni.add(res.next().get("nume").asString());
+        } catch (Exception e) {}
+        return prieteni;
+    }
+
+    public void trimiteRecomandare(String sender, String receiver, String titluCarte, String mesaj) {
+        try (Session session = driver.session()) {
+            String id = UUID.randomUUID().toString();
+            session.run("MERGE (r:Recomandare {id: $id}) SET r.sender = $s, r.receiver = $rec, r.titlu = $t, r.mesaj = $m", Map.of("id", id, "s", sender, "rec", receiver, "t", titluCarte, "m", mesaj != null ? mesaj : ""));
+        } catch (Exception e) {}
+    }
+
+    public List<Map<String, String>> getRecomandariPrimite(String username) {
+        List<Map<String, String>> recs = new ArrayList<>();
+        try (Session session = driver.session()) {
+            var res = session.run("MATCH (r:Recomandare {receiver: $u}) RETURN r.id AS id, r.sender AS sender, r.titlu AS titlu, r.mesaj AS mesaj", Map.of("u", username));
+            while(res.hasNext()) {
+                var record = res.next();
+                recs.add(Map.of("id", record.get("id").asString(), "sender", record.get("sender").asString(), "titlu", record.get("titlu").asString(), "mesaj", record.get("mesaj").asString()));
+            }
+        } catch (Exception e) {}
+        return recs;
+    }
+
+    public void stergeRecomandare(String id) {
+        try (Session session = driver.session()) {
+            session.run("MATCH (r:Recomandare {id: $id}) DELETE r", Map.of("id", id));
+        } catch (Exception e) {}
+    }
+
+    // ==========================================
+    // IMPORT BAZĂ DE DATE (JSON -> AURADB)
+    // ==========================================
+    public String importaJsonInBazaDeDate(List<Map<String, Object>> carti) {
+        int count = 0;
+        try (Session session = driver.session()) {
+            for (Map<String, Object> carte : carti) {
+                String titlu = (String) carte.get("titlu");
+                String autor = (String) carte.get("autor");
+                String categorie = (String) carte.get("categorie");
+                String imagine = (String) carte.get("imagine");
+                String descriere = (String) carte.get("descriere");
+
+                if (titlu == null || autor == null) continue;
+
+                // Salvăm ca și :Carte:CarteLibrarie pentru a le separa de nodurile fantomă
+                session.run("MERGE (c:Carte:CarteLibrarie {titlu: $t}) " +
+                                "SET c.autor = $a, c.categoria = $cat, c.imagine = $img, c.descriere = $desc " +
+                                "MERGE (au:Autor {nume: $a}) " +
+                                "MERGE (c)-[:SCRISA_DE]->(au)",
+                        Map.of("t", titlu, "a", autor,
+                                "cat", categorie != null ? categorie : "General",
+                                "img", imagine != null ? imagine : "https://placehold.co/300x450",
+                                "desc", descriere != null ? descriere : "Fără descriere"));
+
+                @SuppressWarnings("unchecked")
+                List<String> tags = (List<String>) carte.get("cuvinte_cheie");
+                if (tags != null) {
+                    for (String tag : tags) {
+                        session.run("MATCH (c:Carte {titlu: $t}) " +
+                                        "MERGE (tg:Tag {nume: $tag}) " +
+                                        "MERGE (c)-[:ARE_TAG]->(tg)",
+                                Map.of("t", titlu, "tag", tag.toLowerCase().trim()));
+                    }
+                }
+                count++;
+            }
+            return "Succes: " + count + " cărți adăugate în AuraDB.";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Eroare import: " + e.getMessage();
+        }
+    }
+
+    @PostMapping("/api/admin/import-json")
+    @ResponseBody
+    public String importJsonDb(@RequestBody List<Map<String, Object>> payload) {
+        int count = 0;
+        try (Session session = driver.session()) {
+            for (Map<String, Object> item : payload) {
+                String titlu = (String) item.get("titlu");
+                String autor = (String) item.get("autor");
+                String categorie = (String) item.get("categorie");
+                String imagine = (String) item.get("imagine");
+                String descriere = (String) item.get("descriere");
+
+                if (titlu != null && !titlu.isEmpty()) {
+                    // Inserare directă în AuraDB (Neo4j)
+                    String cypher = "MERGE (c:Carte {titlu: $titlu}) " +
+                            "SET c.categoria = $categoria, " +
+                            "    c.imagine = $imagine, " +
+                            "    c.descriere = $descriere " +
+                            "MERGE (a:Autor {nume: $autor}) " +
+                            "MERGE (c)-[:SCRISA_DE]->(a)";
+
+                    session.run(cypher, Map.of(
+                            "titlu", titlu,
+                            "autor", autor != null ? autor : "Necunoscut",
+                            "categoria", categorie != null ? categorie : "Fără categorie",
+                            "imagine", imagine != null ? imagine : "",
+                            "descriere", descriere != null ? descriere : ""
+                    ));
+                    count++;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Eroare la import: " + e.getMessage();
+        }
+        return "Succes: Au fost importate " + count + " cărți în AuraDB.";
     }
 
     public String genereazaSiSalveaza(String gen) { return "Metodă dezactivată."; }

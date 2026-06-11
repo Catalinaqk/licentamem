@@ -1,528 +1,1041 @@
 <!DOCTYPE html>
-<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<html class="light" lang="ro" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Book Reading AI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Book AI - Sanctuarul Intelectual</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#006666",
+                        "on-background": "#181c1e",
+                        "primary": "#004c4c",
+                        "on-surface": "#181c1e",
+                        "surface-container-low": "#f1f4f6",
+                        "surface": "#f7fafc",
+                        "background": "#f7fafc",
+                        "outline-variant": "#bec9c8",
+                        "surface-container-lowest": "#ffffff"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"], "display": ["Manrope"],
+                        "body": ["Inter"], "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .warm-canvas { background-color: #FCFAF2; }
+
+        .typing-indicator span {
+            display: inline-block; width: 6px; height: 6px;
+            background-color: #004c4c; border-radius: 50%;
+            animation: typing 1.4s infinite both; margin: 0 2px;
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d7dadc; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #bec9c8; }
+
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
 </head>
-<body class="flex h-screen bg-gray-50 text-gray-800 font-sans overflow-hidden">
+<body class="bg-surface font-body text-on-surface antialiased overflow-hidden">
 
-<div class="w-64 bg-white border-r border-gray-200 flex flex-col z-20 shadow-sm">
-    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+<div class="flex h-screen overflow-hidden">
+
+    <aside class="hidden lg:flex flex-col h-screen p-8 gap-y-6 bg-[#f1f4f6] border-r border-gray-200 docked full-height left-0 w-72 flex-shrink-0 z-20 shadow-sm relative">
         <div>
-            <h1 class="text-xl font-bold text-gray-900 cursor-pointer" onclick="schimbaEcran('galerie')">📖 Book AI</h1>
-            <p class="text-xs text-gray-500 mt-1">Sesiune: <strong id="username-display">Se încarcă...</strong></p>
+            <h3 class="font-manrope text-xl font-bold text-[#004c4c]">Comunitate</h3>
+            <p class="font-inter text-[10px] uppercase tracking-widest text-gray-400 font-bold mt-1">Conexiuni AuraDB</p>
         </div>
-        <button onclick="logout()" class="text-xs text-red-500 hover:text-red-700 font-bold">Ieșire</button>
-    </div>
 
-    <nav class="flex-1 overflow-y-auto mt-6 px-4 flex flex-col gap-2">
-        <button onclick="schimbaEcran('profil')" id="btn-profil" class="text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-gray-600 hover:bg-gray-100">👤 Profil & Preferințe</button>
-        <button onclick="schimbaEcran('galerie')" id="btn-galerie" class="text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 bg-black text-white shadow-md">📚 Galerie Cărți</button>
-        <button onclick="schimbaEcran('trasee')" id="btn-trasee" class="text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-gray-600 hover:bg-gray-100">🗺️ Trasee de Lectură</button>
-        <button onclick="schimbaEcran('noutati')" id="btn-noutati" class="text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-gray-600 hover:bg-gray-100">🔥 Noutăți Internet</button>
-        <button onclick="schimbaEcran('chat')" id="btn-chat" class="text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-gray-600 hover:bg-gray-100">🤖 Agent Personalizat</button>
-    </nav>
-</div>
-
-<div class="flex-1 flex flex-col h-screen overflow-hidden relative bg-white">
-
-    <div id="ecran-profil" class="hidden absolute inset-0 bg-white p-8 z-0 overflow-y-auto">
-        <div class="max-w-5xl mx-auto">
-            <h2 class="text-3xl font-bold mb-8 text-gray-900">Profilul Meu</h2>
-
-            <div class="bg-gray-50 p-8 rounded-3xl border border-gray-100 mb-8 shadow-sm">
-                <h3 class="font-bold text-lg mb-4 text-indigo-900">🎯 Taxonomie (Interese)</h3>
-                <div id="lista-taxonomie" class="flex flex-wrap gap-2 mb-6"></div>
-                <div class="flex gap-2">
-                    <input type="text" id="input-domeniu-nou" placeholder="Adaugă alt domeniu..." class="border p-2 rounded-lg flex-1 outline-none">
-                    <button onclick="adaugaDomeniuNou()" class="bg-white border border-gray-300 px-4 rounded-lg font-medium">Adaugă</button>
-                    <button onclick="salveazaTaxonomie()" class="bg-black text-white px-8 rounded-lg font-bold ml-2">Salvează</button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm">
-                    <h3 class="font-bold text-lg mb-4 text-green-700 flex items-center gap-2">✅ Cărți Citite (Istoric)</h3>
-                    <div class="flex gap-2 mb-6">
-                        <input type="text" id="input-citita-titlu" placeholder="Titlul cărții..." class="flex-1 border p-2 rounded-lg outline-none text-sm">
-                        <input type="text" id="input-citita-autor" placeholder="Autorul..." class="w-1/3 border p-2 rounded-lg outline-none text-sm">
-                        <button onclick="adaugaCarteCitita()" class="bg-green-600 text-white px-4 rounded-lg font-bold hover:bg-green-700 transition">+</button>
-                    </div>
-                    <ul id="lista-carti-citite" class="space-y-2 max-h-60 overflow-y-auto pr-2"></ul>
-                </div>
-
-                <div class="bg-indigo-50 p-8 rounded-3xl border border-indigo-100 shadow-sm">
-                    <h3 class="font-bold text-lg mb-4 text-indigo-900 flex items-center gap-2">📚 TBR (To Be Read)</h3>
-                    <p class="text-xs text-indigo-700 mb-6">Lista ta de dorințe. Adaugă cărți de la Agent sau Noutăți.</p>
-                    <ul id="lista-carti-tbr" class="space-y-3 max-h-60 overflow-y-auto pr-2"></ul>
-                </div>
-            </div>
+        <div class="mt-2 relative">
+            <input type="text" id="input-cauta-prieteni" placeholder="Găsește cititori..." class="w-full bg-white border border-gray-200 p-3 rounded-xl outline-none text-sm font-medium focus:border-[#004c4c] transition shadow-sm mb-2" onkeyup="cautaUtilizator()">
+            <div id="rezultate-cautare" class="hidden absolute left-0 right-0 top-12 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto"></div>
         </div>
-    </div>
 
-    <div id="ecran-galerie" class="flex-1 overflow-y-auto p-8 z-10 transition-opacity duration-300">
-        <div class="max-w-6xl mx-auto">
-            <h2 class="text-3xl font-bold mb-6 text-gray-900">Explorează Biblioteca</h2>
-            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 mb-6 shadow-sm">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Gen</label>
-                        <select id="filtru-gen" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-400 transition cursor-pointer">
-                            <option value="">Toate Genurile</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Autor</label>
-                        <select id="filtru-autor" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-400 transition cursor-pointer">
-                            <option value="">Toți Autorii</option>
-                        </select>
+        <div id="container-cereri" class="hidden">
+            <h4 class="text-[10px] font-bold text-[#004c4c] uppercase tracking-widest mb-2 border-b border-[#004c4c]/10 pb-2">Cereri Primite</h4>
+            <div id="lista-cereri" class="space-y-2 mb-2"></div>
+        </div>
+
+        <div class="flex-grow overflow-y-auto pt-2 border-t border-gray-200">
+            <h4 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Rețeaua ta</h4>
+            <ul id="lista-prieteni" class="space-y-2">
+                <li class="text-xs text-gray-400 font-medium italic">Niciun prieten adăugat.</li>
+            </ul>
+        </div>
+
+        <a id="nav-notificari" onclick="schimbaEcran('notificari')" class="flex items-center justify-between px-5 py-4 rounded-xl text-gray-700 font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-gray-200 bg-white/50 transition-all duration-200 cursor-pointer mt-auto">
+            <span class="font-inter text-sm tracking-wide">Cutie Poștală</span>
+            <span id="badge-notificari" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full hidden shadow-sm">0</span>
+        </a>
+    </aside>
+
+    <main class="flex-grow flex flex-col h-screen warm-canvas relative overflow-hidden">
+
+        <header class="flex justify-between items-center w-full px-8 h-20 bg-[#FCFAF2]/80 backdrop-blur-xl border-b border-gray-200 shrink-0 z-40">
+            <h1 class="text-2xl font-extrabold font-manrope tracking-tighter text-[#004c4c]">Recomandare cărți</h1>
+            <button onclick="logout()" class="text-xs text-red-500 hover:text-red-700 font-bold bg-white px-4 py-2 rounded-lg shadow-sm border border-red-100 transition">Ieșire Cont</button>
+        </header>
+
+        <div class="relative flex-grow overflow-hidden">
+
+            <div id="ecran-chat" class="absolute inset-0 flex flex-col z-10 transition-opacity duration-300 opacity-100">
+                <div id="chat-messages" class="flex-grow overflow-y-auto px-8 md:px-24 pt-8 pb-32 flex flex-col gap-8">
+                    <div class="flex flex-col items-start max-w-4xl mr-auto group mt-6">
+                        <div class="flex items-center gap-3 mb-2 px-1">
+                            <span class="text-xs font-bold text-[#004c4c] uppercase tracking-wider">Agent AI</span>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl rounded-tl-none shadow-[0px_12px_32px_rgba(24,28,30,0.04)] border border-gray-100">
+                            <p class="font-manrope text-lg text-gray-800 leading-relaxed font-medium">Salut! Ce subiect explorăm astăzi? Îți pot oferi un rezumat sau o recomandare explicată pas cu pas.</p>
+                        </div>
                     </div>
                 </div>
-                <button onclick="filtreazaCarti()" class="bg-black text-white px-10 py-3 rounded-xl font-bold hover:bg-gray-800 transition flex items-center gap-2">🔍 Caută în Bibliotecă</button>
-            </div>
-            <div id="grila-carti" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-20">
-                <div class="col-span-4 py-20 text-center text-gray-400 border-2 border-dashed border-gray-100 rounded-3xl">Folosește filtrele pentru a explora colecția.</div>
-            </div>
-        </div>
-    </div>
 
-    <div id="ecran-trasee" class="hidden absolute inset-0 bg-white z-0 flex flex-col p-8 overflow-hidden">
-        <h2 class="text-3xl font-bold mb-6 text-gray-900">Trasee de Lectură</h2>
-        <div class="flex flex-1 gap-8 overflow-hidden">
-            <div class="w-1/4 bg-gray-50 border border-gray-100 rounded-2xl p-4 flex flex-col h-full shadow-inner">
-                <h3 class="font-bold text-[10px] text-gray-400 uppercase mb-4 tracking-widest text-center">Istoric</h3>
-                <ul id="lista-trasee-salvate" class="space-y-2 overflow-y-auto flex-1 pr-2"></ul>
+                <div class="absolute bottom-0 left-0 right-0 p-6 flex justify-center bg-gradient-to-t from-[#FCFAF2] via-[#FCFAF2]/90 to-transparent">
+                    <div class="w-full max-w-4xl">
+                        <div class="relative group">
+                            <div class="absolute inset-0 bg-[#004c4c]/5 rounded-2xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+                            <div class="relative flex items-center bg-white p-2 pl-6 rounded-2xl shadow-[0px_16px_40px_rgba(0,76,76,0.08)] border border-gray-200 focus-within:border-[#004c4c]/50 transition-all">
+                                <input id="chat-input" class="flex-grow py-4 bg-transparent border-none outline-none focus:ring-0 text-on-surface placeholder:text-outline-variant font-manrope font-medium" placeholder="Adresează o întrebare despre lecturile tale..." type="text" onkeypress="if(event.key==='Enter') trimiteMesajChat()">
+                                <button onclick="trimiteMesajChat()" class="bg-[#004c4c] hover:bg-[#006666] text-white px-8 py-4 rounded-xl font-bold transition-all active:scale-95 shadow-md flex items-center justify-center">
+                                    Trimite
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="w-3/4 flex flex-col overflow-hidden">
-                <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6">
-                    <div class="flex gap-4 mb-4">
+            <div id="ecran-galerie" class="hidden absolute inset-0 flex flex-col overflow-y-auto px-8 py-8 z-0 transition-opacity duration-300 opacity-0 bg-[#FCFAF2]">
+                <div class="max-w-7xl mx-auto w-full">
+                    <h2 class="text-3xl font-extrabold font-manrope mb-8 text-[#004c4c]">Librăria Ta Personală</h2>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                        <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm flex flex-col min-h-[24rem]">
+                            <h3 class="font-bold text-lg mb-4 text-[#004c4c]">Istoric Lecturi</h3>
+                            <div class="flex gap-2 mb-6 shrink-0">
+                                <input type="text" id="input-citita-titlu" placeholder="Titlul cărții..." class="flex-1 border border-gray-200 p-3 rounded-xl outline-none bg-[#f7fafc] text-sm font-medium">
+                                <input type="text" id="input-citita-autor" placeholder="Autorul..." class="w-1/3 border border-gray-200 p-3 rounded-xl outline-none bg-[#f7fafc] text-sm font-medium">
+                                <button onclick="adaugaCarteCitita()" class="bg-[#004c4c] text-white px-6 rounded-xl font-bold hover:bg-[#006666] transition shadow-sm text-sm">Adaugă</button>
+                            </div>
+                            <div id="lista-carti-citite" class="grid grid-cols-2 sm:grid-cols-3 gap-4 overflow-y-auto pr-2 content-start flex-grow pb-4"></div>
+                        </div>
+
+                        <div class="bg-[#f8fbfb] p-8 rounded-3xl border border-[#004c4c]/20 shadow-sm flex flex-col min-h-[24rem]">
+                            <div class="flex justify-between items-center mb-2 shrink-0">
+                                <h3 class="font-bold text-lg text-[#004c4c]">Lista de Dorințe (TBR)</h3>
+                                <span class="bg-[#004c4c]/10 text-[#004c4c] px-3 py-1 rounded-lg text-xs font-bold" id="tbr-count">0 cărți</span>
+                            </div>
+                            <p class="text-xs text-[#3f4948] mb-6 font-medium shrink-0">Cărțile salvate din discuțiile cu AI, din Descoperă sau primite de la prieteni.</p>
+                            <div id="lista-carti-tbr" class="grid grid-cols-2 sm:grid-cols-3 gap-4 overflow-y-auto pr-2 content-start flex-grow pb-4"></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 border-t border-gray-200 pt-10">
+                        <h2 class="text-2xl font-extrabold font-manrope mb-6 text-gray-900">Explorează Biblioteca Totală</h2>
+
+                        <div class="bg-white p-6 rounded-3xl border border-gray-200 mb-8 shadow-sm flex flex-col md:flex-row gap-6 items-end">
+                            <div class="flex-1 w-full">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Subiect / Gen (Ex: viata, dragoste, SF)</label>
+                                <input type="text" id="filtru-gen" class="w-full bg-[#f7fafc] border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#004c4c] transition text-sm font-medium text-gray-700" placeholder="Ex: mister, dragoste, SF..." onkeypress="if(event.key==='Enter') filtreazaCarti()">
+                            </div>
+                            <div class="flex-1 w-full">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Autor (Ex: Jane Austen)</label>
+                                <input type="text" id="filtru-autor" class="w-full bg-[#f7fafc] border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#004c4c] transition text-sm font-medium text-gray-700" placeholder="Ex: Stephen King..." onkeypress="if(event.key==='Enter') filtreazaCarti()">
+                            </div>
+                            <button onclick="filtreazaCarti()" class="bg-[#004c4c] text-white px-10 py-3 rounded-xl font-bold hover:bg-[#006666] transition shadow-md w-full md:w-auto h-12">
+                                Caută
+                            </button>
+                        </div>
+
+                        <div id="grila-carti" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 pb-20">
+                            <div class="col-span-full py-20 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-3xl font-medium">Introdu un subiect sau un autor pentru a explora biblioteca totală.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ecran-profil" class="hidden absolute inset-0 flex flex-col overflow-y-auto px-8 py-8 z-0 transition-opacity duration-300 opacity-0 bg-[#FCFAF2]">
+                <div class="max-w-5xl mx-auto w-full">
+                    <h2 class="text-3xl font-extrabold font-manrope mb-8 text-[#004c4c]">Profil & Preferințe</h2>
+
+                    <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4 text-[#004c4c]">Taxonomie (Interese)</h3>
+                        <p class="text-xs text-[#3f4948] mb-6 font-medium">Aceste domenii ajută Agentul AI să îți ofere recomandări personalizate în baza grafului de cunoștințe.</p>
+
+                        <div id="lista-taxonomie" class="flex flex-wrap gap-2 mb-6"></div>
+                        <div class="flex gap-2">
+                            <input type="text" id="input-domeniu-nou" placeholder="Adaugă alt domeniu..." class="border border-gray-200 p-3 rounded-xl flex-1 outline-none bg-[#f7fafc] focus:border-[#004c4c] text-sm font-medium">
+                            <button onclick="adaugaDomeniuNou()" class="bg-white border border-gray-300 px-6 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition text-sm">Adaugă</button>
+                            <button onclick="salveazaTaxonomie()" class="bg-[#004c4c] text-white px-8 rounded-xl font-bold ml-2 hover:bg-[#006666] shadow-md transition text-sm">Salvează Preferințele</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ecran-trasee" class="hidden absolute inset-0 flex flex-col p-8 z-0 transition-opacity duration-300 opacity-0 bg-[#FCFAF2] overflow-hidden">
+                <h2 class="text-3xl font-extrabold font-manrope mb-6 text-[#004c4c]">Trasee de Lectură</h2>
+                <div class="flex flex-1 gap-8 overflow-hidden max-w-7xl mx-auto w-full">
+                    <div class="w-1/4 bg-white border border-gray-200 rounded-3xl p-6 flex flex-col h-full shadow-sm">
+                        <h3 class="font-bold text-[10px] text-gray-400 uppercase mb-4 tracking-widest text-center">Istoric Trasee</h3>
+                        <ul id="lista-trasee-salvate" class="space-y-2 overflow-y-auto flex-1 pr-2"></ul>
+                    </div>
+
+                    <div class="w-3/4 flex flex-col overflow-hidden">
+                        <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm mb-6 shrink-0">
+                            <div class="flex gap-4 mb-4">
+                                <div class="flex-1">
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-widest">Subiect</label>
+                                    <input type="text" id="input-traseu" class="w-full border border-gray-200 p-3 rounded-xl outline-none focus:border-[#004c4c] bg-[#f7fafc] font-medium text-sm" placeholder="Ex: Filosofia stoică...">
+                                </div>
+                                <div class="w-1/3">
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-widest">Număr de Etape</label>
+                                    <select id="input-etape" class="w-full border border-gray-200 p-3 rounded-xl outline-none focus:border-[#004c4c] bg-[#f7fafc] cursor-pointer font-medium text-sm text-gray-700">
+                                        <option value="3">3 etape - rapid</option>
+                                        <option value="5" selected>5 etape - recomandat</option>
+                                        <option value="7">7 etape - aprofundat</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-end mt-2">
+                                <button onclick="genereazaTraseu()" class="bg-[#004c4c] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#006666] transition shadow-md text-sm">Generează Traseu Nou</button>
+                            </div>
+                        </div>
+
+                        <div id="rezultat-traseu" class="overflow-y-auto flex-1 space-y-6 pr-4 pb-10">
+                            <div class="h-full flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-3xl bg-white/50 font-medium text-sm">Introdu un subiect pentru a genera un traseu structurat.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ecran-noutati" class="hidden absolute inset-0 flex flex-col overflow-y-auto p-8 z-0 transition-opacity duration-300 opacity-0 bg-[#FCFAF2]">
+                <div class="max-w-5xl mx-auto w-full">
+                    <h2 id="titlu-noutati" class="text-3xl font-extrabold font-manrope mb-2 text-[#004c4c]">Descoperă Cărți</h2>
+                    <p class="text-gray-500 mb-6 font-medium">Caută apariții recente sau titluri populare specifice unui anumit autor ori subiect.</p>
+
+                    <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm mb-8 flex gap-4">
                         <div class="flex-1">
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-widest">Domeniu sau Subiect</label>
-                            <input type="text" id="input-traseu" class="w-full border border-gray-200 p-3 rounded-xl outline-none focus:border-indigo-400 bg-gray-50" placeholder="ex: Filosofia stoică...">
+                            <input type="text" id="input-cauta-noutati" class="w-full border border-gray-200 p-4 rounded-xl outline-none focus:border-[#004c4c] bg-[#f7fafc] font-medium text-sm" placeholder="Ex: Stephen King, Dezvoltare personală, Thriller..." onkeypress="if(event.key==='Enter') cautaNoutatiPersonalizate()">
                         </div>
-                        <div class="w-1/3">
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-widest">Număr de Etape</label>
-                            <select id="input-etape" class="w-full border border-gray-200 p-3 rounded-xl outline-none focus:border-indigo-400 bg-gray-50 cursor-pointer">
-                                <option value="3">3 etape - rapid</option>
-                                <option value="5" selected>5 etape - recomandat</option>
-                                <option value="7">7 etape - aprofundat</option>
-                            </select>
-                        </div>
+                        <button onclick="cautaNoutatiPersonalizate()" class="bg-[#004c4c] text-white px-8 py-4 rounded-xl font-bold hover:bg-[#006666] transition shadow-md text-sm shrink-0">Caută Cărți</button>
                     </div>
 
-                    <div class="flex items-center justify-end mt-2">
-                        <button onclick="genereazaTraseu()" class="bg-black text-white px-8 py-3 rounded-xl font-bold hover:bg-gray-800 transition shadow-md">Generează traseu nou</button>
+                    <div id="grila-noutati" class="flex flex-col gap-8 pb-20">
+                        <div class="py-10 text-center text-gray-400 font-medium border-2 border-dashed border-gray-200 rounded-3xl bg-white/50 h-64 flex items-center justify-center">
+                            Introdu un subiect în bara de mai sus pentru a explora recomandările.
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div id="rezultat-traseu" class="overflow-y-auto flex-1 space-y-6 pr-4 pb-10">
-                    <div class="h-full flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-100 rounded-3xl">Introdu un subiect pentru a genera un traseu structurat.</div>
+            <div id="ecran-notificari" class="hidden absolute inset-0 flex flex-col overflow-y-auto p-8 z-0 transition-opacity duration-300 opacity-0 bg-[#FCFAF2]">
+                <div class="max-w-4xl mx-auto w-full">
+                    <h2 class="text-3xl font-extrabold font-manrope mb-2 text-[#004c4c]">Cutia Poștală</h2>
+                    <p class="text-gray-500 mb-8 font-medium">Cărți recomandate de prietenii tăi din comunitate.</p>
+
+                    <div id="lista-notificari" class="space-y-6 pb-20">
+                        <div class="py-10 text-center text-gray-400 font-medium border-2 border-dashed border-gray-200 rounded-3xl bg-white/50 h-32 flex items-center justify-center">Nu ai primit nicio recomandare nouă.</div>
+                    </div>
                 </div>
             </div>
+
         </div>
-    </div>
+    </main>
 
-    <div id="ecran-noutati" class="hidden absolute inset-0 bg-white overflow-y-auto p-8 z-0">
-        <div class="max-w-5xl mx-auto">
-            <h2 id="titlu-noutati" class="text-3xl font-bold mb-2">New Releases 🔥</h2>
-            <p class="text-gray-500 mb-8">Cele mai proaspete lansări din ultima lună, alese special pentru tine.</p>
+    <aside class="hidden lg:flex flex-col h-screen p-8 gap-y-6 bg-[#f1f4f6] border-l border-gray-200 docked full-height right-0 w-72 flex-shrink-0 z-20 shadow-sm relative">
 
-            <div id="grila-noutati" class="flex flex-col gap-8 pb-10">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-12 h-12 rounded-full overflow-hidden border border-gray-300 shadow-sm flex items-center justify-center bg-white shrink-0">
+                <span class="text-xl font-extrabold text-[#004c4c] font-manrope" id="avatar-initial">U</span>
             </div>
-        </div>
-    </div>
-
-    <div id="ecran-chat" class="hidden flex-col absolute inset-0 bg-white z-0 overflow-hidden">
-        <div class="bg-white border-b border-gray-100 p-4 shadow-sm z-10 flex items-center gap-3">
-            <div class="text-2xl">🤖</div>
             <div>
-                <h2 class="font-bold text-gray-800">Agentul tău literar</h2>
-                <p class="text-xs text-gray-500">Cere-mi recomandări de cărți!</p>
+                <h3 class="font-manrope text-xl font-bold text-[#004c4c]" id="sidebar-user-name">Se încarcă...</h3>
+                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Membru</p>
             </div>
         </div>
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 bg-gray-50">
-            <div class="m-auto text-center text-gray-400 font-medium bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                Spune-mi ce fel de carte cauți, iar eu îți voi oferi opțiuni.
+
+        <nav class="space-y-3 flex-grow mt-2">
+            <a id="nav-profil" onclick="schimbaEcran('profil')" class="flex items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer">
+                <span class="font-inter text-sm tracking-wide">Profil & Preferințe</span>
+            </a>
+
+            <a id="nav-galerie" onclick="schimbaEcran('galerie')" class="flex items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer">
+                <span class="font-inter text-sm tracking-wide">Galerie Cărți</span>
+            </a>
+
+            <a id="nav-trasee" onclick="schimbaEcran('trasee')" class="flex items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer">
+                <span class="font-inter text-sm tracking-wide">Trasee de Lectură</span>
+            </a>
+
+            <a id="nav-noutati" onclick="schimbaEcran('noutati')" class="flex items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer">
+                <span class="font-inter text-sm tracking-wide">Descoperă Cărți</span>
+            </a>
+
+            <a id="nav-chat" onclick="schimbaEcran('chat')" class="flex items-center px-5 py-4 rounded-xl text-[#004c4c] font-extrabold translate-x-2 transition-transform bg-white shadow-sm border border-gray-200 cursor-pointer absolute bottom-8 left-8 right-8">
+                <span class="font-inter text-sm tracking-wide">Agent AI</span>
+            </a>
+        </nav>
+    </aside>
+
+    <div id="modal-recomanda" class="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[60] p-4 hidden" onclick="if(event.target === this) inchideModalRecomandare()">
+        <div class="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl flex flex-col relative border border-gray-200">
+            <h3 class="text-2xl font-extrabold font-manrope text-[#004c4c] mb-2">Recomandă această carte</h3>
+            <p class="text-sm text-gray-500 mb-6 font-medium">Trimite această sugestie de lectură direct în Cutia Poștală a unui prieten.</p>
+
+            <div class="mb-4">
+                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Alege Prietenul</label>
+                <select id="select-prieten-recomanda" class="w-full bg-[#f7fafc] border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#004c4c] transition text-sm font-medium text-gray-700"></select>
             </div>
-        </div>
-        <div class="p-4 border-t border-gray-200 bg-white">
-            <div class="flex gap-2 max-w-4xl mx-auto">
-                <input type="text" id="chat-input" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-indigo-400 transition" placeholder="Ex: Vreau o carte thriller psihologic..." onkeypress="if(event.key==='Enter') trimiteMesajChat()">
-                <button onclick="trimiteMesajChat()" class="px-8 py-3 rounded-xl bg-black text-white font-medium hover:bg-gray-800 transition">Trimite</button>
+
+            <div class="mb-6">
+                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Mesaj Opțional</label>
+                <textarea id="mesaj-recomandare" class="w-full bg-[#f7fafc] border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#004c4c] transition text-sm font-medium text-gray-700 resize-none h-24" placeholder="Hei! Cred că această carte o să ți se pară super interesantă pentru că..."></textarea>
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="inchideModalRecomandare()" class="flex-1 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition text-sm">Anulează</button>
+                <button onclick="executaTrimitereRecomandare()" class="flex-1 py-3 bg-[#004c4c] text-white rounded-xl font-bold hover:bg-[#003333] transition text-sm shadow-md">Trimite Sugestia</button>
             </div>
         </div>
     </div>
 
-    <div id="modal-carte" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 hidden" onclick="if(event.target === this) inchideModal()">
+    <div id="modal-carte" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 hidden" onclick="if(event.target === this) inchideModal()">
         <div class="bg-white rounded-3xl w-full max-w-4xl flex flex-col md:flex-row overflow-hidden shadow-2xl max-h-[90vh]">
             <img id="modal-img" class="w-full md:w-2/5 h-64 md:h-auto object-cover bg-gray-100" onerror="this.src='https://placehold.co/300x450?text=Coperta'">
-
             <div class="p-8 md:p-10 flex-1 relative flex flex-col overflow-y-auto">
-                <button onclick="inchideModal()" class="absolute top-4 right-4 text-gray-400 hover:text-black text-2xl font-bold z-10 bg-white/80 rounded-full w-10 h-10 flex items-center justify-center shadow-sm">✕</button>
-
-                <h2 id="modal-titlu" class="text-3xl font-bold text-gray-900 mb-2 pr-8">Titlu</h2>
+                <button onclick="inchideModal()" class="absolute top-4 right-4 text-gray-400 hover:text-black text-sm font-bold z-10 bg-white/80 rounded-full px-4 py-2 flex items-center justify-center shadow-sm border border-gray-100">Închide</button>
+                <h2 id="modal-titlu" class="text-3xl font-extrabold font-manrope text-[#004c4c] mb-2 pr-16">Titlu</h2>
                 <p id="modal-autor" class="text-xl text-gray-500 mb-6 font-medium italic">Autor</p>
-
                 <div class="mb-6">
                     <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Scurtă Descriere</h4>
                     <p id="modal-desc" class="text-gray-700 leading-relaxed text-sm"></p>
                 </div>
-
                 <div id="modal-actions" class="mt-auto pt-6 border-t border-gray-100 flex flex-col gap-3"></div>
-                <div id="modal-ai-rezumat" class="hidden mt-4 bg-indigo-50 p-5 rounded-2xl text-sm text-indigo-900 leading-relaxed border border-indigo-100 shadow-inner max-h-80 overflow-y-auto"></div>
+                <div id="modal-ai-rezumat" class="hidden mt-4 bg-[#f8fbfb] p-6 rounded-2xl text-sm text-[#004c4c] leading-relaxed border border-[#004c4c]/20 shadow-sm max-h-80 overflow-y-auto"></div>
             </div>
         </div>
     </div>
 
-    <div id="modal-carte-traseu" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 hidden" onclick="if(event.target === this) inchideModalTraseu()">
-        <div class="bg-[#1a1a1a] text-gray-200 rounded-3xl w-full max-w-3xl flex flex-col overflow-hidden shadow-2xl max-h-[90vh] border border-gray-800">
-
-            <div class="p-6 md:p-8 flex gap-6 border-b border-gray-800 relative bg-[#111]">
-                <button onclick="inchideModalTraseu()" class="absolute top-4 right-4 text-gray-500 hover:text-white text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 transition">✕</button>
-
-                <img id="modal-traseu-img" class="w-32 h-48 object-cover rounded-lg shadow-lg border border-gray-700" src="" referrerpolicy="no-referrer">
-
+    <div id="modal-carte-traseu" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 hidden" onclick="if(event.target === this) inchideModalTraseu()">
+        <div class="bg-white rounded-3xl w-full max-w-3xl flex flex-col overflow-hidden shadow-2xl max-h-[90vh] border border-gray-200">
+            <div class="p-6 md:p-8 flex gap-6 border-b border-gray-100 relative bg-[#f7fafc]">
+                <button onclick="inchideModalTraseu()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-900 text-sm font-bold px-4 py-2 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 transition">Închide</button>
+                <img id="modal-traseu-img" class="w-32 h-48 object-cover rounded-xl shadow-md border border-gray-200 fade-in" src="" referrerpolicy="no-referrer" onerror="this.src='https://placehold.co/150x220/f7fafc/004c4c?text=AuraDB'">
                 <div class="flex-1 flex flex-col justify-center">
-                    <h2 id="modal-traseu-titlu" class="text-2xl font-bold text-white mb-1 leading-tight">Titlu Carte</h2>
-                    <p id="modal-traseu-autor" class="text-gray-400 mb-4 font-medium text-lg">Autor</p>
-
-                    <div>
-                        <span id="modal-traseu-insigna" class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-900/50 text-blue-300 border border-blue-700/50">✦ GENERAT DE AI</span>
+                    <h2 id="modal-traseu-titlu" class="text-2xl font-extrabold font-manrope text-[#004c4c] mb-1 leading-tight pr-16">Titlu Carte</h2>
+                    <p id="modal-traseu-autor" class="text-gray-500 mb-4 font-medium text-lg">Autor</p>
+                    <div class="flex items-center gap-3">
+                        <span id="modal-traseu-insigna" class="inline-block px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#004c4c]/10 text-[#004c4c] border border-[#004c4c]/20">Analiză Detaliată</span>
+                        <button onclick="deschideModalRecomandare()" class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white text-[#004c4c] border border-[#004c4c]/20 hover:bg-[#004c4c] hover:text-white transition shadow-sm">Recomandă Prieten</button>
                     </div>
                 </div>
             </div>
-
-            <div class="p-6 md:p-8 flex-1 overflow-y-auto bg-[#1a1a1a]">
+            <div class="p-6 md:p-8 flex-1 overflow-y-auto bg-white">
                 <div class="mb-6">
-                    <h4 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">REZUMAT DETALIAT</h4>
-                    <p id="modal-traseu-rezumat" class="text-gray-300 leading-relaxed text-sm"></p>
+                    <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Rezumat Detaliat</h4>
+                    <p id="modal-traseu-rezumat" class="text-gray-700 leading-relaxed text-sm font-medium"></p>
                 </div>
-
                 <div class="mb-6">
-                    <h4 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">DESPRE AUTOR</h4>
-                    <p id="modal-traseu-despre-autor" class="text-gray-400 leading-relaxed text-sm italic border-l-2 border-gray-700 pl-4"></p>
+                    <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Despre Autor</h4>
+                    <p id="modal-traseu-despre-autor" class="text-gray-600 leading-relaxed text-sm italic border-l-4 border-[#004c4c] pl-4 bg-[#f8fbfb] p-4 rounded-r-xl"></p>
                 </div>
-
                 <div class="mb-6">
-                    <h4 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">TEME PRINCIPALE</h4>
-                    <div id="modal-traseu-teme" class="flex flex-wrap gap-2">
-                    </div>
+                    <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Teme Principale</h4>
+                    <div id="modal-traseu-teme" class="flex flex-wrap gap-2"></div>
                 </div>
             </div>
-
-            <div class="p-6 border-t border-gray-800 bg-[#111] flex flex-col sm:flex-row gap-3">
-                <a id="btn-magazin-google" href="#" target="_blank" class="flex-1 py-3 bg-gray-800 text-white text-center rounded-xl font-bold hover:bg-gray-700 transition text-sm flex items-center justify-center gap-2 border border-gray-700">🔍 Google Books</a>
-                <a id="btn-magazin-amazon" href="#" target="_blank" class="flex-1 py-3 bg-[#FF9900]/10 text-[#FF9900] text-center rounded-xl font-bold hover:bg-[#FF9900]/20 transition text-sm flex items-center justify-center gap-2 border border-[#FF9900]/30">🛒 Amazon</a>
-                <a id="btn-magazin-carturesti" href="#" target="_blank" class="flex-1 py-3 bg-red-900/20 text-red-400 text-center rounded-xl font-bold hover:bg-red-900/40 transition text-sm flex items-center justify-center gap-2 border border-red-800/50">📚 Cărturești</a>
+            <div class="p-6 border-t border-gray-100 bg-[#f7fafc] flex flex-col sm:flex-row gap-3">
+                <a id="btn-magazin-google" href="#" target="_blank" class="flex-1 py-3 bg-white text-gray-800 text-center rounded-xl font-bold hover:bg-gray-50 transition text-sm border border-gray-200 shadow-sm">Google Books</a>
+                <a id="btn-magazin-amazon" href="#" target="_blank" class="flex-1 py-3 bg-white text-gray-800 text-center rounded-xl font-bold hover:bg-gray-50 transition text-sm border border-gray-200 shadow-sm">Amazon</a>
+                <a id="btn-magazin-carturesti" href="#" target="_blank" class="flex-1 py-3 bg-white text-gray-800 text-center rounded-xl font-bold hover:bg-gray-50 transition text-sm border border-gray-200 shadow-sm">Cărturești</a>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+    // Funcție sigură care elimină erorile cu null/undefined
+    function getSafeStr(val) {
+        if (!val || val === 'null' || val === 'undefined') return '';
+        return String(val).trim();
+    }
+
     let toateCartile = [];
     let toateNoutatile = [];
     let chatIstoric = [];
-    let currentUser = new URLSearchParams(window.location.search).get('user') || sessionStorage.getItem('currentUser') || "Maria";
+    let currentUser = new URLSearchParams(window.location.search).get('user') || sessionStorage.getItem('currentUser') || "Utilizator";
     let myTags = [];
     let myBooks = [];
     let myTBR = JSON.parse(localStorage.getItem('tbr_' + currentUser)) || [];
-    let selectedBook = null;
+    let myFriends = [];
+    let selectedBookTitle = "";
+
     let domeniiDisponibile = ["Science Fiction", "Fantasy", "Thriller", "Mister", "Romance", "Istorie", "Psihologie", "Dragoste"];
     let currentTraseuData = [];
 
     window.onload = function() {
-        document.getElementById('username-display').innerText = currentUser;
-        incarcaFiltre();
-        incarcaProfil();
-        deseneazaTBR();
+        document.getElementById('sidebar-user-name').innerText = currentUser;
+        document.getElementById('avatar-initial').innerText = currentUser.charAt(0).toUpperCase();
+
+        fetch('/api/carti/toate').then(r => r.json()).then(data => {
+            toateCartile = data;
+            incarcaProfil();
+        }).catch(e => { incarcaProfil(); });
+
+        incarcaPrieteni();
+        incarcaCereri();
+        incarcaNotificari(true);
+        incarcaFiltre(); // Încarcă opțiunile pentru listele dropdown
     };
 
     function schimbaEcran(numeEcran) {
-        const ecrane = ['profil', 'galerie', 'trasee', 'noutati', 'chat'];
+        const ecrane = ['profil', 'galerie', 'trasee', 'noutati', 'chat', 'notificari'];
         ecrane.forEach(e => {
             const div = document.getElementById('ecran-' + e);
-            const btn = document.getElementById('btn-' + e);
+            const nav = document.getElementById('nav-' + e);
+
             if (e === numeEcran) {
                 div.classList.remove('hidden');
-                div.classList.add('flex', 'opacity-100', 'z-10');
-                if(btn) btn.className = "text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 bg-black text-white shadow-md";
+                setTimeout(() => div.classList.remove('opacity-0'), 10);
+                div.classList.add('z-10');
+
+                if(nav && e !== 'notificari') nav.className = "flex items-center px-5 py-4 rounded-xl text-[#004c4c] font-extrabold translate-x-2 transition-transform bg-white shadow-sm border border-gray-200 cursor-pointer";
             } else {
-                div.classList.add('hidden');
-                div.classList.remove('flex', 'opacity-100', 'z-10');
-                if(btn) btn.className = "text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 text-gray-600 hover:bg-gray-100";
+                div.classList.add('opacity-0');
+                div.classList.remove('z-10');
+                setTimeout(() => div.classList.add('hidden'), 300);
+
+                if(nav && e !== 'notificari') nav.className = "flex items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer";
             }
         });
 
         if(numeEcran === 'trasee') incarcaTraseeSalvate();
+        if(numeEcran === 'notificari') incarcaNotificari(false);
+    }
 
-        if(numeEcran === 'noutati' && toateNoutatile.length === 0) {
-            incarcaNoutati();
+    // --- POPULARE LISTE DROPDOWN DIN AURADB ---
+    async function incarcaFiltre() {
+        try {
+            const res = await fetch('/api/carti/filtre-unice');
+            const filtre = await res.json();
+
+            const selectGen = document.getElementById('filtru-gen');
+            const genuriSortate = filtre.genuri.filter(g => g && g !== 'null').sort();
+            genuriSortate.forEach(g => {
+                selectGen.innerHTML += `<option value="${g}">${g}</option>`;
+            });
+
+            const selectAutor = document.getElementById('filtru-autor');
+            const autoriSortati = filtre.autori.filter(a => a && a !== 'null' && a !== 'Necunoscut').sort();
+            autoriSortati.forEach(a => {
+                selectAutor.innerHTML += `<option value="${a}">${a}</option>`;
+            });
+        } catch(e) { console.log("Eroare la preluarea filtrelor din baza de date", e); }
+    }
+
+    // --- MODUL SOCIAL: CERERI DE PRIETENIE & CONEXIUNI ---
+    async function cautaUtilizator() {
+        const query = document.getElementById('input-cauta-prieteni').value.trim();
+        const box = document.getElementById('rezultate-cautare');
+        if(query.length < 2) { box.classList.add('hidden'); return; }
+
+        try {
+            const res = await fetch(`/api/social/cauta-utilizatori?q=${encodeURIComponent(query)}&current=${encodeURIComponent(currentUser)}`);
+            const users = await res.json();
+
+            if(users.length === 0) {
+                box.innerHTML = `<div class="p-4 text-xs text-gray-500 font-medium text-center">Niciun utilizator găsit.</div>`;
+            } else {
+                box.innerHTML = users.map(u => `
+                    <div class="p-3 border-b border-gray-100 flex justify-between items-center hover:bg-gray-50 transition">
+                        <span class="text-sm font-bold text-[#004c4c]">${u}</span>
+                        <button onclick="trimiteCerere('${u}')" class="bg-white border border-[#004c4c] text-[#004c4c] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[#004c4c] hover:text-white transition">Trimite Cerere</button>
+                    </div>
+                `).join('');
+            }
+            box.classList.remove('hidden');
+        } catch(e) { box.classList.add('hidden'); }
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#input-cauta-prieteni') && !e.target.closest('#rezultate-cautare')) {
+            document.getElementById('rezultate-cautare').classList.add('hidden');
         }
+    });
+
+    async function trimiteCerere(receiver) {
+        try {
+            await fetch('/api/social/trimite-cerere', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({sender: currentUser, receiver: receiver})
+            });
+            document.getElementById('input-cauta-prieteni').value = "";
+            document.getElementById('rezultate-cautare').classList.add('hidden');
+            alert(`Sistem: Cererea a fost expediată către ${receiver}.`);
+        } catch(e) { alert("Eroare la expedierea cererii."); }
     }
 
-    // --- GALERIE ---
-    function incarcaFiltre() {
-        fetch('/api/carti/filtre-unice').then(r => r.json()).then(data => {
-            const sg = document.getElementById('filtru-gen');
-            const sa = document.getElementById('filtru-autor');
-            sg.innerHTML = '<option value="">Toate Genurile</option>';
-            sa.innerHTML = '<option value="">Toți Autorii</option>';
-            data.genuri.forEach(g => sg.innerHTML += `<option value="${g}">${g}</option>`);
-            data.autori.forEach(a => sa.innerHTML += `<option value="${a}">${a}</option>`);
-        }).catch(e => console.log("Eroare filtre."));
+    async function incarcaCereri() {
+        try {
+            const res = await fetch(`/api/social/cereri?username=${encodeURIComponent(currentUser)}`);
+            const cereri = await res.json();
+            const container = document.getElementById('container-cereri');
+            const list = document.getElementById('lista-cereri');
+
+            if(cereri.length > 0) {
+                container.classList.remove('hidden');
+                list.innerHTML = cereri.map(s => `
+                    <div class="flex justify-between items-center bg-white p-2 rounded-xl border border-[#004c4c]/20 shadow-sm">
+                        <span class="text-xs font-bold text-[#004c4c] truncate pl-2">${s}</span>
+                        <div class="flex gap-1 shrink-0">
+                           <button onclick="raspundeCerere('${s}', true)" class="bg-[#004c4c] text-white px-2 py-1 rounded-lg text-[10px] font-bold hover:bg-[#003333] transition">Accept</button>
+                           <button onclick="raspundeCerere('${s}', false)" class="bg-gray-100 text-gray-500 px-2 py-1 rounded-lg text-[10px] font-bold hover:bg-gray-200 transition">Ignor</button>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.classList.add('hidden');
+            }
+        } catch(e) {}
     }
 
-    async function filtreazaCarti() {
-        const container = document.getElementById('grila-carti');
-        const gen = document.getElementById('filtru-gen').value.toLowerCase();
-        const aut = document.getElementById('filtru-autor').value.toLowerCase();
-        container.innerHTML = "<div class='col-span-4 text-center py-20 animate-pulse text-indigo-600 font-bold'>Căutăm în baza de date...</div>";
+    async function raspundeCerere(sender, acceptat) {
+        try {
+            await fetch('/api/social/raspunde-cerere', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({sender: sender, receiver: currentUser, acceptat: acceptat})
+            });
+            incarcaCereri();
+            if(acceptat) incarcaPrieteni();
+        } catch(e) {}
+    }
 
-        if (toateCartile.length === 0) {
-            try {
-                const res = await fetch('/api/carti/toate');
-                toateCartile = await res.json();
-            } catch(e) {
-                container.innerHTML = "<div class='col-span-4 py-20 text-center text-red-500'>Eroare la încărcare cărți.</div>";
+    async function incarcaPrieteni() {
+        try {
+            const res = await fetch(`/api/social/prieteni?username=${encodeURIComponent(currentUser)}`);
+            myFriends = await res.json();
+            const list = document.getElementById('lista-prieteni');
+
+            if(myFriends.length === 0) {
+                list.innerHTML = `<li class="text-xs text-gray-400 font-medium italic">Niciun prieten adăugat.</li>`;
+            } else {
+                list.innerHTML = myFriends.map(f => `
+                    <li class="flex items-center gap-3 p-2 rounded-xl hover:bg-white transition border border-transparent hover:border-gray-200 hover:shadow-sm">
+                        <div class="w-8 h-8 rounded-full bg-[#004c4c]/10 flex items-center justify-center text-[#004c4c] font-bold text-xs shrink-0">${f.charAt(0).toUpperCase()}</div>
+                        <span class="text-sm font-bold text-gray-700 truncate">${f}</span>
+                    </li>
+                `).join('');
+            }
+        } catch(e) {}
+    }
+
+    function deschideModalRecomandare() {
+        if(myFriends.length === 0) {
+            alert("Sistem: Trebuie să accepți prieteni (din meniul stânga) pentru a face o recomandare.");
+            return;
+        }
+
+        selectedBookTitle = document.getElementById('modal-traseu-titlu').innerText;
+        document.getElementById('modal-carte-traseu').classList.add('hidden');
+
+        const select = document.getElementById('select-prieten-recomanda');
+        select.innerHTML = myFriends.map(f => `<option value="${f}">${f}</option>`).join('');
+        document.getElementById('mesaj-recomandare').value = "";
+
+        document.getElementById('modal-recomanda').classList.remove('hidden');
+    }
+
+    function inchideModalRecomandare() {
+        document.getElementById('modal-recomanda').classList.add('hidden');
+        document.getElementById('modal-carte-traseu').classList.remove('hidden');
+    }
+
+    async function executaTrimitereRecomandare() {
+        const receiver = document.getElementById('select-prieten-recomanda').value;
+        const mesaj = document.getElementById('mesaj-recomandare').value.trim();
+
+        try {
+            await fetch('/api/social/trimite-recomandare', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({sender: currentUser, receiver: receiver, titlu: selectedBookTitle, mesaj: mesaj})
+            });
+            inchideModalRecomandare();
+            alert(`Sistem: Recomandarea pentru lucrarea "${selectedBookTitle}" a fost expediată către ${receiver}.`);
+        } catch(e) { alert("Eroare la expediere."); }
+    }
+
+    async function incarcaNotificari(doarContor) {
+        try {
+            const res = await fetch(`/api/social/recomandari?username=${encodeURIComponent(currentUser)}`);
+            const recs = await res.json();
+
+            const badge = document.getElementById('badge-notificari');
+            if(recs.length > 0) {
+                badge.innerText = recs.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            if(doarContor) return;
+
+            const container = document.getElementById('lista-notificari');
+            if(recs.length === 0) {
+                container.innerHTML = `<div class="py-10 text-center text-gray-400 font-medium border-2 border-dashed border-gray-200 rounded-3xl bg-white/50 h-32 flex items-center justify-center">Cutia poștală este goală. Niciun mesaj nou.</div>`;
                 return;
             }
-        }
-        const filtrate = toateCartile.filter(c => {
-            const mG = !gen || (c.categorie && c.categorie.toLowerCase().includes(gen));
-            const mA = !aut || (c.autor && c.autor.toLowerCase().includes(aut));
-            return mG && mA;
-        });
-        deseneazaCarti(filtrate);
+
+            container.innerHTML = recs.map(r => {
+                const imgStr = `/api/carti/coperta?titlu=${encodeURIComponent(r.titlu)}`;
+                return `
+                <div class="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm flex flex-col md:flex-row gap-6">
+                    <img src="${imgStr}" class="w-full md:w-24 h-36 object-cover rounded-xl shadow-sm border border-gray-100 shrink-0 fade-in" onerror="this.src='https://placehold.co/150x220/f7fafc/004c4c?text=AuraDB'">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border border-blue-200">Recomandare Nouă</span>
+                            <span class="text-xs text-gray-400 font-bold">De la: <span class="text-[#004c4c]">${r.sender}</span></span>
+                        </div>
+                        <h3 class="text-xl font-extrabold font-manrope text-[#004c4c] mb-3">${r.titlu}</h3>
+                        ${r.mesaj ? `<div class="bg-[#f8fbfb] border-l-4 border-[#004c4c] p-4 rounded-r-xl text-sm text-gray-700 italic font-medium">"${r.mesaj}"</div>` : ''}
+                    </div>
+                    <div class="flex flex-col gap-3 justify-center w-full md:w-48 shrink-0">
+                        <button onclick="adaugaTBRDinRecomandare('${r.titlu.replace(/'/g, "\\'")}', '${r.id}')" class="py-3 bg-[#004c4c] text-white rounded-xl font-bold hover:bg-[#003333] transition shadow-md text-sm w-full">Adaugă în TBR</button>
+                        <button onclick="stergeNotificare('${r.id}')" class="py-3 bg-white border border-gray-200 text-gray-600 rounded-xl font-bold hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition shadow-sm text-sm w-full">Șterge Mesajul</button>
+                    </div>
+                </div>
+            `}).join('');
+
+        } catch(e) {}
     }
 
-    function deseneazaCarti(lista) {
-        const g = document.getElementById('grila-carti');
-        g.innerHTML = "";
-        lista.forEach(c => {
-            g.innerHTML += `
-                <div onclick="deschideModalDinLista('${c.titlu.replace(/'/g, "\\'")}')" class="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group flex flex-col">
-                    <div class="h-64 overflow-hidden bg-gray-50 flex-shrink-0">
-                        <img src="${c.imagine}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" onerror="this.src='https://placehold.co/300x450?text=Coperta'">
-                    </div>
-                    <div class="p-4 flex-1 flex flex-col">
-                        <span class="text-[10px] font-bold text-indigo-500 uppercase">${c.categorie || 'General'}</span>
-                        <h3 class="font-bold text-gray-900 leading-tight truncate mt-1">${c.titlu}</h3>
-                        <p class="text-xs text-gray-500 mt-1 truncate">${c.autor}</p>
-                    </div>
-                </div>`;
-        });
+    async function adaugaTBRDinRecomandare(titlu, idRecomandare) {
+        adaugaTBR(titlu, "Recomandat de un prieten");
+        await stergeNotificare(idRecomandare);
     }
 
-    // --- AGENT AI (CHAT) ---
+    async function stergeNotificare(id) {
+        try {
+            await fetch('/api/social/sterge-recomandare', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({id: id})
+            });
+            incarcaNotificari(false);
+        } catch(e) {}
+    }
+
     async function trimiteMesajChat() {
         const inp = document.getElementById('chat-input');
         const t = inp.value.trim();
         if(!t) return;
         const box = document.getElementById('chat-messages');
 
-        if(chatIstoric.length === 0) box.innerHTML = "";
+        box.innerHTML += `
+            <div class="flex flex-col items-end max-w-4xl ml-auto w-full mb-2 mt-4">
+                <div class="flex items-center gap-3 mb-2 px-1">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Tu</span>
+                </div>
+                <div class="bg-[#004c4c] p-6 rounded-2xl rounded-tr-none shadow-md">
+                    <p class="text-white font-manrope font-medium leading-relaxed">${t}</p>
+                </div>
+            </div>`;
 
-        box.innerHTML += `<div class="max-w-[80%] p-4 rounded-2xl bg-black text-white self-end mb-2 shadow-sm">${t}</div>`;
         chatIstoric.push({sender:'user', text:t});
         inp.value = "";
         box.scrollTop = box.scrollHeight;
 
         const idLoader = 'loader-' + Date.now();
-        box.innerHTML += `<div id="${idLoader}" class="max-w-[85%] p-4 rounded-2xl bg-gray-100 text-gray-500 self-start mb-4 border border-gray-200 animate-pulse">Agentul scrie...</div>`;
+        box.innerHTML += `
+            <div id="${idLoader}" class="flex flex-col items-start max-w-4xl mr-auto w-full mb-4">
+                <div class="bg-white p-5 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 flex items-center gap-3 typing-indicator">
+                    <span class="text-[#004c4c] font-bold text-xs uppercase tracking-wider font-manrope mr-2">Procesare Analitică</span>
+                    <span></span><span></span><span></span>
+                </div>
+            </div>`;
         box.scrollTop = box.scrollHeight;
 
-        const res = await fetch('/api/agent/experti-smart', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:currentUser, mesaj:t, istoric:chatIstoric})});
-        const rawAiText = await res.text();
+        try {
+            const res = await fetch('/api/agent/experti-smart', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({username:currentUser, mesaj:t, istoric:chatIstoric})
+            });
+            const rawAiText = await res.text();
+            document.getElementById(idLoader).remove();
 
-        document.getElementById(idLoader).remove();
+            const regexCarte = /\[CARTE:\s*(.*?)\s*\|\s*(.*?)\s*\]/g;
+            let aiTextFormatat = rawAiText.replace(regexCarte, (match, titlu, autor) => {
+                const cleanTitlu = titlu.replace(/'/g, "\\'").trim();
+                const cleanAutor = autor.replace(/'/g, "\\'").trim();
+                return `
+                    <div class="mt-6 mb-4 p-6 bg-white border border-[#004c4c]/20 rounded-2xl shadow-sm text-sm inline-block w-full">
+                        <div class="font-extrabold font-manrope text-[#004c4c] mb-1 text-xl">${titlu}</div>
+                        <div class="font-medium text-gray-500 text-sm italic mb-4">de ${autor}</div>
+                        <div class="flex gap-3 flex-wrap border-t border-gray-100 pt-4">
+                            <button onclick="adaugaTBR('${cleanTitlu}', '${cleanAutor}')" class="bg-[#004c4c] text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-[#003333] transition shadow-sm">Adaugă în Listă</button>
+                            <button onclick="deschideModalCarteDinChat('${cleanTitlu}', '${cleanAutor}')" class="bg-[#f7fafc] border border-gray-200 text-gray-700 px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-gray-100 transition shadow-sm">Detalii AI</button>
+                        </div>
+                    </div>`;
+            });
 
-        const regexCarte = /\[CARTE:\s*(.*?)\s*\|\s*(.*?)\s*\]/g;
-        let aiTextFormatat = rawAiText.replace(regexCarte, (match, titlu, autor) => {
-            const cleanTitlu = titlu.replace(/'/g, "\\'").trim();
-            const cleanAutor = autor.replace(/'/g, "\\'").trim();
-            return `
-                <div class="mt-4 p-4 bg-white border border-indigo-100 rounded-xl shadow-sm text-sm inline-block w-full">
-                    <div class="font-bold text-indigo-900 mb-1 text-base">📖 ${titlu} <span class="font-normal text-gray-500 text-sm">de ${autor}</span></div>
-                    <div class="flex gap-2 mt-3 flex-wrap">
-                        <button onclick="adaugaTBR('${cleanTitlu}', '${cleanAutor}')" class="bg-indigo-600 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-indigo-700 transition shadow-sm">➕ O vreau (TBR)</button>
-                        <button onclick="cautaPeNet('${cleanTitlu}', '${cleanAutor}')" class="bg-white border border-gray-200 text-gray-700 px-3 py-2 rounded-lg text-xs font-bold hover:bg-gray-50 transition shadow-sm">🔍 Caută pe Net</button>
+            aiTextFormatat = aiTextFormatat.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#004c4c] font-extrabold">$1</strong>');
+            aiTextFormatat = aiTextFormatat.replace(/(.*?)(?=\n|$)/g, '<div class="mt-3 bg-[#FCFAF2] p-4 rounded-xl border-l-4 border-[#004c4c] text-sm text-gray-800 shadow-sm font-medium"><span class="font-extrabold text-[#004c4c] uppercase tracking-wider text-[10px] block mb-1">Argumentație Logică</span>$1</div>');
+
+            box.innerHTML += `
+                <div class="flex flex-col items-start max-w-4xl mr-auto w-full mb-4">
+                    <div class="flex items-center gap-3 mb-2 px-1">
+                        <span class="text-xs font-bold text-[#004c4c] uppercase tracking-wider">Agent AI</span>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl rounded-tl-none shadow-[0px_8px_24px_rgba(0,76,76,0.05)] border border-gray-100">
+                        <div class="text-gray-800 font-manrope leading-relaxed font-medium whitespace-pre-wrap">${aiTextFormatat}</div>
+                    </div>
+                </div>`;
+
+            chatIstoric.push({sender:'ai', text:rawAiText});
+            box.scrollTop = box.scrollHeight;
+        } catch (e) {
+            document.getElementById(idLoader).remove();
+            box.innerHTML += `<div class="text-red-500 font-bold p-4 text-sm">Eroare de conexiune cu serverul.</div>`;
+        }
+    }
+
+    // ============================================================
+    // AICI E FUNCȚIA DE CĂUTARE PENTRU MENIUL DROPDOWN
+    // ============================================================
+    async function filtreazaCarti() {
+        const container = document.getElementById('grila-carti');
+        const subiect = document.getElementById('filtru-gen').value.toLowerCase().trim();
+        const autor = document.getElementById('filtru-autor').value.toLowerCase().trim();
+
+        if (!subiect && !autor) {
+            container.innerHTML = "<col-span-4 py-20 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-3xl font-medium'>Selectează o categorie sau un autor pentru a explora colecția.</div>";
+            return;
+        }
+
+        container.innerHTML = "<div class='col-span-4 text-center py-20 animate-pulse text-[#004c4c] font-bold text-lg'>Se caută în colecție...</div>";
+
+        try {
+            if (toateCartile.length === 0) {
+                const res = await fetch('/api/carti/toate');
+                toateCartile = await res.json();
+            }
+
+            const eliminaDiacritice = (str) => {
+                if (!str) return "";
+                return str.toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+            };
+
+            const subLower = eliminaDiacritice(subiect);
+            const autLower = eliminaDiacritice(autor);
+
+            const filtrate = toateCartile.filter(c => {
+                const catStr = eliminaDiacritice(getSafeStr(c.categorie));
+                const autStr = eliminaDiacritice(getSafeStr(c.autor));
+                const tagStr = eliminaDiacritice(getSafeStr(c.taguri));
+
+                let matchSubiect = false;
+                if (subLower !== "") {
+                    // CAUTĂ STRICT ÎN CATEGORIE SAU CUVINTE CHEIE (TAGS)
+                    matchSubiect = catStr.includes(subLower) || tagStr.includes(subLower);
+                }
+
+                let matchAutor = false;
+                if (autLower !== "") {
+                    // CAUTĂ STRICT DUPĂ AUTOR
+                    matchAutor = autStr.includes(autLower);
+                }
+
+                if (subLower !== "" && autLower !== "") {
+                    return matchSubiect || matchAutor;
+                } else if (subLower !== "") {
+                    return matchSubiect;
+                } else if (autLower !== "") {
+                    return matchAutor;
+                }
+                return false;
+            });
+
+            if (filtrate.length === 0) {
+                container.innerHTML = "<div class='col-span-4 py-20 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-3xl font-medium'>Nicio carte găsită pentru criteriile acestea.</div>";
+                return;
+            }
+
+            deseneazaCarti(filtrate);
+        } catch (error) {
+            container.innerHTML = "<div class='col-span-4 py-20 text-center text-red-500 font-bold'>Eroare la filtrare.</div>";
+        }
+    }
+
+    function deseneazaCarti(lista) {
+        const g = document.getElementById('grila-carti'); g.innerHTML = "";
+        lista.forEach(c => {
+            const titluSafe = getSafeStr(c.titlu) || "Necunoscut";
+            const autorSafe = getSafeStr(c.autor) || "Necunoscut";
+            const catSafe = getSafeStr(c.categorie) || "General";
+
+            const imgStr = `/api/carti/coperta?titlu=${encodeURIComponent(titluSafe)}&autor=${encodeURIComponent(autorSafe)}`;
+            g.innerHTML += `
+                <div onclick="deschideModalDinLista('${titluSafe.replace(/'/g, "\\'")}')" class="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group flex flex-col">
+                    <div class="h-64 overflow-hidden bg-gray-50 flex-shrink-0 relative">
+                        <img src="${imgStr}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700 fade-in" onerror="this.src='https://placehold.co/300x450/f7fafc/004c4c?text=AuraDB'">
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <span class="text-[10px] font-extrabold text-[#004c4c] uppercase tracking-widest">${catSafe}</span>
+                        <h3 class="font-extrabold font-manrope text-gray-900 leading-tight mt-3 line-clamp-2 text-lg">${titluSafe}</h3>
+                        <p class="text-sm text-gray-500 mt-2 truncate font-medium">de ${autorSafe}</p>
                     </div>
                 </div>`;
         });
-
-        box.innerHTML += `<div class="max-w-[85%] p-4 rounded-2xl bg-white text-gray-800 self-start mb-4 border border-gray-200 leading-relaxed shadow-sm">${aiTextFormatat.replace(/\n/g, '<br>')}</div>`;
-        chatIstoric.push({sender:'ai', text:rawAiText});
-        box.scrollTop = box.scrollHeight;
     }
 
-    // --- NOUTĂȚI INTERNET (AUTO LOAD - CORECTAT „LUNA CURENTĂ”) ---
-    async function incarcaNoutati() {
+    async function cautaNoutatiPersonalizate() {
+        const input = document.getElementById('input-cauta-noutati').value.trim();
+        if(!input) { alert("Te rog să introduci un autor sau un subiect!"); return; }
+
         const g = document.getElementById('grila-noutati');
-        g.className = "flex flex-col gap-8 pb-10";
-        g.innerHTML = `<div class="py-20 text-center"><div class="inline-block animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-black mb-4"></div><p class="text-gray-600 font-serif italic text-lg">Se aduc cele mai proaspete lansări din ultima lună...</p></div>`;
+        g.className = "flex flex-col gap-10 pb-10";
+        g.innerHTML = `<div class="py-20 text-center"><div class="inline-block animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-[#004c4c] mb-6"></div><p class="text-[#004c4c] font-manrope font-bold text-lg">Se caută recomandări pentru: ${input}...</p></div>`;
 
         try {
-            const res = await fetch('/api/carti/noutati-internet', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({interese: myTags})
+            const res = await fetch('/api/carti/noutati-personalizate', {
+                method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({subiect: input})
             });
-
             const textRaw = await res.text();
             const jsonCurat = textRaw.substring(textRaw.indexOf('['), textRaw.lastIndexOf(']') + 1);
             const categorii = JSON.parse(jsonCurat);
 
-            toateNoutatile = [];
-            g.innerHTML = "";
+            toateNoutatile = []; g.innerHTML = "";
 
             categorii.forEach(cat => {
                 let cartiHtml = cat.carti.map(c => {
                     toateNoutatile.push(c);
+                    const imgStr = `/api/carti/coperta?titlu=${encodeURIComponent(c.titlu)}&autor=${encodeURIComponent(c.autor)}`;
                     return `
-                        <div onclick="deschideModalNoutati('${c.titlu.replace(/'/g, "\\'")}')" class="w-28 sm:w-32 flex flex-col group cursor-pointer hover:opacity-80 transition">
-                            <img src="${c.imagine}" class="w-full h-44 sm:h-48 object-cover shadow-sm group-hover:shadow-md transition border border-gray-200" onerror="this.src='https://placehold.co/150x220?text=Cover'">
-                            <p class="text-[11px] font-bold text-indigo-900 mt-2 leading-tight line-clamp-2 group-hover:underline">${c.titlu}</p>
-                            <p class="text-[10px] text-gray-500 mt-1 truncate">${c.autor}</p>
+                        <div onclick="deschideModalNoutati('${c.titlu.replace(/'/g, "\\'")}')" class="w-32 sm:w-40 flex flex-col group cursor-pointer hover:-translate-y-2 transition-transform duration-300">
+                            <img src="${imgStr}" class="w-full h-48 sm:h-60 object-cover rounded-xl shadow-md group-hover:shadow-xl transition-shadow border border-gray-200 fade-in" onerror="this.src='https://placehold.co/150x220/f7fafc/004c4c?text=AuraDB'">
+                            <p class="text-sm font-extrabold font-manrope text-[#004c4c] mt-4 leading-tight line-clamp-2 group-hover:text-[#006666]">${c.titlu}</p>
+                            <p class="text-[11px] text-gray-500 mt-1 truncate font-medium">de ${c.autor}</p>
                         </div>`;
                 }).join('');
 
-                const lowercaseClass = cat.gen.includes('Recomandări') ? '' : 'lowercase';
-
                 g.innerHTML += `
-                        <div class="flex flex-col md:flex-row gap-6 border-b border-gray-100 pb-8">
-                            <div class="w-full md:w-1/5 pt-2">
-                                <h3 class="text-lg font-serif italic text-gray-800 border-b-2 border-gray-800 inline-block pb-1 ${lowercaseClass}">${cat.gen}</h3>
+                        <div class="flex flex-col lg:flex-row gap-8 border-b border-gray-200 pb-12 bg-white p-8 rounded-3xl shadow-sm mt-4">
+                            <div class="w-full lg:w-1/4 pt-2">
+                                <h3 class="text-2xl font-extrabold font-manrope text-gray-900">${cat.gen}</h3>
+                                <p class="text-xs text-gray-400 mt-3 font-medium uppercase tracking-wider leading-relaxed">Rezultate generate inteligent prin intermediul inteligenței artificiale.</p>
                             </div>
-                            <div class="w-full md:w-4/5 flex flex-wrap gap-4 sm:gap-6">
-                                ${cartiHtml}
-                            </div>
+                            <div class="w-full lg:w-3/4 flex flex-wrap gap-6 sm:gap-8">${cartiHtml}</div>
                         </div>`;
             });
-        } catch(e) {
-            g.innerHTML = `<div class='text-center py-20 text-red-500 font-bold'>Eroare la procesarea lansărilor. Încearcă să reîncarci pagina.</div>`;
-        }
+        } catch(e) { g.innerHTML = `<div class='text-center py-20 text-red-500 font-bold'>Eroare de procesare. Reîncercați căutarea.</div>`; }
     }
 
-    // --- TRASEE INTERACTIVE (COMPLET REFĂCUT) ---
     async function incarcaTraseeSalvate() {
-        const res = await fetch('/api/trasee/salvate');
-        const data = await res.json();
-        const l = document.getElementById('lista-trasee-salvate');
-        l.innerHTML = data.map(t => `<li onclick="incarcaTraseuExistent('${t}')" class="p-3 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-black hover:text-white hover:border-black cursor-pointer transition shadow-sm">📌 ${t}</li>`).join('');
+        const res = await fetch('/api/trasee/salvate'); const data = await res.json();
+        document.getElementById('lista-trasee-salvate').innerHTML = data.map(t => `<li onclick="incarcaTraseuExistent('${t}')" class="p-4 bg-[#f7fafc] border border-gray-200 rounded-xl text-sm font-bold text-[#004c4c] hover:bg-[#004c4c] hover:text-white cursor-pointer transition shadow-sm mb-3 text-center">${t}</li>`).join('');
     }
 
     async function incarcaTraseuExistent(s) {
-        document.getElementById('rezultat-traseu').innerHTML = "<div class='text-center py-20 animate-spin text-4xl text-gray-300'>⌛</div>";
+        document.getElementById('rezultat-traseu').innerHTML = "<div class='text-center py-20 text-[#004c4c] font-bold animate-pulse'>Se descarcă structura detaliată...</div>";
         const res = await fetch(`/api/agent/traseu-salvat?subiect=${encodeURIComponent(s)}`);
-        currentTraseuData = JSON.parse(await res.text());
-        renderTraseuInitial();
+        currentTraseuData = JSON.parse(await res.text()); renderTraseuInitial();
     }
 
     async function genereazaTraseu() {
-        const s = document.getElementById('input-traseu').value.trim();
-        const e = document.getElementById('input-etape').value;
-        if(!s) { alert("Introdu un domeniu sau subiect!"); return; }
-
-        document.getElementById('rezultat-traseu').innerHTML = "<div class='py-20 text-center'><div class='inline-block animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-black mb-4'></div><p class='text-gray-600 font-bold'>Agentul structurează planul de lectură...</p></div>";
-
+        const s = document.getElementById('input-traseu').value.trim(); const e = document.getElementById('input-etape').value;
+        if(!s) { alert("Introdu un domeniu sau subiect."); return; }
+        document.getElementById('rezultat-traseu').innerHTML = "<div class='py-20 text-center bg-white rounded-3xl border border-gray-200 shadow-sm'><div class='inline-block animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-[#004c4c] mb-6'></div><p class='text-[#004c4c] font-bold text-lg'>Sistemul construiește planul analitic...</p></div>";
         try {
-            const res = await fetch('/api/agent/traseu-nou', {
-                method: 'POST',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({subiect: s, etape: e, stieBaze: "false"})
-            });
-            currentTraseuData = await res.json();
-            renderTraseuInitial();
-            incarcaTraseeSalvate();
-        } catch(err) {
-            document.getElementById('rezultat-traseu').innerHTML = "<div class='py-20 text-center text-red-500 font-bold'>Eroare la generarea traseului. Reîncearcă.</div>";
-        }
+            const res = await fetch('/api/agent/traseu-nou', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({subiect: s, etape: e, stieBaze: "false", username: currentUser}) });
+            currentTraseuData = await res.json(); renderTraseuInitial(); incarcaTraseeSalvate();
+        } catch(err) { document.getElementById('rezultat-traseu').innerHTML = "<div class='py-20 text-center text-red-500 font-bold'>Eroare de generare.</div>"; }
     }
 
     function renderTraseuInitial() {
         if (!currentTraseuData || currentTraseuData.length === 0) return;
-
         let html = renderEtapaHtml(currentTraseuData[0], 1);
-
         if (currentTraseuData.length > 1) {
-            html += `
-            <div id="bloc-intrebare-baze" class="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl mb-8 text-center shadow-sm relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
-                <h4 class="font-bold text-indigo-900 mb-4">Ai citit deja cartea de bază recomandată mai sus?</h4>
-                <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <button onclick="dezvaluieRestulTraseului('da')" class="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition shadow-md flex-1 sm:flex-none">Da, arată-mi ce urmează</button>
-                    <button onclick="dezvaluieRestulTraseului('nu')" class="px-6 py-3 bg-white text-indigo-600 border border-indigo-200 font-bold rounded-xl hover:bg-indigo-50 transition shadow-sm flex-1 sm:flex-none">Nu, vreau să încep cu ea</button>
-                </div>
-            </div>
-            `;
+            html += `<div id="bloc-intrebare-baze" class="bg-[#f8fbfb] border border-[#004c4c]/20 p-8 rounded-3xl mb-10 text-center shadow-sm relative overflow-hidden"><div class="absolute top-0 left-0 w-2 h-full bg-[#004c4c]"></div><h4 class="font-extrabold font-manrope text-[#004c4c] text-xl mb-6">Ai parcurs deja lectura fundamentală menționată anterior?</h4><div class="flex flex-col sm:flex-row justify-center gap-4"><button onclick="dezvaluieRestulTraseului('da')" class="px-8 py-4 bg-[#004c4c] text-white font-bold rounded-xl hover:bg-[#003333] transition shadow-md flex-1 sm:flex-none">Confirm parcurgerea</button><button onclick="dezvaluieRestulTraseului('nu')" class="px-8 py-4 bg-white text-[#004c4c] border border-gray-200 font-bold rounded-xl hover:bg-gray-50 transition shadow-sm flex-1 sm:flex-none">Doresc să încep cu ea</button></div></div>`;
         }
-
         html += `<div id="restul-etapelor-traseu" class="hidden opacity-0 transition-opacity duration-500">`;
-        for(let i = 1; i < currentTraseuData.length; i++) {
-            html += renderEtapaHtml(currentTraseuData[i], i + 1);
-        }
-        html += `</div>`;
-
-        document.getElementById('rezultat-traseu').innerHTML = html;
+        for(let i = 1; i < currentTraseuData.length; i++) { html += renderEtapaHtml(currentTraseuData[i], i + 1); }
+        html += `</div>`; document.getElementById('rezultat-traseu').innerHTML = html;
     }
 
     function dezvaluieRestulTraseului(raspuns) {
-        const blocIntrebare = document.getElementById('bloc-intrebare-baze');
-        const containerRest = document.getElementById('restul-etapelor-traseu');
-
-        if(raspuns === 'da') {
-            blocIntrebare.innerHTML = `<div class="text-green-700 font-bold text-lg flex items-center justify-center gap-2">✅ Perfect! Sărim peste baze și trecem la nivelul următor:</div>`;
-            blocIntrebare.className = "bg-green-50 border border-green-100 p-4 rounded-2xl mb-8 text-center shadow-sm";
-        } else {
-            blocIntrebare.innerHTML = `<div class="text-indigo-800 font-bold text-lg flex items-center justify-center gap-2">💡 Decizie excelentă! Începe cu recomandarea de bază, apoi continuă cu:</div>`;
-        }
-
-        containerRest.classList.remove('hidden');
-        setTimeout(() => containerRest.classList.remove('opacity-0'), 50);
+        const blocIntrebare = document.getElementById('bloc-intrebare-baze'); const containerRest = document.getElementById('restul-etapelor-traseu');
+        if(raspuns === 'da') { blocIntrebare.innerHTML = `<div class="text-[#004c4c] font-bold text-lg flex items-center justify-center">Alegere confirmată. Trecem la nivelul avansat.</div>`; blocIntrebare.className = "bg-[#FCFAF2] border border-gray-200 p-6 rounded-2xl mb-8 text-center shadow-sm"; }
+        else { blocIntrebare.innerHTML = `<div class="text-[#004c4c] font-bold text-lg flex items-center justify-center">Baza este esențială. Parcurge prima etapă, apoi continuă cu:</div>`; }
+        containerRest.classList.remove('hidden'); setTimeout(() => containerRest.classList.remove('opacity-0'), 50);
     }
 
     function renderEtapaHtml(e, index) {
-        return `
-            <div class="relative pl-12 mb-8">
-                <div class="absolute left-0 top-0 w-8 h-8 bg-black text-white font-bold rounded-full flex items-center justify-center text-sm shadow-md">${index}</div>
-                <h4 class="font-bold text-gray-400 text-[10px] mb-1 uppercase tracking-widest">${e.nivel}</h4>
-                <h5 class="text-xl font-bold mb-2 text-gray-900">${e.titlu_etapa}</h5>
-                <p class="text-sm text-gray-600 mb-5 leading-relaxed">${e.descriere}</p>
-                <h6 class="text-[10px] font-bold text-indigo-500 mb-3 tracking-widest uppercase">Cărți Recomandate:</h6>
-                <div class="space-y-3">
-                    ${e.carti.map(c => `
-                        <div onclick="deschideDetaliiTraseu('${c.titlu.replace(/'/g, "\\'")}', '${c.autor.replace(/'/g, "\\'")}', '${c.imagine_generata || 'https://placehold.co/150x220?text=Cover'}')" class="bg-[#1e1e1e] p-4 rounded-2xl flex items-center gap-4 cursor-pointer hover:bg-black transition group shadow-md border border-gray-800">
-                            <img src="${c.imagine_generata || 'https://placehold.co/150x220?text=Cover'}" referrerpolicy="no-referrer" class="w-10 h-14 object-cover rounded shadow border border-gray-700 group-hover:scale-105 transition">
-                            <div class="flex-1">
-                                <b class="text-sm md:text-base block text-gray-100 group-hover:text-white transition">${c.titlu}</b>
-                                <span class="text-xs text-gray-500 font-medium">${c.autor}</span>
-                            </div>
-                            <div class="text-gray-600 group-hover:text-white transition text-xl px-2">›</div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>`;
+        return `<div class="relative pl-16 mb-10"><div class="absolute left-0 top-0 w-12 h-12 bg-[#004c4c] text-white font-black rounded-full flex items-center justify-center text-xl shadow-md border-4 border-white z-10">${index}</div><div class="absolute left-6 top-12 bottom-[-2.5rem] w-1 bg-gray-100 -z-10 rounded-full"></div><div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm hover:shadow-md transition"><h4 class="font-black text-gray-400 text-[10px] mb-2 uppercase tracking-widest">${e.nivel}</h4><h5 class="text-2xl font-extrabold font-manrope mb-3 text-gray-900">${e.titlu_etapa}</h5><p class="text-sm text-gray-600 mb-8 leading-relaxed font-medium">${e.descriere}</p><h6 class="text-[10px] font-black text-[#004c4c] mb-4 tracking-widest uppercase border-b border-gray-100 pb-2">Materiale Recomandate</h6><div class="space-y-4">${e.carti.map(c => {
+            let safeTitlu = c.titlu.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            let safeAutor = c.autor.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            let imgStr = `/api/carti/coperta?titlu=${encodeURIComponent(c.titlu)}&autor=${encodeURIComponent(c.autor)}`;
+            return `<div onclick="deschideModalDinTraseu('${safeTitlu}', '${safeAutor}')" class="bg-[#f8fbfb] p-5 rounded-2xl flex items-center gap-5 cursor-pointer hover:bg-[#004c4c] hover:border-[#004c4c] transition-all duration-300 group shadow-sm border border-gray-200"><div class="w-12 h-16 bg-gray-200 rounded-lg shadow-sm border border-gray-200 group-hover:border-transparent transition flex items-center justify-center text-[10px] text-gray-400 font-bold uppercase overflow-hidden"><img src="${imgStr}" alt="cover" class="w-full h-full object-cover fade-in"></div><div class="flex-1"><b class="text-base block text-[#004c4c] group-hover:text-white transition font-manrope font-extrabold mb-1">${c.titlu}</b><span class="text-xs text-gray-500 font-bold uppercase tracking-wider group-hover:text-gray-200 transition">de ${c.autor}</span></div><div class="text-[#004c4c] group-hover:text-white transition text-2xl px-2 font-light">›</div></div>`;
+        }).join('')}</div></div></div>`;
     }
 
-    // --- FUNCȚII MODAL SPECIAL PENTRU TRASEE (CORECTAT MEMGRAPH) ---
-    async function deschideDetaliiTraseu(titlu, autor, pozaUrl) {
-        const modal = document.getElementById('modal-carte-traseu');
-        modal.classList.remove('hidden');
+    function incarcaProfil() { fetch(`/api/utilizator/profil?username=${currentUser}`).then(r => r.json()).then(data => { myTags = data.tags || []; myBooks = data.books || []; myBooks = myBooks.filter(b => b.title !== 'null' && b.title !== null && b.title !== ''); myTags.forEach(t => { if(!domeniiDisponibile.includes(t)) domeniiDisponibile.push(t); }); deseneazaTaxonomie(); deseneazaCartiCitite(); deseneazaTBR(); }).catch(e => console.log("Eroare profil.")); }
+    function deseneazaTaxonomie() { document.getElementById('lista-taxonomie').innerHTML = domeniiDisponibile.map(d => `<button onclick="toggleTag('${d}')" class="px-5 py-2.5 rounded-xl border text-xs font-bold transition-all shadow-sm ${myTags.includes(d) ? 'bg-[#004c4c] text-white border-[#004c4c]' : 'bg-white text-gray-500 hover:border-gray-400'}">${d}</button>`).join(''); }
+    function toggleTag(d) { myTags.includes(d) ? myTags = myTags.filter(t => t!==d) : myTags.push(d); deseneazaTaxonomie(); }
+    function adaugaDomeniuNou() { const i = document.getElementById('input-domeniu-nou'); if(!i.value) return; domeniiDisponibile.push(i.value); myTags.push(i.value); deseneazaTaxonomie(); i.value = ""; }
+    async function salveazaTaxonomie() { await fetch('/api/utilizator/salveaza-interese', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:currentUser, interese:myTags})}); alert("Sistem: Preferințe stocate în AuraDB."); }
 
+    function deseneazaCartiCitite() {
+        const container = document.getElementById('lista-carti-citite');
+        if(!container) return;
+
+        const validBooks = myBooks.filter(b => {
+            const t = b.titlu || b.title;
+            return t && t !== 'null' && t.trim() !== '';
+        });
+
+        if(validBooks.length === 0) {
+            container.innerHTML = "<div class='col-span-full text-sm text-gray-400 font-medium py-4 flex items-center justify-center border-2 border-dashed border-gray-200 rounded-2xl h-32'>Nu ai adăugat nicio carte.</div>";
+            return;
+        }
+
+        container.innerHTML = validBooks.map(b => {
+            const titlu = getSafeStr(b.titlu || b.title) || "Necunoscut";
+            const autor = getSafeStr(b.autor || b.author) || "Necunoscut";
+            const safeTitlu = titlu.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const safeAutor = autor.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+            const imgStr = `/api/carti/coperta?titlu=${encodeURIComponent(titlu)}&autor=${encodeURIComponent(autor)}`;
+
+            return `
+            <div class="relative group flex flex-col cursor-pointer hover:-translate-y-1 transition-transform duration-200 bg-white border border-gray-100 p-3 rounded-2xl shadow-sm hover:shadow-md">
+                <button onclick="event.stopPropagation(); stergeLectura('${safeTitlu}')" class="absolute -top-2 -right-2 bg-white text-red-500 hover:bg-red-500 hover:text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10 border border-gray-200">X</button>
+                <img onclick="deschideModalCarteDinListaPersonala('${safeTitlu}', '${safeAutor}')" src="${imgStr}" class="w-full h-32 object-cover rounded-xl shadow-sm border border-gray-100 mb-3 fade-in" onerror="this.src='https://placehold.co/150x220/f7fafc/004c4c?text=AuraDB'">
+                <div class="w-full" onclick="deschideModalCarteDinListaPersonala('${safeTitlu}', '${safeAutor}')">
+                    <p class="text-xs font-extrabold font-manrope text-[#004c4c] leading-tight line-clamp-2">${titlu}</p>
+                    <p class="text-[10px] text-gray-500 mt-1 truncate font-medium">de ${autor}</p>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    async function adaugaCarteCitita() {
+        const inputT = document.getElementById('input-citita-titlu');
+        const inputA = document.getElementById('input-citita-autor');
+        const t = inputT.value.trim();
+        const a = inputA.value.trim() || 'Necunoscut';
+
+        if(!t) { alert("Te rog să introduci un titlu!"); return; }
+
+        inputT.value = "";
+        inputA.value = "";
+
+        myBooks.push({title: t, author: a});
+        deseneazaCartiCitite();
+
+        try {
+            await fetch('/api/utilizator/adauga-lectura', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({username:currentUser, titlu:t, autor:a})
+            });
+        } catch(e) {}
+    }
+
+    async function stergeLectura(t) {
+        myBooks = myBooks.filter(b => (b.titlu || b.title) !== t);
+        deseneazaCartiCitite();
+        try {
+            await fetch('/api/utilizator/sterge-lectura', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:currentUser, titlu:t})});
+        } catch(e){}
+    }
+
+    function deseneazaTBR() {
+        const container = document.getElementById('lista-carti-tbr');
+        const counter = document.getElementById('tbr-count');
+        if(!container) return;
+
+        const validTBR = myTBR.filter(b => {
+            const t = b.titlu || b.title;
+            return t && t !== 'null' && t.trim() !== '';
+        });
+
+        if (counter) counter.innerText = validTBR.length === 1 ? '1 carte' : validTBR.length + ' cărți';
+
+        if(validTBR.length === 0) {
+            container.innerHTML = "<div class='col-span-full text-sm text-gray-400 font-medium py-4 flex items-center justify-center border-2 border-dashed border-[#004c4c]/20 rounded-2xl h-32'>Lista ta TBR este goală.</div>";
+            return;
+        }
+
+        container.innerHTML = validTBR.map(b => {
+            const titlu = getSafeStr(b.titlu || b.title) || "Necunoscut";
+            const autor = getSafeStr(b.autor || b.author) || "Necunoscut";
+            const safeTitlu = titlu.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const safeAutor = autor.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+            const imgStr = `/api/carti/coperta?titlu=${encodeURIComponent(titlu)}&autor=${encodeURIComponent(autor)}`;
+
+            return `
+            <div class="relative group flex flex-col cursor-pointer hover:-translate-y-1 transition-transform duration-200 bg-white border border-gray-100 p-3 rounded-2xl shadow-sm hover:shadow-md">
+                <button onclick="event.stopPropagation(); stergeTBR('${safeTitlu}')" class="absolute -top-2 -right-2 bg-white text-red-500 hover:bg-red-500 hover:text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-10 border border-gray-200">X</button>
+                <img onclick="deschideModalCarteDinListaPersonala('${safeTitlu}', '${safeAutor}')" src="${imgStr}" class="w-full h-32 object-cover rounded-xl shadow-sm border border-gray-100 mb-3 fade-in" onerror="this.src='https://placehold.co/150x220/f7fafc/004c4c?text=AuraDB'">
+                <div class="w-full" onclick="deschideModalCarteDinListaPersonala('${safeTitlu}', '${safeAutor}')">
+                    <p class="text-xs font-extrabold font-manrope text-[#004c4c] leading-tight line-clamp-2">${titlu}</p>
+                    <p class="text-[10px] text-gray-500 mt-1 truncate font-medium">de ${autor}</p>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function adaugaTBR(titlu, autor) { if(!myTBR.find(b => b.titlu === titlu)) { myTBR.push({titlu, autor}); localStorage.setItem('tbr_' + currentUser, JSON.stringify(myTBR)); deseneazaTBR(); alert(`Adăugată în lista ta TBR`); } }
+    function stergeTBR(titlu) { myTBR = myTBR.filter(b => b.titlu !== titlu); localStorage.setItem('tbr_' + currentUser, JSON.stringify(myTBR)); deseneazaTBR(); }
+
+    function inchideModal() { document.getElementById('modal-carte').classList.add('hidden'); }
+    function inchideModalTraseu() { document.getElementById('modal-carte-traseu').classList.add('hidden'); }
+
+    function deschideModalCarteDinListaPersonala(titlu, autor) {
+        let imagine = `/api/carti/coperta?titlu=${encodeURIComponent(titlu)}&autor=${encodeURIComponent(autor)}`;
+        arataModalUniversal(titlu, autor, imagine);
+    }
+
+    function deschideModalDinTraseu(titlu, autor) {
+        let imagine = `/api/carti/coperta?titlu=${encodeURIComponent(titlu)}&autor=${encodeURIComponent(autor)}`;
+        arataModalUniversal(titlu, autor, imagine);
+    }
+
+    function deschideModalCarteDinChat(titlu, autor) {
+        let imagine = `/api/carti/coperta?titlu=${encodeURIComponent(titlu)}&autor=${encodeURIComponent(autor)}`;
+        arataModalUniversal(titlu, autor, imagine);
+    }
+
+    async function arataModalUniversal(titlu, autor, imagine) {
+        document.getElementById('modal-carte-traseu').classList.remove('hidden');
         document.getElementById('modal-traseu-titlu').innerText = titlu;
         document.getElementById('modal-traseu-autor').innerText = "de " + autor;
-        document.getElementById('modal-traseu-img').src = pozaUrl;
-
-        document.getElementById('modal-traseu-rezumat').innerHTML = "<span class='animate-pulse text-indigo-400'>Se extrag datele detaliate din graful de cunoștințe...</span>";
-        document.getElementById('modal-traseu-despre-autor').innerText = "...";
+        document.getElementById('modal-traseu-img').src = imagine;
+        document.getElementById('modal-traseu-rezumat').innerHTML = "<span class='animate-pulse text-[#004c4c] font-bold'>Se conectează la serverul AI...</span>";
         document.getElementById('modal-traseu-teme').innerHTML = "";
-
-        const insigna = document.getElementById('modal-traseu-insigna');
-        insigna.innerText = "⏳ Se analizează...";
-        insigna.className = "inline-block px-3 py-1 rounded-full text-xs font-bold bg-gray-800 text-gray-400 border border-gray-600";
+        document.getElementById('modal-traseu-despre-autor').innerText = "";
+        document.getElementById('modal-traseu-insigna').innerText = "ÎN AȘTEPTARE";
+        document.getElementById('modal-traseu-insigna').className = "inline-block px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-gray-100 text-gray-500 border border-gray-200";
 
         try {
             const res = await fetch(`/api/carti/detalii-complete?titlu=${encodeURIComponent(titlu)}&autor=${encodeURIComponent(autor)}`);
@@ -530,185 +1043,69 @@
 
             document.getElementById('modal-traseu-rezumat').innerText = date.rezumat;
             document.getElementById('modal-traseu-despre-autor').innerText = date.despre_autor;
+            document.getElementById('modal-traseu-teme').innerHTML = date.teme_principale.map(tema => `<span class="px-4 py-2 rounded-xl border border-gray-200 text-xs text-gray-800 bg-[#f7fafc] font-bold shadow-sm">${tema}</span>`).join('');
 
-            insigna.innerText = "✦ " + date.sursa_date;
+            let sursaFinala = date.sursa_date;
+            if(sursaFinala === "DIN MEMGRAPH" || sursaFinala === "DATE EXTRAS DIN AURADB") { sursaFinala = "AURADB"; }
 
-            if(date.sursa_date === "DIN MEMGRAPH") {
-                insigna.className = "inline-block px-3 py-1 rounded-full text-xs font-bold bg-[#00ff9d]/20 text-[#00ff9d] border border-[#00ff9d]/50";
+            document.getElementById('modal-traseu-insigna').innerText = "SURSA DATE: " + sursaFinala;
+            if(sursaFinala === "AURADB") {
+                document.getElementById('modal-traseu-insigna').className = "inline-block px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#004c4c]/10 text-[#004c4c] border border-[#004c4c]/20";
             } else {
-                insigna.className = "inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-900/50 text-blue-300 border border-blue-700/50";
+                document.getElementById('modal-traseu-insigna').className = "inline-block px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-blue-50 text-blue-600 border border-blue-200";
             }
-
-            const temeContainer = document.getElementById('modal-traseu-teme');
-            temeContainer.innerHTML = date.teme_principale.map(tema =>
-                `<span class="px-3 py-1.5 rounded-lg border border-gray-700 text-xs text-gray-300 bg-gray-800/50 font-medium">${tema}</span>`
-            ).join('');
 
             document.getElementById('btn-magazin-google').href = date.link_google;
             document.getElementById('btn-magazin-amazon').href = date.link_amazon;
             document.getElementById('btn-magazin-carturesti').href = date.link_carturesti;
-
         } catch(e) {
-            document.getElementById('modal-traseu-rezumat').innerText = "❌ Nu s-au putut încărca detaliile.";
+            document.getElementById('modal-traseu-rezumat').innerText = "Eroare la extragerea detaliilor de la agentul AI.";
         }
-    }
-
-    function inchideModalTraseu() {
-        document.getElementById('modal-carte-traseu').classList.add('hidden');
-    }
-
-    // --- PROFIL & ALTELE ---
-    function incarcaProfil() {
-        fetch(`/api/utilizator/profil?username=${currentUser}`).then(r => r.json()).then(data => {
-            myTags = data.tags || []; myBooks = data.books || [];
-            myTags.forEach(t => { if(!domeniiDisponibile.includes(t)) domeniiDisponibile.push(t); });
-            deseneazaTaxonomie(); deseneazaCartiCitite();
-        }).catch(e => console.log("Eroare profil."));
-    }
-    function deseneazaTaxonomie() {
-        document.getElementById('lista-taxonomie').innerHTML = domeniiDisponibile.map(d => `<button onclick="toggleTag('${d}')" class="px-4 py-2 rounded-full border text-xs font-bold transition ${myTags.includes(d) ? 'bg-black text-white border-black' : 'bg-white text-gray-400 hover:border-gray-400'}">${d}</button>`).join('');
-    }
-    function toggleTag(d) { myTags.includes(d) ? myTags = myTags.filter(t => t!==d) : myTags.push(d); deseneazaTaxonomie(); }
-    function adaugaDomeniuNou() { const i = document.getElementById('input-domeniu-nou'); if(!i.value) return; domeniiDisponibile.push(i.value); myTags.push(i.value); deseneazaTaxonomie(); i.value = ""; }
-
-    // REPARAT: Salvarea profilului apelează acum corect endpoint-ul hibrid
-    async function salveazaTaxonomie() {
-        await fetch('/api/utilizator/salveaza-interese', {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({username:currentUser, interese:myTags})
-        });
-        alert("Preferințe salvate cu succes în Memgraph!");
-    }
-
-    function deseneazaCartiCitite() {
-        const lista = document.getElementById('lista-carti-citite');
-        if(myBooks.length === 0) {
-            lista.innerHTML = "<p class='text-sm text-gray-400'>Încă nu ai citit nicio carte.</p>";
-            return;
-        }
-        lista.innerHTML = myBooks.map(b =>
-            `<li class="p-3 border border-green-100 rounded-xl flex justify-between bg-green-50 text-sm shadow-sm items-center">
-                    <span><b class="text-green-900">${b.titlu || b.title}</b> <span class="text-green-700">de ${b.autor || b.author}</span></span>
-                    <button onclick="stergeLectura('${b.titlu || b.title}')" class="text-red-500 font-bold hover:scale-125 transition ml-4">✕</button>
-                </li>`
-        ).join('');
-    }
-    async function adaugaCarteCitita() {
-        const t = document.getElementById('input-citita-titlu').value.trim();
-        const a = document.getElementById('input-citita-autor').value.trim() || 'Necunoscut';
-        if(!t) return;
-        await fetch('/api/utilizator/adauga-lectura', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:currentUser, titlu:t, autor:a})});
-        myBooks.push({titlu:t, autor:a}); deseneazaCartiCitite();
-        document.getElementById('input-citita-titlu').value = ""; document.getElementById('input-citita-autor').value = "";
-    }
-    async function stergeLectura(t) {
-        await fetch('/api/utilizator/sterge-lectura', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:currentUser, titlu:t})});
-        myBooks = myBooks.filter(b => (b.titlu || b.title) !== t); deseneazaCartiCitite();
-    }
-
-    // --- SISTEM TBR ---
-    function deseneazaTBR() {
-        const list = document.getElementById('lista-carti-tbr');
-        if(myTBR.length === 0) {
-            list.innerHTML = "<p class='text-sm text-gray-400'>Lista ta TBR este goală. Adaugă cărți din Chat sau Noutăți!</p>";
-            return;
-        }
-        list.innerHTML = myTBR.map(b =>
-            `<li class="p-3 border border-indigo-100 rounded-xl flex justify-between bg-white text-sm shadow-sm items-center">
-                    <span><b class="text-indigo-900">${b.titlu}</b> <span class="text-indigo-700">de ${b.autor}</span></span>
-                    <button onclick="stergeTBR('${b.titlu.replace(/'/g, "\\'")}')" class="text-red-500 font-bold hover:scale-125 transition ml-4">✕</button>
-                </li>`
-        ).join('');
-    }
-
-    function adaugaTBR(titlu, autor) {
-        if(!myTBR.find(b => b.titlu === titlu)) {
-            myTBR.push({titlu, autor});
-            localStorage.setItem('tbr_' + currentUser, JSON.stringify(myTBR));
-            deseneazaTBR();
-            alert(`📖 "${titlu}" a fost adăugată în lista ta TBR!`);
-        } else {
-            alert(`⚠️ "${titlu}" este deja în lista TBR!`);
-        }
-    }
-
-    function stergeTBR(titlu) {
-        myTBR = myTBR.filter(b => b.titlu !== titlu);
-        localStorage.setItem('tbr_' + currentUser, JSON.stringify(myTBR));
-        deseneazaTBR();
-    }
-
-    // --- SISTEM MODAL VECHI (Galerie & Noutăți) ---
-    function inchideModal() {
-        document.getElementById('modal-carte').classList.add('hidden');
-        document.querySelector('#modal-carte > div > div:nth-child(2)').scrollTop = 0;
     }
 
     function deschideModalDinLista(titlu) {
-        const c = toateCartile.find(x => x.titlu === titlu);
-        if(!c) return;
-        selectedBook = c;
-
-        document.getElementById('modal-img').src = c.imagine;
+        const c = toateCartile.find(x => x.titlu === titlu); if(!c) return; selectedBook = c;
+        document.getElementById('modal-img').src = `/api/carti/coperta?titlu=${encodeURIComponent(c.titlu)}&autor=${encodeURIComponent(c.autor)}`;
         document.getElementById('modal-titlu').innerText = c.titlu;
         document.getElementById('modal-autor').innerText = "de " + c.autor;
-        document.getElementById('modal-desc').innerText = c.descriere || "Fără descriere.";
+        document.getElementById('modal-desc').innerText = c.descriere || "Informații indisponibile.";
         document.getElementById('modal-ai-rezumat').classList.add('hidden');
 
+        const safeTitlu = c.titlu.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeAutor = (c.autor || 'Necunoscut').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         document.getElementById('modal-actions').innerHTML = `
-                <button id="btn-genereaza-rezumat" onclick="genereazaRezumatAI()" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-md flex items-center justify-center gap-2">
-                    ✨ Generează Analiză AI Detaliată
-                </button>
-            `;
+            <button id="btn-genereaza-rezumat" onclick="genereazaRezumatAI()" class="w-full py-4 bg-[#004c4c] text-white rounded-xl font-bold shadow-md hover:bg-[#003333] transition flex items-center justify-center">Generare Analiză AI</button>
+            <button onclick="adaugaTBR('${safeTitlu}', '${safeAutor}')" class="w-full py-4 bg-[#f7fafc] border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition shadow-sm mt-2">Adaugă în lista TBR</button>
+        `;
         document.getElementById('modal-carte').classList.remove('hidden');
     }
 
     function deschideModalNoutati(titlu) {
-        const c = toateNoutatile.find(x => x.titlu === titlu);
-        if(!c) return;
-        selectedBook = c;
-
-        document.getElementById('modal-img').src = c.imagine;
+        const c = toateNoutatile.find(x => x.titlu === titlu); if(!c) return; selectedBook = c;
+        document.getElementById('modal-img').src = `/api/carti/coperta?titlu=${encodeURIComponent(c.titlu)}&autor=${encodeURIComponent(c.autor)}`;
         document.getElementById('modal-titlu').innerText = c.titlu;
         document.getElementById('modal-autor').innerText = "de " + c.autor;
-        document.getElementById('modal-desc').innerText = c.descriere || "O noutate editorială ce merită explorată.";
+        document.getElementById('modal-desc').innerText = c.descriere;
         document.getElementById('modal-ai-rezumat').classList.add('hidden');
 
-        document.getElementById('modal-actions').innerHTML = `
-                <button id="btn-genereaza-rezumat" onclick="genereazaRezumatAI()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-md flex items-center justify-center">✨ Generează Descriere Detaliată AI</button>
+        const safeTitlu = c.titlu.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeAutor = (c.autor || 'Necunoscut').replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
-                <div class="flex flex-col sm:flex-row gap-3 mt-2">
-                    <button onclick="cautaPeNet('${c.titlu.replace(/'/g, "\\'")}', '${c.autor.replace(/'/g, "\\'")}')" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">🔍 Caută pe Net (Google)</button>
-                    <button onclick="adaugaTBR('${c.titlu.replace(/'/g, "\\'")}', '${c.autor.replace(/'/g, "\\'")}')" class="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition">❤️ O vreau (TBR)</button>
-                    <button onclick="inchideModal()" class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition">❌ Nu o vreau</button>
-                </div>
-            `;
+        document.getElementById('modal-actions').innerHTML = `
+            <button id="btn-genereaza-rezumat" onclick="genereazaRezumatAI()" class="w-full py-4 bg-[#004c4c] text-white rounded-xl font-bold shadow-sm hover:bg-[#003333] transition">Generare Analiză AI</button>
+            <button onclick="adaugaTBR('${safeTitlu}', '${safeAutor}')" class="w-full py-4 bg-[#f7fafc] border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition shadow-sm mt-2">Adaugă în lista TBR</button>
+            <div class="flex gap-4 mt-3">
+                <button onclick="cautaPeNet('${safeTitlu}', '${safeAutor}')" class="flex-1 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 shadow-sm transition">Căutare Web</button>
+            </div>`;
         document.getElementById('modal-carte').classList.remove('hidden');
     }
 
-    function cautaPeNet(titlu, autor) {
-        window.open(`https://www.google.com/search?q=${encodeURIComponent(titlu + ' ' + autor + ' carte')}`, '_blank');
-    }
+    function cautaPeNet(titlu, autor) { window.open(`https://www.google.com/search?q=${encodeURIComponent(titlu + ' ' + autor + ' carte')}`, '_blank'); }
 
     async function genereazaRezumatAI() {
-        const btn = document.getElementById('btn-genereaza-rezumat');
-        const box = document.getElementById('modal-ai-rezumat');
-
-        btn.innerHTML = `<span class="animate-spin">⏳</span> AI scrie... (Așteaptă)`;
-        btn.disabled = true;
-
-        try {
-            const res = await fetch('/api/agent/rezumat', {
-                method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({titlu: selectedBook.titlu, autor: selectedBook.autor})
-            });
-            box.classList.remove('hidden');
-            box.innerHTML = `<div class="font-bold mb-2 uppercase text-[10px] tracking-widest text-indigo-400">Analiză AI Generată:</div>` + (await res.text()).replace(/\n/g, '<br>');
-            btn.innerHTML = "✨ Rescrie Analiza"; btn.disabled = false;
-            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        } catch (e) {
-            btn.innerText = "❌ Eroare. Reîncearcă."; btn.disabled = false;
-        }
+        const btn = document.getElementById('btn-genereaza-rezumat'); const box = document.getElementById('modal-ai-rezumat');
+        btn.innerHTML = `<span class="animate-pulse">Procesare text...</span>`; btn.disabled = true;
+        try { const res = await fetch('/api/agent/rezumat', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({titlu: selectedBook.titlu, autor: selectedBook.autor}) }); box.classList.remove('hidden'); box.innerHTML = `<div class="font-black text-[#004c4c] mb-3 uppercase text-[10px] tracking-widest border-b border-[#004c4c]/10 pb-2">Analiză AI GraphRAG</div><div class="text-gray-800">` + (await res.text()).replace(/\n/g, '<br>') + `</div>`; btn.innerHTML = "Regenerare Analiză"; btn.disabled = false; box.scrollIntoView({ behavior: 'smooth'}); } catch (e) { btn.innerText = "Eroare Procesare"; btn.disabled = false; }
     }
 
     function logout() { sessionStorage.clear(); window.location.href = "/login"; }

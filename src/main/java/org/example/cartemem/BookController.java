@@ -1,13 +1,23 @@
 package org.example.cartemem;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +34,6 @@ public class BookController {
         this.bookAgent = bookAgent;
     }
 
-    // --- 1. PAGINA PRINCIPALĂ ---
     @GetMapping({"/", "/carti"})
     public String arataCartile(@RequestParam(value = "q", required = false) String query,
                                @RequestParam(value = "gen", required = false) String gen,
@@ -36,17 +45,18 @@ public class BookController {
         }
 
         List<Map<String, String>> listaCartiPersonalizate = new ArrayList<>();
-        List<String> listaGenuri = List.of("Bestseller", "Science Fiction", "Fantasy", "Horror", "Thriller", "Mister", "Romance", "Istorie", "Psihologie", "Scanata");
+        List<String> listaGenuri = List.of("Bestseller", "Science Fiction", "Fantasy", "Horror", "Thriller", "Mister", "Romance", "Istorie", "Psihologie", "Documentar");
 
         try (Session session = driver.session()) {
             if (username != null && !username.isEmpty()) {
                 String queryPersonalizat =
                         "MATCH (u:Utilizator {username: $user}) " +
-                                "OPTIONAL MATCH (u)-[:INTERESAT_DE]->(t:Tag鍵<-[:ARE_TAG]-(c1:Carte) " +
-                                "OPTIONAL MATCH (u)-[:A_CITIT]->(citita:Carte)-[:ARE_TAG]->(:Tag鍵<-[:ARE_TAG]-(c2:Carte) " +
+                                "OPTIONAL MATCH (u)-[:INTERESAT_DE]->(t:Tag)<-[:ARE_TAG]-(c1:Carte) " +
+                                "OPTIONAL MATCH (u)-[:A_CITIT]->(citita:Carte)-[:ARE_TAG]->(:Tag)<-[:ARE_TAG]-(c2:Carte) " +
                                 "WITH collect(c1) + collect(c2) AS toate " +
                                 "UNWIND toate AS c " +
                                 "MATCH (c)-[:SCRISA_DE]->(a:Autor) " +
+                                "WHERE c.categoria IS NOT NULL " +
                                 "RETURN DISTINCT c.titlu AS titlu, c.imagine AS imagine, c.categoria AS categorie, c.descriere AS desc, a.nume AS autor " +
                                 "LIMIT 12";
 
@@ -82,7 +92,51 @@ public class BookController {
         return "galerie";
     }
 
-    // --- 2. ENDPOINT-URI PENTRU AGENT (CHAT) ---
+    @GetMapping("/api/carti/coperta")
+    public void servesteImagineaCoperta(
+            @RequestParam String titlu,
+            @RequestParam(required = false, defaultValue = "Necunoscut") String autor,
+            HttpServletResponse response) throws IOException {
+
+        String urlCoperta = bookAgent.gasesteSauCreeazaCoperta(titlu, autor);
+
+        try {
+            if (urlCoperta.contains("placehold.co")) {
+                response.sendRedirect(urlCoperta);
+                return;
+            }
+
+            HttpClient client = HttpClient.newBuilder()
+                    .followRedirects(HttpClient.Redirect.ALWAYS)
+                    .connectTimeout(Duration.ofSeconds(10))
+                    .build();
+
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create(urlCoperta))
+                    .header("User-Agent", "Mozilla/5.0")
+                    .build();
+
+            HttpResponse<byte[]> imgResponse = client.send(req, HttpResponse.BodyHandlers.ofByteArray());
+
+            if (imgResponse.statusCode() == 200) {
+                String contentType = imgResponse.headers()
+                        .firstValue("Content-Type")
+                        .orElse("image/jpeg");
+
+                response.setContentType(contentType);
+                response.setHeader("Cache-Control", "public, max-age=86400");
+                response.getOutputStream().write(imgResponse.body());
+            } else {
+                response.sendRedirect("https://placehold.co/300x450/f7fafc/004c4c?text=" +
+                        URLEncoder.encode(titlu.length() > 20 ? titlu.substring(0, 20) : titlu,
+                                StandardCharsets.UTF_8));
+            }
+
+        } catch (Exception e) {
+            response.sendRedirect("https://placehold.co/300x450/f7fafc/004c4c?text=Cover");
+        }
+    }
+
     @PostMapping("/api/agent/experti-smart")
     @ResponseBody
     public String cereSfatulExpertilorSmart(@RequestBody Map<String, Object> payload) {
@@ -92,13 +146,12 @@ public class BookController {
         List<Map<String, String>> istoric = (List<Map<String, String>>) payload.get("istoric");
 
         if (username == null || username.isEmpty()) {
-            return "Te rog să te loghezi pentru a primi sfaturi personalizate!";
+            return "Este necesară autentificarea pentru procesarea solicitării.";
         }
 
         return bookAgent.genereazaRecomandareGraphRAG(username, mesaj, istoric);
     }
 
-    // --- 3. ENDPOINT-URI PENTRU PROFIL & UTILIZATOR ---
     @PostMapping("/api/utilizator/actualizeaza-profil")
     @ResponseBody
     public String actualizeazaProfil(@RequestBody Map<String, Object> payload) {
@@ -114,7 +167,6 @@ public class BookController {
         return "Succes";
     }
 
-    // RUTA MODIFICATĂ AICI PENTRU A EVITA DUPLICATUL CU UTILIZATORCONTROLLER
     @PostMapping("/api/carti/salveaza-interese")
     @ResponseBody
     public String salveazaInterese(@RequestBody Map<String, Object> payload) {
@@ -132,6 +184,20 @@ public class BookController {
         return bookAgent.incarcaProfil(username);
     }
 
+    @PostMapping("/api/utilizator/adauga-lectura")
+    @ResponseBody
+    public String adaugaLecturaProfil(@RequestBody Map<String, String> payload) {
+        bookAgent.adaugaLectura(payload.get("username"), payload.get("titlu"), payload.get("autor"));
+        return "{\"status\":\"succes\"}";
+    }
+
+    @PostMapping("/api/utilizator/sterge-lectura")
+    @ResponseBody
+    public String stergeLecturaProfil(@RequestBody Map<String, String> payload) {
+        bookAgent.stergeLectura(payload.get("username"), payload.get("titlu"));
+        return "{\"status\":\"succes\"}";
+    }
+
     @PostMapping("/api/delete-book")
     @ResponseBody
     public String stergeCarte(@RequestBody Map<String, String> payload) {
@@ -139,13 +205,12 @@ public class BookController {
         try (Session session = driver.session()) {
             session.run("MATCH (c:Carte {titlu: $titlu}) DETACH DELETE c",
                     Map.of("titlu", titlu));
-            return "✅ Cartea a fost ștearsă.";
+            return "Sistem: Datele au fost eliminate cu succes din AuraDB.";
         } catch (Exception e) {
-            return "❌ Eroare la ștergere.";
+            return "Eroare: Procedura de eliminare a întâmpinat o problemă.";
         }
     }
 
-    // --- 4. ENDPOINT-URI PENTRU TRASEE DE LECTURĂ ---
     @GetMapping("/api/agent/traseu-salvat")
     @ResponseBody
     public String getTraseuSalvat(@RequestParam("subiect") String subiect) {
@@ -164,8 +229,9 @@ public class BookController {
         String subiect = payload.get("subiect");
         int nrEtape = Integer.parseInt(payload.get("etape"));
         boolean stieBaze = Boolean.parseBoolean(payload.getOrDefault("stieBaze", "false"));
+        String username = payload.get("username");
 
-        return bookAgent.genereazaTraseuStructurat(subiect, nrEtape, stieBaze);
+        return bookAgent.genereazaTraseuStructurat(username, subiect, nrEtape, stieBaze);
     }
 
     @GetMapping("/api/trasee/salvate")
@@ -181,7 +247,6 @@ public class BookController {
         return trasee;
     }
 
-    // --- 5. ENDPOINT-URI GENERALE API ---
     @PostMapping("/api/agent/rezumat")
     @ResponseBody
     public String genereazaRezumat(@RequestBody Map<String, String> payload) {
@@ -202,14 +267,27 @@ public class BookController {
         return bookAgent.cautaNoutatiInternet(interese);
     }
 
+    @PostMapping("/api/carti/noutati-personalizate")
+    @ResponseBody
+    public ResponseEntity<String> noutatiPersonalizate(@RequestBody Map<String, String> payload) {
+        String subiect = payload.get("subiect");
+        String rezultat = bookAgent.cautaNoutatiDupaSubiect(subiect);
+        return ResponseEntity.ok(rezultat);
+    }
+
     @GetMapping("/api/carti/toate")
     @ResponseBody
     public List<Map<String, String>> getToateCartile() {
         List<Map<String, String>> listaCarti = new ArrayList<>();
         try (Session session = driver.session()) {
-            var result = session.run("MATCH (c:Carte)-[:SCRISA_DE]->(a:Autor) " +
-                    "RETURN DISTINCT c.titlu AS titlu, c.imagine AS imagine, c.categoria AS categorie, c.descriere AS descriere, a.nume AS autor " +
-                    "ORDER BY id(c) DESC LIMIT 1000");
+            String query = "MATCH (c:CarteLibrarie)-[:SCRISA_DE]->(a:Autor) " +
+                    "OPTIONAL MATCH (c)-[:ARE_TAG]->(t:Tag) " +
+                    "WITH c, a, collect(t.nume) AS taguri " +
+                    "ORDER BY id(c) DESC " +
+                    "RETURN c.titlu AS titlu, c.imagine AS imagine, c.categoria AS categorie, c.descriere AS descriere, a.nume AS autor, taguri " +
+                    "LIMIT 1000";
+
+            var result = session.run(query);
             while (result.hasNext()) {
                 var r = result.next();
                 Map<String, String> carte = new HashMap<>();
@@ -218,7 +296,12 @@ public class BookController {
                 carte.put("categorie", r.get("categorie").asString());
                 carte.put("imagine", r.get("imagine").asString());
                 var desc = r.get("descriere");
-                carte.put("descriere", (desc.isNull() || desc.asString().isEmpty()) ? "Fără descriere" : desc.asString());
+                carte.put("descriere", (desc.isNull() || desc.asString().isEmpty()) ? "Date indisponibile" : desc.asString());
+
+                List<String> tags = new ArrayList<>();
+                r.get("taguri").values().forEach(v -> tags.add(v.asString()));
+                carte.put("taguri", String.join(" ", tags));
+
                 listaCarti.add(carte);
             }
         } catch (Exception e) {
@@ -242,37 +325,74 @@ public class BookController {
         return Map.of("autori", autori, "genuri", genuri);
     }
 
-    // --- 6. ENDPOINT-URI ADMINISTRATIVE ---
-    @PostMapping("/api/agent/auto-populeaza")
+    @GetMapping("/api/social/cauta-utilizatori")
     @ResponseBody
-    public String triggerAgent(@RequestBody Map<String, String> payload) {
-        return bookAgent.genereazaSiSalveaza(payload.getOrDefault("gen", "Science Fiction"));
+    public List<String> cautaUtilizatori(@RequestParam String q, @RequestParam String current) {
+        return bookAgent.cautaUtilizatori(q, current);
     }
 
-    @PostMapping("/api/agent/custom")
+    @PostMapping("/api/social/trimite-cerere")
     @ResponseBody
-    public String triggerCustomAgent(@RequestBody Map<String, String> payload) {
-        return bookAgent.genereazaPersonalizat(payload.get("sursa"), payload.get("autor"));
+    public String trimiteCerere(@RequestBody Map<String, String> payload) {
+        bookAgent.trimiteCererePrietenie(payload.get("sender"), payload.get("receiver"));
+        return "{\"status\":\"succes\"}";
     }
 
-    @PostMapping("/api/admin/repara-pagini")
+    @GetMapping("/api/social/cereri")
     @ResponseBody
-    public String reparaPagini() {
-        return bookAgent.reparaDateLipsa();
+    public List<String> getCereri(@RequestParam String username) {
+        return bookAgent.getCereriPrietenie(username);
     }
 
-    @GetMapping("/api/smart-search")
+    @PostMapping("/api/social/raspunde-cerere")
     @ResponseBody
-    public List<Map<String, String>> smartSearch(@RequestParam("q") String query) {
-        return bookAgent.recomandaDupaTag(query);
+    public String raspundeCerere(@RequestBody Map<String, String> payload) {
+        boolean acceptat = Boolean.parseBoolean(payload.get("acceptat"));
+        bookAgent.raspundeCerere(payload.get("sender"), payload.get("receiver"), acceptat);
+        return "{\"status\":\"succes\"}";
+    }
+
+    @GetMapping("/api/social/prieteni")
+    @ResponseBody
+    public List<String> getPrieteni(@RequestParam String username) {
+        return bookAgent.getPrieteni(username);
+    }
+
+    @PostMapping("/api/social/trimite-recomandare")
+    @ResponseBody
+    public String trimiteRecomandare(@RequestBody Map<String, String> payload) {
+        bookAgent.trimiteRecomandare(payload.get("sender"), payload.get("receiver"), payload.get("titlu"), payload.get("mesaj"));
+        return "{\"status\":\"succes\"}";
+    }
+
+    @GetMapping("/api/social/recomandari")
+    @ResponseBody
+    public List<Map<String, String>> getRecomandari(@RequestParam String username) {
+        return bookAgent.getRecomandariPrimite(username);
+    }
+
+    @PostMapping("/api/social/sterge-recomandare")
+    @ResponseBody
+    public String stergeRecomandare(@RequestBody Map<String, String> payload) {
+        bookAgent.stergeRecomandare(payload.get("id"));
+        return "{\"status\":\"succes\"}";
+    }
+
+    // ==========================================================
+    // PUNCTUL DE ACCES CORECT PENTRU SALVARE DIN BROWSER CONSOLE
+    // ==========================================================
+    @PostMapping("/api/admin/import-json")
+    @ResponseBody
+    public String importJsonDb(@RequestBody List<Map<String, Object>> payload) {
+        return bookAgent.importaJsonInBazaDeDate(payload);
     }
 
     private String incarcaPagina(String query, String gen, Model model, String templateName) {
         List<Map<String, String>> listaCarti = new ArrayList<>();
-        List<String> listaGenuri = List.of("Bestseller", "Science Fiction", "Fantasy", "Horror", "Thriller", "Mister", "Romance", "Istorie", "Psihologie", "Scanata");
+        List<String> listaGenuri = List.of("Bestseller", "Science Fiction", "Fantasy", "Horror", "Thriller", "Mister", "Romance", "Istorie", "Psihologie", "Documentar");
 
         try (Session session = driver.session()) {
-            StringBuilder cypher = new StringBuilder("MATCH (c:Carte)-[:SCRISA_DE]->(a:Autor) WHERE 1=1 ");
+            StringBuilder cypher = new StringBuilder("MATCH (c:Carte)-[:SCRISA_DE]->(a:Autor) WHERE c.categoria IS NOT NULL ");
             Map<String, Object> params = new HashMap<>();
 
             boolean esteCautare = false;
