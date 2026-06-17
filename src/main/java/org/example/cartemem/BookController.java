@@ -34,6 +34,20 @@ public class BookController {
         this.bookAgent = bookAgent;
     }
 
+    // ==========================================
+    // RUTE PENTRU AFIȘAREA PAGINILOR HTML
+    // ==========================================
+
+    @GetMapping("/login")
+    public String arataPaginaLogin() {
+        return "login";
+    }
+
+    @GetMapping("/register")
+    public String arataPaginaRegister() {
+        return "register";
+    }
+
     @GetMapping({"/", "/carti"})
     public String arataCartile(@RequestParam(value = "q", required = false) String query,
                                @RequestParam(value = "gen", required = false) String gen,
@@ -91,6 +105,10 @@ public class BookController {
 
         return "galerie";
     }
+
+    // ==========================================
+    // RUTE API (BACKEND)
+    // ==========================================
 
     @GetMapping("/api/carti/coperta")
     public void servesteImagineaCoperta(
@@ -378,8 +396,85 @@ public class BookController {
         return "{\"status\":\"succes\"}";
     }
 
+    // ==========================================
+    // RUTE PENTRU INREGISTRARE SI LOGIN
+    // ==========================================
+
+    @PostMapping("/api/utilizator/register")
+    @ResponseBody
+    public Map<String, String> proceseazaInregistrare(@RequestBody Map<String, Object> payload) {
+        String username = (String) payload.getOrDefault("username", "Anonim");
+        String email = (String) payload.getOrDefault("email", "");
+
+        String password = "";
+        if (payload.containsKey("password")) {
+            password = (String) payload.get("password");
+        } else if (payload.containsKey("parola")) {
+            password = (String) payload.get("parola");
+        }
+
+        Map<String, String> response = new HashMap<>();
+
+        try (Session session = driver.session()) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("user", username);
+            params.put("email", email);
+            params.put("pass", password);
+
+            session.run("MERGE (u:Utilizator {username: $user}) SET u.email = $email, u.parola = $pass", params);
+
+            response.put("status", "success");
+            response.put("message", "Cont creat cu succes! Te poți autentifica.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("status", "error");
+            response.put("message", "Eroare la salvarea în baza de date AuraDB.");
+        }
+
+        return response;
+    }
+
+    @PostMapping("/api/utilizator/login")
+    @ResponseBody
+    public Map<String, String> proceseazaLogin(@RequestBody Map<String, String> payload) {
+        String email = payload.getOrDefault("email", "");
+
+        String password = "";
+        if (payload.containsKey("password")) {
+            password = payload.get("password");
+        } else if (payload.containsKey("parola")) {
+            password = payload.get("parola");
+        }
+
+        Map<String, String> response = new HashMap<>();
+
+        try (Session session = driver.session()) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("email", email);
+            params.put("pass", password);
+
+            var result = session.run("MATCH (u:Utilizator {email: $email, parola: $pass}) RETURN u.username AS username", params);
+
+            if (result.hasNext()) {
+                String username = result.next().get("username").asString();
+                response.put("status", "success");
+                response.put("username", username);
+                response.put("message", "Autentificare reușită!");
+            } else {
+                response.put("status", "error");
+                response.put("message", "Email sau parolă incorecte!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("status", "error");
+            response.put("message", "Eroare la conexiunea cu baza de date.");
+        }
+
+        return response;
+    }
+
     // ==========================================================
-    // PUNCTUL DE ACCES CORECT PENTRU SALVARE DIN BROWSER CONSOLE
+    // PUNCTUL DE ACCES PENTRU SALVARE JSON DIN BROWSER CONSOLE
     // ==========================================================
     @PostMapping("/api/admin/import-json")
     @ResponseBody

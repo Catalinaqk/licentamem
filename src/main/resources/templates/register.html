@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Înregistrare | Sanctuarul Intelectual</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #181c1e; padding: 40px 20px; }
+        .card { background: white; padding: 48px 40px; border-radius: 24px; box-shadow: 0 16px 40px rgba(0,76,76,0.05); border: 1px solid #e0e3e5; width: 100%; max-width: 500px; box-sizing: border-box; }
+        h1 { margin: 0 0 8px 0; font-size: 2em; font-family: 'Manrope', sans-serif; font-weight: 800; color: #004c4c; text-align: center; }
+        p.subtitle { color: #64748b; margin: 0 0 32px 0; text-align: center; font-size: 0.95em; }
+
+        .section-title { font-size: 0.85em; font-weight: 700; color: #181c1e; text-transform: uppercase; letter-spacing: 1px; margin: 24px 0 16px 0; padding-bottom: 8px; border-bottom: 1px solid #e0e3e5; }
+
+        .input-group { margin-bottom: 16px; }
+        label { display: block; font-size: 0.75em; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        input { width: 100%; padding: 14px 16px; background-color: #f7fafc; border: 1px solid #e0e3e5; border-radius: 12px; font-size: 15px; box-sizing: border-box; outline: none; transition: 0.2s; font-family: 'Inter', sans-serif; color: #181c1e;}
+        input:focus { border-color: #004c4c; background-color: white; box-shadow: 0 0 0 3px rgba(0,76,76,0.1); }
+        input::placeholder { color: #bec9c8; }
+
+        button { background: #004c4c; color: white; padding: 16px; width: 100%; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 16px; font-family: 'Inter', sans-serif; }
+        button:hover { background: #003333; transform: translateY(-1px); }
+        button:disabled { background: #bec9c8; cursor: not-allowed; transform: none; }
+
+        .links-container { margin-top: 24px; text-align: center; }
+        .link { color: #64748b; text-decoration: none; font-size: 0.9em; font-weight: 500; transition: 0.2s;}
+        .link:hover { color: #181c1e; }
+        .link strong { color: #004c4c; font-weight: 700; }
+
+        .password-container { position: relative; width: 100%; }
+        .password-container input { padding-right: 70px; }
+        .toggle-password { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 0.85em; font-weight: 600; color: #004c4c; user-select: none; transition: 0.2s; }
+        .toggle-password:hover { color: #002020; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>Creare Cont</h1>
+    <p class="subtitle">Configurează-ți profilul de lectură.</p>
+
+    <div class="section-title">Informații de Autentificare</div>
+    <div class="input-group">
+        <label>Nume / Pseudonim</label>
+        <input type="text" id="nume" placeholder="Cum dorești să te numim?">
+    </div>
+    <div class="input-group">
+        <label>Adresa de Email</label>
+        <input type="email" id="email" placeholder="nume@exemplu.ro">
+    </div>
+    <div class="input-group">
+        <label>Parolă</label>
+        <div class="password-container">
+            <input type="password" id="parola" placeholder="Alege o parolă sigură">
+            <span class="toggle-password" onclick="togglePassword('parola', this)">Arată</span>
+        </div>
+    </div>
+
+    <div class="section-title">Profil & Preferințe (Opțional)</div>
+    <div class="input-group">
+        <label>Domenii de interes</label>
+        <input type="text" id="interese" placeholder="Ex: Psihologie, Istorie, Science Fiction (separate prin virgulă)">
+    </div>
+    <div class="input-group">
+        <label>Cărți citite / preferate</label>
+        <input type="text" id="carti" placeholder="Ex: Dune, Gândire rapidă și lentă (separate prin virgulă)">
+    </div>
+
+    <button onclick="creareCont()" id="btnReg">Finalizează Crearea Contului</button>
+
+    <div class="links-container">
+        <a href="/login" class="link">Ai deja un cont? <strong>Loghează-te aici.</strong></a>
+    </div>
+</div>
+
+<script>
+    function togglePassword(inputId, textElement) {
+        const input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+            textElement.innerText = "Ascunde";
+        } else {
+            input.type = "password";
+            textElement.innerText = "Arată";
+        }
+    }
+
+    function creareCont() {
+        const nume = document.getElementById('nume').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const parola = document.getElementById('parola').value.trim();
+        const intereseStr = document.getElementById('interese').value.trim();
+        const cartiStr = document.getElementById('carti').value.trim();
+
+        if(!nume || !email || !parola) {
+            alert("Vă rugăm să completați informațiile de autentificare (Nume, Email, Parolă).");
+            return;
+        }
+
+        const btn = document.getElementById('btnReg');
+        btn.innerText = "Se procesează datele...";
+        btn.disabled = true;
+
+        // 1. Creăm contul de bază
+        fetch('/api/utilizator/register', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            // Trimiți "username" în loc de "nume" pentru ca Java să-l recunoască
+            body: JSON.stringify({username: nume, email: email, parola: parola})
+        })
+            .then(res => res.json())
+            .then(data => {
+                // Căutăm 'success', nu 'succes'
+                if(data.status === 'success') {
+                    sessionStorage.setItem('currentUser', nume);
+
+                    // 2. Parsăm datele opționale
+                    let arrayInterese = intereseStr ? intereseStr.split(',').map(s => s.trim()).filter(s => s) : [];
+                    let arrayCarti = [];
+                    if (cartiStr) {
+                        cartiStr.split(',').forEach(c => {
+                            let titluCurat = c.trim();
+                            if(titluCurat) arrayCarti.push({ title: titluCurat, author: "Autor Necunoscut" });
+                        });
+                    }
+
+                    // Dacă utilizatorul a introdus preferințe, le salvăm în graf
+                    if (arrayInterese.length > 0 || arrayCarti.length > 0) {
+                        fetch('/api/utilizator/actualizeaza-profil', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                username: nume,
+                                tags: arrayInterese,
+                                experts: [],
+                                books: arrayCarti
+                            })
+                        }).then(() => {
+                            window.location.href = '/?user=' + encodeURIComponent(nume);
+                        });
+                    } else {
+                        // Dacă nu a introdus preferințe, îl trimitem direct în aplicație
+                        window.location.href = '/?user=' + encodeURIComponent(nume);
+                    }
+
+                } else {
+                    // Căutăm 'message' în loc de 'mesaj' pentru ca alerta să nu mai dea "undefined"
+                    alert(data.message);
+                    btn.innerText = "Finalizează Crearea Contului";
+                    btn.disabled = false;
+                }
+            })
+            .catch(() => {
+                alert("Eroare de conexiune cu serverul.");
+                btn.innerText = "Finalizează Crearea Contului";
+                btn.disabled = false;
+            });
+    }
+</script>
+</body>
+</html>

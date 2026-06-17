@@ -6,9 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Session;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -26,7 +23,7 @@ public class BookGeneratorAgent {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(60)).build();
 
-    private final String ANTHROPIC_API_KEY =
+    private final String ANTHROPIC_API_KEY = "";
     private final String MODEL_NAME = "claude-opus-4-7";
     private final String ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
 
@@ -528,44 +525,6 @@ public class BookGeneratorAgent {
             e.printStackTrace();
             return "Eroare import: " + e.getMessage();
         }
-    }
-
-    @PostMapping("/api/admin/import-json")
-    @ResponseBody
-    public String importJsonDb(@RequestBody List<Map<String, Object>> payload) {
-        int count = 0;
-        try (Session session = driver.session()) {
-            for (Map<String, Object> item : payload) {
-                String titlu = (String) item.get("titlu");
-                String autor = (String) item.get("autor");
-                String categorie = (String) item.get("categorie");
-                String imagine = (String) item.get("imagine");
-                String descriere = (String) item.get("descriere");
-
-                if (titlu != null && !titlu.isEmpty()) {
-                    // Inserare directă în AuraDB (Neo4j)
-                    String cypher = "MERGE (c:Carte {titlu: $titlu}) " +
-                            "SET c.categoria = $categoria, " +
-                            "    c.imagine = $imagine, " +
-                            "    c.descriere = $descriere " +
-                            "MERGE (a:Autor {nume: $autor}) " +
-                            "MERGE (c)-[:SCRISA_DE]->(a)";
-
-                    session.run(cypher, Map.of(
-                            "titlu", titlu,
-                            "autor", autor != null ? autor : "Necunoscut",
-                            "categoria", categorie != null ? categorie : "Fără categorie",
-                            "imagine", imagine != null ? imagine : "",
-                            "descriere", descriere != null ? descriere : ""
-                    ));
-                    count++;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Eroare la import: " + e.getMessage();
-        }
-        return "Succes: Au fost importate " + count + " cărți în AuraDB.";
     }
 
     public String genereazaSiSalveaza(String gen) { return "Metodă dezactivată."; }
