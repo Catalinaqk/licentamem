@@ -38,7 +38,7 @@
 
 <div class="card">
     <h1>Creare Cont</h1>
-    <p class="subtitle">Configurează-ți profilul de lectură.</p>
+    <p class="subtitle">Alătură-te comunității noastre.</p>
 
     <div class="section-title">Informații de Autentificare</div>
     <div class="input-group">
@@ -55,16 +55,6 @@
             <input type="password" id="parola" placeholder="Alege o parolă sigură">
             <span class="toggle-password" onclick="togglePassword('parola', this)">Arată</span>
         </div>
-    </div>
-
-    <div class="section-title">Profil & Preferințe (Opțional)</div>
-    <div class="input-group">
-        <label>Domenii de interes</label>
-        <input type="text" id="interese" placeholder="Ex: Psihologie, Istorie, Science Fiction (separate prin virgulă)">
-    </div>
-    <div class="input-group">
-        <label>Cărți citite / preferate</label>
-        <input type="text" id="carti" placeholder="Ex: Dune, Gândire rapidă și lentă (separate prin virgulă)">
     </div>
 
     <button onclick="creareCont()" id="btnReg">Finalizează Crearea Contului</button>
@@ -90,8 +80,6 @@
         const nume = document.getElementById('nume').value.trim();
         const email = document.getElementById('email').value.trim();
         const parola = document.getElementById('parola').value.trim();
-        const intereseStr = document.getElementById('interese').value.trim();
-        const cartiStr = document.getElementById('carti').value.trim();
 
         if(!nume || !email || !parola) {
             alert("Vă rugăm să completați informațiile de autentificare (Nume, Email, Parolă).");
@@ -102,50 +90,18 @@
         btn.innerText = "Se procesează datele...";
         btn.disabled = true;
 
-        // 1. Creăm contul de bază
         fetch('/api/utilizator/register', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            // Trimiți "username" în loc de "nume" pentru ca Java să-l recunoască
             body: JSON.stringify({username: nume, email: email, parola: parola})
         })
             .then(res => res.json())
             .then(data => {
-                // Căutăm 'success', nu 'succes'
                 if(data.status === 'success') {
+                    // Salvăm utilizatorul în sesiune și îl direcționăm spre pagina principală
                     sessionStorage.setItem('currentUser', nume);
-
-                    // 2. Parsăm datele opționale
-                    let arrayInterese = intereseStr ? intereseStr.split(',').map(s => s.trim()).filter(s => s) : [];
-                    let arrayCarti = [];
-                    if (cartiStr) {
-                        cartiStr.split(',').forEach(c => {
-                            let titluCurat = c.trim();
-                            if(titluCurat) arrayCarti.push({ title: titluCurat, author: "Autor Necunoscut" });
-                        });
-                    }
-
-                    // Dacă utilizatorul a introdus preferințe, le salvăm în graf
-                    if (arrayInterese.length > 0 || arrayCarti.length > 0) {
-                        fetch('/api/utilizator/actualizeaza-profil', {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({
-                                username: nume,
-                                tags: arrayInterese,
-                                experts: [],
-                                books: arrayCarti
-                            })
-                        }).then(() => {
-                            window.location.href = '/?user=' + encodeURIComponent(nume);
-                        });
-                    } else {
-                        // Dacă nu a introdus preferințe, îl trimitem direct în aplicație
-                        window.location.href = '/?user=' + encodeURIComponent(nume);
-                    }
-
+                    window.location.href = '/?user=' + encodeURIComponent(nume);
                 } else {
-                    // Căutăm 'message' în loc de 'mesaj' pentru ca alerta să nu mai dea "undefined"
                     alert(data.message);
                     btn.innerText = "Finalizează Crearea Contului";
                     btn.disabled = false;

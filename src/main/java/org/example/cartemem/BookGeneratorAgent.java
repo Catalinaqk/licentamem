@@ -197,7 +197,9 @@ public class BookGeneratorAgent {
             if (start != -1 && end != -1) {
                 String finalJson = curatat.substring(start, end + 1);
                 try (Session session = driver.session()) {
-                    session.run("MERGE (tr:Traseu {subiect: $sub}) SET tr.json = $json", Map.of("sub", subiect, "json", finalJson));
+                    // AICI AM ADĂUGAT username: $u pentru a-l face personal
+                    session.run("MERGE (tr:Traseu {subiect: $sub, username: $u}) SET tr.json = $json",
+                            Map.of("sub", subiect, "u", username, "json", finalJson));
                 }
                 return finalJson;
             }

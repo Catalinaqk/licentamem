@@ -231,9 +231,10 @@ public class BookController {
 
     @GetMapping("/api/agent/traseu-salvat")
     @ResponseBody
-    public String getTraseuSalvat(@RequestParam("subiect") String subiect) {
+    public String getTraseuSalvat(@RequestParam("subiect") String subiect, @RequestParam("username") String username) {
         try (Session session = driver.session()) {
-            var res = session.run("MATCH (t:Traseu {subiect: $sub}) RETURN t.json AS json", Map.of("sub", subiect));
+            // Caută traseul strict pentru acest utilizator
+            var res = session.run("MATCH (t:Traseu {subiect: $sub, username: $u}) RETURN t.json AS json", Map.of("sub", subiect, "u", username));
             if(res.hasNext()) {
                 return res.next().get("json").asString();
             }
@@ -254,10 +255,11 @@ public class BookController {
 
     @GetMapping("/api/trasee/salvate")
     @ResponseBody
-    public List<String> getToateTraseeleSalvate() {
+    public List<String> getToateTraseeleSalvate(@RequestParam("username") String username) {
         List<String> trasee = new ArrayList<>();
         try (Session session = driver.session()) {
-            var result = session.run("MATCH (t:Traseu) RETURN t.subiect AS domeniu ORDER BY t.subiect ASC");
+            // Aduce doar lista cu traseele utilizatorului curent
+            var result = session.run("MATCH (t:Traseu {username: $u}) RETURN t.subiect AS domeniu ORDER BY t.subiect ASC", Map.of("u", username));
             while(result.hasNext()) {
                 trasee.add(result.next().get("domeniu").asString());
             }

@@ -125,13 +125,34 @@
                 </div>
             </div>
 
+            <div id="ecran-fisa" class="hidden absolute inset-0 flex flex-col overflow-y-auto px-8 py-8 z-0 transition-opacity duration-300 opacity-0 bg-[#FCFAF2]">
+                <div class="max-w-6xl mx-auto w-full">
+                    <h2 class="text-3xl font-extrabold font-manrope mb-2 text-[#004c4c]">Fișe de Disciplină - UTCN</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
+                        <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+                            <h3 class="text-xl font-extrabold mb-4">Nivel Licență</h3>
+                            <input type="text" id="cauta-licenta" onkeyup="filtreazaDiscipline('licenta')" placeholder="Caută materie licență..." class="w-full bg-[#f7fafc] border border-gray-200 rounded-xl px-4 py-3 mb-4 text-sm">
+                            <div id="rezultate-licenta" class="space-y-4"></div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+                            <h3 class="text-xl font-extrabold mb-4">Nivel Master</h3>
+                            <input type="text" id="cauta-master" onkeyup="filtreazaDiscipline('master')" placeholder="Caută materie master..." class="w-full bg-[#f7fafc] border border-gray-200 rounded-xl px-4 py-3 mb-4 text-sm">
+                            <div id="rezultate-master" class="space-y-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
             <div id="ecran-galerie" class="hidden absolute inset-0 flex flex-col overflow-y-auto px-8 py-8 z-0 transition-opacity duration-300 opacity-0 bg-[#FCFAF2]">
                 <div class="max-w-7xl mx-auto w-full">
                     <h2 class="text-3xl font-extrabold font-manrope mb-8 text-[#004c4c]">Librăria Ta Personală</h2>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
                         <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm flex flex-col min-h-[24rem]">
-                            <h3 class="font-bold text-lg mb-4 text-[#004c4c]">Istoric Lecturi</h3>
+                            <h3 class="font-bold text-lg mb-4 text-[#004c4c]">Cărțile citite</h3>
                             <div class="flex gap-2 mb-6 shrink-0">
                                 <input type="text" id="input-citita-titlu" placeholder="Titlul cărții..." class="flex-1 border border-gray-200 p-3 rounded-xl outline-none bg-[#f7fafc] text-sm font-medium">
                                 <input type="text" id="input-citita-autor" placeholder="Autorul..." class="w-1/3 border border-gray-200 p-3 rounded-xl outline-none bg-[#f7fafc] text-sm font-medium">
@@ -142,7 +163,7 @@
 
                         <div class="bg-[#f8fbfb] p-8 rounded-3xl border border-[#004c4c]/20 shadow-sm flex flex-col min-h-[24rem]">
                             <div class="flex justify-between items-center mb-2 shrink-0">
-                                <h3 class="font-bold text-lg text-[#004c4c]">Lista de Dorințe (TBR)</h3>
+                                <h3 class="font-bold text-lg text-[#004c4c]">De citit (TBR)</h3>
                                 <span class="bg-[#004c4c]/10 text-[#004c4c] px-3 py-1 rounded-lg text-xs font-bold" id="tbr-count">0 cărți</span>
                             </div>
                             <p class="text-xs text-[#3f4948] mb-6 font-medium shrink-0">Cărțile salvate din discuțiile cu AI, din Descoperă sau primite de la prieteni.</p>
@@ -151,16 +172,16 @@
                     </div>
 
                     <div class="mt-8 border-t border-gray-200 pt-10">
-                        <h2 class="text-2xl font-extrabold font-manrope mb-6 text-gray-900">Explorează Biblioteca Totală</h2>
+                        <h2 class="text-2xl font-extrabold font-manrope mb-6 text-gray-900">Cărți existente</h2>
 
                         <div class="bg-white p-6 rounded-3xl border border-gray-200 mb-8 shadow-sm flex flex-col md:flex-row gap-6 items-end">
                             <div class="flex-1 w-full">
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Subiect / Gen (Ex: viata, dragoste, SF)</label>
-                                <input type="text" id="filtru-gen" class="w-full bg-[#f7fafc] border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#004c4c] transition text-sm font-medium text-gray-700" placeholder="Ex: mister, dragoste, SF..." onkeypress="if(event.key==='Enter') filtreazaCarti()">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Titlu Carte</label>
+                                <input type="text" id="filtru-titlu" class="w-full bg-[#f7fafc] border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#004c4c] transition text-sm font-medium text-gray-700" placeholder="" onkeypress="if(event.key==='Enter') filtreazaCarti()">
                             </div>
                             <div class="flex-1 w-full">
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Autor (Ex: Jane Austen)</label>
-                                <input type="text" id="filtru-autor" class="w-full bg-[#f7fafc] border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#004c4c] transition text-sm font-medium text-gray-700" placeholder="Ex: Stephen King..." onkeypress="if(event.key==='Enter') filtreazaCarti()">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Autor</label>
+                                <input type="text" id="filtru-autor" class="w-full bg-[#f7fafc] border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#004c4c] transition text-sm font-medium text-gray-700" placeholder="" onkeypress="if(event.key==='Enter') filtreazaCarti()">
                             </div>
                             <button onclick="filtreazaCarti()" class="bg-[#004c4c] text-white px-10 py-3 rounded-xl font-bold hover:bg-[#006666] transition shadow-md w-full md:w-auto h-12">
                                 Caută
@@ -187,6 +208,17 @@
                             <input type="text" id="input-domeniu-nou" placeholder="Adaugă alt domeniu..." class="border border-gray-200 p-3 rounded-xl flex-1 outline-none bg-[#f7fafc] focus:border-[#004c4c] text-sm font-medium">
                             <button onclick="adaugaDomeniuNou()" class="bg-white border border-gray-300 px-6 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition text-sm">Adaugă</button>
                             <button onclick="salveazaTaxonomie()" class="bg-[#004c4c] text-white px-8 rounded-xl font-bold ml-2 hover:bg-[#006666] shadow-md transition text-sm">Salvează Preferințele</button>
+                        </div>
+                        <div class="mt-10 border-t border-gray-100 pt-8">
+                            <h3 class="font-bold text-lg mb-4 text-[#004c4c]">Status Academic UTCN</h3>
+                            <p class="text-xs text-[#3f4948] mb-4 font-medium">Deblochează bibliografia recomandată de profesori pentru disciplinele de la specializarea Calculatoare.</p>
+                            <div class="flex items-center gap-6">
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" id="checkbox-student" onchange="toggleStudentUtcn()" class="w-6 h-6 text-[#004c4c] bg-[#f7fafc] border-gray-300 rounded-md focus:ring-[#004c4c] transition">
+                                    <span class="text-sm font-extrabold text-gray-700">Sunt student UTCN</span>
+                                </label>
+                                <button id="btn-mergi-fisa" onclick="schimbaEcran('fisa')" class="hidden bg-[#004c4c] text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-[#003333] transition shadow-md">Mergi la Fișele de Disciplină</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -251,7 +283,7 @@
             <div id="ecran-notificari" class="hidden absolute inset-0 flex flex-col overflow-y-auto p-8 z-0 transition-opacity duration-300 opacity-0 bg-[#FCFAF2]">
                 <div class="max-w-4xl mx-auto w-full">
                     <h2 class="text-3xl font-extrabold font-manrope mb-2 text-[#004c4c]">Cutia Poștală</h2>
-                    <p class="text-gray-500 mb-8 font-medium">Cărți recomandate de prietenii tăi din comunitate.</p>
+                    <p class="text-gray-500 mb-8 font-medium">Cărți recomandate de prietenii tăi.</p>
 
                     <div id="lista-notificari" class="space-y-6 pb-20">
                         <div class="py-10 text-center text-gray-400 font-medium border-2 border-dashed border-gray-200 rounded-3xl bg-white/50 h-32 flex items-center justify-center">Nu ai primit nicio recomandare nouă.</div>
@@ -270,7 +302,6 @@
             </div>
             <div>
                 <h3 class="font-manrope text-xl font-bold text-[#004c4c]" id="sidebar-user-name">Se încarcă...</h3>
-                <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Membru</p>
             </div>
         </div>
 
@@ -278,9 +309,12 @@
             <a id="nav-profil" onclick="schimbaEcran('profil')" class="flex items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer">
                 <span class="font-inter text-sm tracking-wide">Profil & Preferințe</span>
             </a>
+            <a id="nav-fisa" onclick="schimbaEcran('fisa')" class="hidden items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer">
+                <span class="font-inter text-sm tracking-wide">Fișe de Disciplină (UTCN)</span>
+            </a>
 
             <a id="nav-galerie" onclick="schimbaEcran('galerie')" class="flex items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer">
-                <span class="font-inter text-sm tracking-wide">Galerie Cărți</span>
+                <span class="font-inter text-sm tracking-wide">Cărțile mele</span>
             </a>
 
             <a id="nav-trasee" onclick="schimbaEcran('trasee')" class="flex items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer">
@@ -288,11 +322,11 @@
             </a>
 
             <a id="nav-noutati" onclick="schimbaEcran('noutati')" class="flex items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer">
-                <span class="font-inter text-sm tracking-wide">Descoperă Cărți</span>
+                <span class="font-inter text-sm tracking-wide">Explorează</span>
             </a>
 
             <a id="nav-chat" onclick="schimbaEcran('chat')" class="flex items-center px-5 py-4 rounded-xl text-[#004c4c] font-extrabold translate-x-2 transition-transform bg-white shadow-sm border border-gray-200 cursor-pointer absolute bottom-8 left-8 right-8">
-                <span class="font-inter text-sm tracking-wide">Agent AI</span>
+                <span class="font-inter text-sm tracking-wide">Chat AI</span>
             </a>
         </nav>
     </aside>
@@ -344,10 +378,10 @@
                 <div class="flex-1 flex flex-col justify-center">
                     <h2 id="modal-traseu-titlu" class="text-2xl font-extrabold font-manrope text-[#004c4c] mb-1 leading-tight pr-16">Titlu Carte</h2>
                     <p id="modal-traseu-autor" class="text-gray-500 mb-4 font-medium text-lg">Autor</p>
-                    <div class="flex items-center gap-3">
-                        <span id="modal-traseu-insigna" class="inline-block px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#004c4c]/10 text-[#004c4c] border border-[#004c4c]/20">Analiză Detaliată</span>
-                        <button onclick="deschideModalRecomandare()" class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white text-[#004c4c] border border-[#004c4c]/20 hover:bg-[#004c4c] hover:text-white transition shadow-sm">Recomandă Prieten</button>
+
+                    <div class="flex items-center gap-2 flex-wrap" id="containere-butoane-traseu">
                     </div>
+
                 </div>
             </div>
             <div class="p-6 md:p-8 flex-1 overflow-y-auto bg-white">
@@ -393,6 +427,777 @@
     let domeniiDisponibile = ["Science Fiction", "Fantasy", "Thriller", "Mister", "Romance", "Istorie", "Psihologie", "Dragoste"];
     let currentTraseuData = [];
 
+    // === DATE BIBLIOGRAFIE UTCN ===
+    const disciplineUTCN = [
+        // ==========================================
+        // --- LICENȚĂ (Calculatoare) - ANUL I ---
+        // ==========================================
+        {
+            nivel: "licenta", nume: "Analiză matematică I ",
+            carti: [
+                { titlu: " Lecții de analiză matematică pentru ingineri", autor: "Bărbosu", profesor: "prof. Tascu" },
+                { titlu: " Calcul diferențial și ecuații diferențiale", autor: "Bărbosu", profesor: "prof. Tascu" },
+                { titlu: " Analiza Matematică. Calcul diferențial", autor: "Coroian", profesor: "prof. Tascu" },
+                { titlu: " Analiză matematică prin exerciții și probleme", autor: "Horvat-Marc", profesor: "prof. Tascu" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Algebră liniară, geometrie analitică și diferențială",
+            carti: [
+                { titlu: " Lecții de geometrie analitică și diferențială", autor: "Pişcoran Laurian Ioan", profesor: "prof. Piscoran" },
+                { titlu: " Algebră liniară, geometrie analitică și diferențială, vol. I și II.", autor: "Pop Maria Sînziana", profesor: "prof. Piscoran" },
+                { titlu: " Algebră, geometrie și ecuații diferențiale", autor: "Udrişte Constantin", profesor: "prof. Piscoran" },
+                { titlu: " Probleme de matematici superioare", autor: "Chiriţă S.", profesor: "prof. Piscoran" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Proiectare logică",
+            carti: [
+                { titlu: " Circuite digitale", autor: "Oniga Ștefan", profesor: "prof. ONIGA" },
+                { titlu: " Circuite digitale I - Note de curs", autor: "Oniga Ștefan", profesor: "prof. ONIGA" },
+                { titlu: " Circuite Integrate Digitale", autor: "S. Hintea", profesor: "prof. ONIGA" },
+                { titlu: " Principiile si practicile folosite in proiectare", autor: "John F. Wakerly", profesor: "prof. ONIGA" },
+                { titlu: " Digital Fundamentals", autor: "Thomas L. Floyd", profesor: "prof. ONIGA" },
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Programarea Calculatoarelor și Limbaje de Programare 1 ",
+            carti: [
+                { titlu: " Programarea calculatoarelor în limbajul C, vol.1: Elemente fundamentale", autor: "Ovidiu Cosma", profesor: "prof. Cosma" },
+                { titlu: " Programarea calculatoarelor în limbajul C, vol.2: Tipuri derivate", autor: "Ovidiu Cosma", profesor: "prof. Cosma" },
+                { titlu: " Manual de programare in limbajul C", autor: "Ovidiu Cosma", profesor: "prof. Cosma" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Fizica",
+            carti: [
+                { titlu: " Fizica generală - mecanica acustică", autor: "Pop", profesor: "prof. TODORAN" },
+                { titlu: "Fizică, E.D.P.", autor: "T.I. Creţu", profesor: "prof. TODORAN" },
+                { titlu: "Fizică generală, Vol. I şi Vol.II", autor: "T. Creţu", profesor: "prof. TODORAN" },
+                { titlu: "Optică", autor: "Daniela Todoran", profesor: "prof. TODORAN" },
+                { titlu: " Îndrumător de lucrări practice - Mecanică și acustică, Litografiat la Universitatea Baia Mare", autor: "Larisa Blându", profesor: "prof. TODORAN" },
+                { titlu: " Fizică – lucrări de laborator", autor: "M. Morar", profesor: "prof. TODORAN" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Limba Engleza I ",
+            carti: [
+                { titlu: " Technical English, suport de curs seminarizat de limba engleza pentru studenții in inginerie, anul I", autor: "Luminiţa Todea", profesor: "prof. Todea" },
+                { titlu: "Technical English, Vocabulary and Grammar", autor: "Nick Brieger", profesor: "prof. Todea" },
+                { titlu: " Everyday Technical English", autor: "Val Lambert", profesor: "prof. Todea" },
+                { titlu: "First Certificate Language Practice with key-English Grammar and Vocabulary", autor: "Michael Vince", profesor: "prof. Todea" },
+                { titlu: " Engineering Workshop", autor: "Lindsay White", profesor: "prof. Todea" },
+                { titlu: " Professional English in Use for Computers and the Internet", autor: "Santiago Esteras and Elena Fabre", profesor: "prof. Todea" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Educație fizică și sport I ",
+            carti: [
+                { titlu: " Pregătirea fizică a studenților,", autor: "Bănățean", profesor: "prof. Aurica" },
+                { titlu: "Educația fizică și pregătirea studenților, E.D.P", autor: "Popescu", profesor: "prof. Aurica" },
+                { titlu: "Metodica educației fizice, Note de curs, A.N.E.F.S.", autor: "Stănescu", profesor: "prof. Aurica" },
+                { titlu: "Teoria educației fizice și sportului, Curs A.N.E.F.S.", autor: "Virgil", profesor: "prof. Aurica" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Analiză matematică II ",
+            carti: [
+                { titlu: " Lecții de analiză matematică pentru ingineri", autor: "Bărbosu", profesor: "prof. Tascu" },
+                { titlu: " Calcul diferențial și ecuații diferențiale", autor: "Bărbosu", profesor: "prof. Tascu" },
+                { titlu: " Analiza Matematică. Calcul diferențial", autor: "Coroian", profesor: "prof. Tascu" },
+                { titlu: " Analiză matematică prin exerciții și probleme", autor: "Horvat-Marc", profesor: "prof. Tascu" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Matematici speciale I ",
+            carti: [
+                { titlu: " Lecții de analiză matematică pentru ingineri", autor: "Bărbosu", profesor: "prof. Tascu" },
+                { titlu: " Calcul diferențial și ecuații diferențiale", autor: "Bărbosu", profesor: "prof. Tascu" },
+                { titlu: " Analiza Matematică. Calcul diferențial", autor: "Coroian", profesor: "prof. Tascu" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Programarea Calculatoarelor și Limbaje de Programare 2 ",
+            carti: [
+                { titlu: " Manual de programare in limbajul C", autor: "Ovidiu Cosma", profesor: "prof. Cosma" },
+                { titlu: " Baze matematice pentru calculatoare numerice", autor: "Dan Ionescu", profesor: "prof. Cosma" },
+                { titlu: " Tratat de programarea calculatoarelor, Algoritmi fundamentali", autor: "Knuth D.E", profesor: "prof. Cosma" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Grafica asistata de calculator",
+            carti: [
+                { titlu: " AutoCAD comenzi 2D", autor: "DASCALESCU", profesor: "prof. DASCALESCU " },
+                { titlu: " DESEN TEHNIC INDUSTRIAL, Reprezentările, cotarea, notarea și înscrierea desenului tehnic. Aplicații", autor: "DASCALESCU", profesor: "prof. DASCALESCU " }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Electrotehnica ",
+            carti: [
+                { titlu: " Bazele electrotehnicii. Probleme. Vol 1", autor: "R. Radulet", profesor: "prof. Eleonora" },
+                { titlu: " Bazele electrotehnicii. Probleme", autor: "M. Preda", profesor: "prof. Eleonora" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Electronică digitală ",
+            carti: [
+                { titlu: " Circuite integrate digitale - Îndrumător de laborator", autor: "Lung, C.", profesor: "prof. ONIGA" },
+                { titlu: " Proiectarea circuitelor digitale VLSI", autor: "S. Hintea", profesor: "prof. ONIGA" },
+                { titlu: " Circuite integrate digitale. Structuri interne. Îndrumător de laborator.", autor: "C. Rus", profesor: "prof. ONIGA" },
+                { titlu: " Tehnologii de proiectare cu arii logice programabile.", autor: "S. Hintea", profesor: "prof. ONIGA" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Limba Engleza II ",
+            carti: [
+                { titlu: " Technical English, suport de curs seminarizat de limba engleza pentru studenții in inginerie, anul I", autor: "Luminiţa Todea", profesor: "prof. Todea" },
+                { titlu: " Technical English, Vocabulary and Grammar", autor: "Nick Brieger", profesor: "prof. Todea" },
+                { titlu: " First Certificate Language Practice with key-English Grammar and Vocabulary", autor: "Michael Vince", profesor: "prof. Todea" },
+                { titlu: " Engineering Workshop", autor: "Lindsay White", profesor: "prof. Todea" },
+                { titlu: " Destination B2 Grammar and Vocabulary", autor: "Mann, M.", profesor: "prof. Todea" },
+                { titlu: " Professional English in Use for Computers and the Internet", autor: "Santiago Esteras and Elena Fabre", profesor: "prof. Todea" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Educație fizică și sport II ",
+            carti: [
+                { titlu: " Pregătirea fizică a studenților,", autor: "Bănățean", profesor: "prof. Aurica" },
+                { titlu: "Educația fizică și pregătirea studenților, E.D.P", autor: "Popescu", profesor: "prof. Aurica" },
+                { titlu: "Metodica educației fizice, Note de curs, A.N.E.F.S.", autor: "Stănescu", profesor: "prof. Aurica" },
+                { titlu: "Teoria educației fizice și sportului, Curs A.N.E.F.S.", autor: "Virgil", profesor: "prof. Aurica" }
+            ]
+        },
+
+        // ==========================================
+        // --- LICENȚĂ (Calculatoare) - ANUL II ---
+        // ==========================================
+        {
+            nivel: "licenta", nume: "Matematici speciale II ",
+            carti: [
+                { titlu: " Matematici superioare II", autor: "D. Bărbosu", profesor: "prof. Tașcu" },
+                { titlu: " Higher Mathematics in Problems and Exercises, Vol. 1-2", autor: "P. E. Danko", profesor: "prof. Tașcu" },
+                { titlu: " Teoria erorilor de măsurare", autor: "I. Plăcințeanu", profesor: "prof. Tașcu" },
+                { titlu: "Matematici aplicate Vol. 1", autor: "I. Tașcu", profesor: "prof. Tașcu" },
+                { titlu: "Probabilități și statistică-Teorie și aplicații", autor: "I. Tascu", profesor: "prof. Tașcu" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Metode Numerice  ",
+            carti: [
+                { titlu: " A new method to apply the Voronovskaja type theorem", autor: "Dan Miclăuș", profesor: "prof. Miclăuș" },
+                { titlu: "Numerical Analysis", autor: "Richard Burden", profesor: "prof. Miclăuș" },
+                { titlu: "Numerical Analysis in Matlab", autor: "Radu Trîmbițaș", profesor: "prof. Miclăuș" },
+                { titlu: "Metode numerice în inginerie", autor: "Anton Hadăr", profesor: "prof. Miclăuș" },
+                { titlu: "Metode de calcul numeric", autor: "Nicolae Pop", profesor: "prof. Miclăuș" },
+                { titlu: "Metode numerice", autor: "Corneliu Berbente", profesor: "prof. Miclăuș" },
+                { titlu: "Analiză numerică", autor: "Gheorghe Coman", profesor: "prof. Miclăuș" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "STRUCTURI DE DATE SI ALGORITMI ",
+            carti: [
+                { titlu: "Structuri de date. Indrumător de lucrări de laborator", autor: "I.Ignat", profesor: "prof. Costea" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Dispozitive electronice si electronica analogica ",
+            carti: [
+                { titlu: "Electronica (EB-111). Îndrumător de laborator", autor: "Buchman Attila", profesor: "prof. Sabou" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Programarea Orientată pe Obiecte 1 (C++) ",
+            carti: [
+                { titlu: "Programare Orientată pe Obiecte în Limbajul C++", autor: "Ovidiu Cosma", profesor: "prof. Cosma" },
+                { titlu: "Analiza, proiectarea şi programarea orientate spre obiecte", autor: "Claudia Spircu", profesor: "prof. Cosma" },
+                { titlu: "C++ manual complet", autor: "Herbert Schildt", profesor: "prof. Cosma" },
+                { titlu: " Programarea orientată spre obiecte în limbajul C++", autor: "Ioan Jurca", profesor: "prof. Cosma" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Structura si organizarea calculatoarelor ",
+            carti: [
+                { titlu: "Programare în limbaj de asamblare x86", autor: "E. Lupu", profesor: "prof. Mic" },
+                { titlu: "Limbajul de asamblare x86. Probleme", autor: "G. Toderean", profesor: "prof. Mic" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "ELEMENTE DE GRAFICA PE CALCULATOR ",
+            carti: [
+                { titlu: "Computer Graphics. Principles and Practice", autor: "Foley J.D", profesor: "prof. Costea" },
+                { titlu: "3D Computer Graphics", autor: "Watt A", profesor: "prof. Costea" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Limba Engleza III (redactare documente tehnice) ",
+            carti: [
+                { titlu: " Infotech, English for Computer Users", autor: "Santiago R.E", profesor: "prof. Todea" },
+                { titlu: " English for Presentations", autor: "Marion Grussendorf", profesor: "prof. Todea" },
+                { titlu: "Engineering-Technical English for Professionals", autor: "Mark Ibbotson", profesor: "prof. Todea" },
+                { titlu: " Cambridge English for Engineering", autor: "Mark Ibbotson", profesor: "prof. Todea" },
+                { titlu: "Grammar Practice for Upper Intermediate Students", autor: "ElaineWalker", profesor: "prof. Todea" },
+                { titlu: " English for Science and Engineering", autor: "Ivor Williams", profesor: "prof. Todea" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Teoria Sistemelor ",
+            carti: [
+                { titlu: "Tehnica reglării automate, Îndrumător de laborator", autor: " Oprea", profesor: "prof. Barz" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Baze de date ",
+            carti: [
+                { titlu: "Perenitatea Conceptelor Promovate de Bazele de date", autor: "Alexandru Leluţiu", profesor: "prof. Sabo" },
+                { titlu: "Data Modeling and Relational Database Design", autor: "Jan Speelpenning", profesor: "prof. Sabo" },
+                { titlu: "Database Design for Mere Mortals", autor: "Michael J Hernandez", profesor: "prof. Sabo" },
+                { titlu: "Learning MySQL", autor: "Vinicius M", profesor: "prof. Sabo" },
+                { titlu: "Writing Stored Procedures for Microsoft SQL Server", autor: "Matt Shepke", profesor: "prof. Sabo" },
+                { titlu: "Microsoft SQL Server 2000 DBA Survival Guide", autor: "Mark Spenik", profesor: "prof. Sabo" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Proiectarea algoritmilor ",
+            carti: [
+                { titlu: " Introducere în Algoritmi", autor: "T. Cormen", profesor: "prof. Petrovan" },
+                { titlu: "Proiectarea algoritmilor", autor: "Lucanu", profesor: "prof. Petrovan" },
+                { titlu: " Introducere în analiza algorimilor", autor: "Giumale", profesor: "prof. Petrovan" },
+                { titlu: "Algoritmi fundamentali în C++", autor: "Logofatu", profesor: "prof. Petrovan" },
+                { titlu: "Algorithm Design", autor: "Jon Kleinberg", profesor: "prof. Petrovan" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Sisteme de operare ",
+            carti: [
+                { titlu: "Sisteme de operare moderne", autor: "Tanenbaum", profesor: "prof. Petrovan" },
+                { titlu: "Operating System Concepts", autor: "Silberschatz", profesor: "prof. Petrovan" },
+                { titlu: " Operating Systems: Internals and Design Principles", autor: "Stallings", profesor: "prof. Petrovan" },
+                { titlu: "Operating Systems: Three Easy Pieces", autor: "Arpaci-Dusseau", profesor: "prof. Petrovan" },
+                { titlu: " Modern Operating Systems", autor: "Tanenbaum", profesor: "prof. Petrovan" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Programarea în limbaj de asamblare ",
+            carti: [
+                { titlu: "Sisteme de programe pentru minicalculatoare", autor: "Boian F.M", profesor: "prof. ZELINA" },
+                { titlu: "Programmation en langage d’assemblage", autor: "Ceaparu M", profesor: "prof. ZELINA" },
+                { titlu: "Tratat de programare a calculatoarelor, vol. I, II, III", autor: "Knuth D.E", profesor: "prof. ZELINA" },
+                { titlu: " Procesoare Intel : programare în limbaj de asamblare", autor: "Lungu V.", profesor: "prof. ZELINA" },
+                { titlu: "Programarea în limbaj de asamblare : culegere de probleme", autor: "Ivan L", profesor: "prof. ZELINA" },
+                { titlu: " Programarea în limbaj de asamblare", autor: "Muscă Gh.", profesor: "prof. ZELINA" },
+                { titlu: " Totul despre microprocesorul Z80", autor: "Patrubany M", profesor: "prof. ZELINA" },
+                { titlu: " Programarea în limbaj de asamblare", autor: "Zelina Ioana", profesor: "prof. ZELINA" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Limba engleza IV - Redactare documente tehnice  ",
+            carti: [
+                { titlu: " Infotech, English for Computer Users", autor: "Santiago R.E", profesor: "prof. Todea" },
+                { titlu: " English for Presentations", autor: "Marion Grussendorf", profesor: "prof. Todea" },
+                { titlu: "Engineering-Technical English for Professionals", autor: "Mark Ibbotson", profesor: "prof. Todea" },
+                { titlu: " Cambridge English for Engineering", autor: "Mark Ibbotson", profesor: "prof. Todea" },
+                { titlu: " Making Effective Presentations", autor: "Comfort", profesor: "prof. Todea" },
+                { titlu: "Language and the Internet", autor: "Crystal", profesor: "prof. Todea" },
+                { titlu: "The Discourse of Negotiation", autor: "Firth", profesor: "prof. Todea" },
+                { titlu: " Power and Politeness in the Workplace", autor: "Holmes", profesor: "prof. Todea" },
+                { titlu: "The Mayfield Handbook of Technical and Scientific Writing", autor: "Perelman", profesor: "prof. Todea" }
+            ]
+        },
+
+
+        // ==========================================
+        // --- LICENȚĂ (Calculatoare) - ANUL III ---
+        // ==========================================
+        {
+            nivel: "licenta", nume: "Proiectare software ",
+            carti: [
+                { titlu: "Beginning XML", autor: " D. Hunter", profesor: "prof. Gâta" },
+                { titlu: "XSLT Cookbook: Solutions and Examples for XML and XSLT Developers", autor: "Sal Mangano", profesor: "prof. Gâta" },
+                { titlu: " Practical Approach To Software Engineering: With UML Diagram", autor: "Sunny Singh", profesor: "prof. Gâta" },
+                { titlu: " Use Case Driven Object Modeling with UML: Theory and Practice", autor: " Doug Rosenberg", profesor: "prof. Gâta" },
+                { titlu: "Using XML", autor: " Lee Anne Philips", profesor: "prof. Gâta" },
+                { titlu: "The Diagrams of UML 2.0", autor: "Scott Ambler", profesor: "prof. Gâta" },
+                { titlu: "Scott Ambler", autor: " Hamilton", profesor: "prof. Gâta" },
+                { titlu: "UML Distilled: A Brief Guide to the Standard Object Modeling Language", autor: "Fowler", profesor: "prof. Gâta" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Rețele de Calculatoare ",
+            carti: [
+                { titlu: "Reţele de calculatoare", autor: "Ovidiu Cosma", profesor: "prof. Cosma" },
+                { titlu: "Reţele de calculatoare", autor: "Andrew S.", profesor: "prof. Cosma" },
+                { titlu: "Practical Industrial Data Networks: Design, Installation and Troubleshooting, Elsevier", autor: "Steve Mackay ", profesor: "prof. Cosma" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Arhitectura sistemelor de calcul ",
+            carti: [
+                { titlu: "Proiectare asistată cu Circuite logice programabile", autor: "Mic Daniel", profesor: "prof. Mic" },
+                { titlu: "Programable Logic Handbook: PLD, CPLDs and FPGAs ", autor: " Ashok K. Sharma ", profesor: "prof. Mic" },
+                { titlu: "Electronică Digitală", autor: " Gheorghe Toacse", profesor: "prof. Mic" },
+                { titlu: "Circuite digitale", autor: " Oniga Ștefan", profesor: "prof. Mic" },
+                { titlu: "Digital Fundamentals", autor: "Thomas L", profesor: "prof. Mic" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Ingineria programelor  ",
+            carti: [
+                { titlu: "Software Engineering 8", autor: "Jan Sommerville", profesor: "prof. Matei" },
+                { titlu: "Software engineering", autor: " K. K. Aggarwal ", profesor: "prof. Matei" },
+                { titlu: "Fundamentals of Software Engineering", autor: " Carlo Ghezzi", profesor: "prof. Matei" },
+                { titlu: "Software Engineering", autor: " R. Stephen Schach", profesor: "prof. Matei" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Inteligență artificială ",
+            carti: [
+                { titlu: "Genetic Algorithms and Evolution Strategies", autor: "D. Dumitrescu", profesor: "prof. Matei" },
+                { titlu: "Neural Networks", autor: "D. Dumitrescu", profesor: "prof. Matei" },
+                { titlu: " Artificial Inteligence Principles", autor: " D. Dumitrescu", profesor: "prof. Matei" },
+                { titlu: "The generalized Minimum Spanning Tree Problem", autor: "P.C. Pop", profesor: "prof. Matei" },
+                { titlu: "A hybrid based genetic algorithm for solving a capacitated fixed-charge transportation problem", autor: "P.C. Pop", profesor: "prof. Matei" },
+                { titlu: "A Variable Neighborhood Search approach for solving the generalized vehicle routing problem", autor: "P.C. Pop", profesor: "prof. Matei" },
+                { titlu: "A genetic algorithm approach for the multidimensional two-way number partitioning problem", autor: "P.C. Pop", profesor: "prof. Matei" },
+                { titlu: "A genetic algorithm for solving the generalized vehicle routing problem", autor: "P.C. Pop", profesor: "prof. Matei" },
+                { titlu: "A Simulated Annealing Based Approach for Solving the Generalized Minimum Spanning Tree Problem", autor: "P.C. Pop", profesor: "prof. Matei" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Proiectarea bazelor de date ",
+            carti: [
+                { titlu: "Perenitatea Concepteleor Promovate de BAZELE de DATE", autor: "Alexandru Leluțiu", profesor: "prof. Văduva" },
+                { titlu: "Database Management Systems", autor: "Raghu Ramakrishnan", profesor: "prof. Văduva" },
+                { titlu: "Database Systems: Design", autor: "Peter Rob", profesor: "prof. Văduva" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Economie ",
+            carti: [
+                { titlu: "Bazele economiei", autor: "Bîrle", profesor: "prof. Bîrle" },
+                { titlu: "Integrarea economică", autor: "Dobrescu", profesor: "prof. Bîrle" },
+                { titlu: " Coordonator Economie politică", autor: "Dorobăţ", profesor: "prof. Bîrle" },
+                { titlu: "Libertatea de a alege, - o declarație personală", autor: "Friedman", profesor: "prof. Bîrle" },
+                { titlu: "Teoria generală a ocupării forței de muncă, a dobânzii și a banilor", autor: "Keynes", profesor: "prof. Bîrle" },
+                { titlu: " Conștiința unui liberal", autor: "Krugman", profesor: "prof. Bîrle" },
+                { titlu: " Ce este globalizarea? Ed. Economică", autor: "Marius", profesor: "prof. Bîrle" },
+                { titlu: "Integrarea economică regională", autor: "Miron", profesor: "prof. Bîrle" },
+                { titlu: "Economie comercială", autor: "Patriche", profesor: "prof. Bîrle" },
+                { titlu: "Globalizarea – mit şi realitate", autor: "Petrescu", profesor: "prof. Bîrle" },
+                { titlu: "Economie politică", autor: "Petrescu", profesor: "prof. Bîrle" },
+                { titlu: "Economie şi politici economice", autor: "Prahoveanu", profesor: "prof. Bîrle" },
+                { titlu: "Politici europene", autor: "Profiroiu", profesor: "prof. Bîrle" },
+                { titlu: "Economia crizelor", autor: "Roubini", profesor: "prof. Bîrle" },
+                { titlu: "Xece mari economiști, de la Marx la Keynes", autor: "Schumpeter", profesor: "prof. Bîrle" },
+                { titlu: "Microeconomie – teorie şi aplicații", autor: "Şarpe", profesor: "prof. Bîrle" },
+                { titlu: "Politici de marketing", autor: "Zima", profesor: "prof. Bîrle" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Proiectare cu microprocesoare ",
+            carti: [
+                { titlu: "MICROPROCESSORS Architectures and Applications", autor: "Lupu", profesor: "prof. Lupu" },
+                { titlu: "SISTEME CU MICROPROCESOARE. Resurse hardware. Prezentare, programare și aplicații.", autor: "Lupu", profesor: "prof. Lupu" },
+                { titlu: "LA BIBLE PC PROGRAMMATION SYSTEME. MICRO Application 1997 Sztojanov, I. și col. De la poarta TTL la Microprocesor (vol. II) ", autor: "Tischer M", profesor: "prof. Lupu" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Paradigme de programare  ",
+            carti: [
+                { titlu: "Functional Programming. Classic Programming Techniques for Modern Projects", autor: "O. Sturnm", profesor: "prof. Gâta" },
+                { titlu: "Microsoft Visual C# 2013, Step by Step", autor: "John Sharp", profesor: "prof. Gâta" },
+                { titlu: " Learn ASP.NET 4.5, C# and Visual Studio 2012, Expert Skills with the Smart Method", autor: "Simion Smart", profesor: "prof. Gâta" },
+                { titlu: "NET Book Zero", autor: " Charles Petzold", profesor: "prof. Gâta" },
+                { titlu: "Microsoft Visual C# 2010. An Introduction to Object-Oriented Programming", autor: "Joyce Farrel", profesor: "prof. Gâta" },
+                { titlu: "Pro C# 5.0 and the .NET 4.5 Framework", autor: "Adrew Troelsen", profesor: "prof. Gâta" },
+                { titlu: "Beginning C# 5.0 Databases", autor: "Vidya Vrat Agarwal", profesor: "prof. Gâta" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Managementul proiectelor software ",
+            carti: [
+                { titlu: " Function points as a measure of productivity", autor: " Albrecht", profesor: "prof. Matei" },
+                { titlu: "Introduction to Decision Analysis", autor: "Alemi", profesor: "prof. Matei" },
+                { titlu: "Extreme Programming: A Humanistic Discipline of Software Development", autor: "Beck", profesor: "prof. Matei" },
+                { titlu: " The Art of Project Management", autor: " Berkun", profesor: "prof. Matei" },
+                { titlu: "A Spiral Model of Software Development and Enhancement", autor: "Boehm", profesor: "prof. Matei" },
+                { titlu: "Software Engineering Economics", autor: " Boehm", profesor: "prof. Matei" },
+                { titlu: "A Guide to the Project Management Body of Knowledge", autor: "Duncan", profesor: "prof. Matei" },
+                { titlu: "General and Industrial Administration. London: Sir Issac Pitman &Sons", autor: "Fayol", profesor: "prof. Matei" },
+                { titlu: "Software Engineering with Visual Studio Team System", autor: "Guckenheimer", profesor: "prof. Matei" },
+                { titlu: "Introduction to Decision Analysis", autor: "Gustafson", profesor: "prof. Matei" },
+                { titlu: "Elements of Software Science", autor: " Halstead", profesor: "prof. Matei" },
+                { titlu: "Using a Strengths, Weaknesses, Opportunities, and Threats (SWOT) Analysis as a Risk Assessment and Risk Management Tool", autor: " Heimberg", profesor: "prof. Matei" },
+                { titlu: "Software Cost Estimation: Metrics and Models", autor: "Johnson", profesor: "prof. Matei" },
+                { titlu: "Decision Theory and Incomplete Knowledge", autor: "Kmietowicz", profesor: "prof. Matei" },
+                { titlu: " Decision Analysis", autor: " Kriwaczek", profesor: "prof. Matei" },
+                { titlu: "Ingineria programării", autor: "Leon", profesor: "prof. Matei" },
+                { titlu: "Software Engineering Methodology: The WaterSluice", autor: "LeRoi Burback", profesor: "prof. Matei" },
+                { titlu: "Structures in Fives: Designing Effective Organizations", autor: "Mintzberg", profesor: "prof. Matei" },
+                { titlu: "Decision Making Techniques", autor: "Mind Tools", profesor: "prof. Matei" },
+                { titlu: "Management Handbook for the Estimation of Computer Programming Costs", autor: "Nelson", profesor: "prof. Matei" },
+                { titlu: "Preparing for the Project Management Professional Certification Exam", autor: "Newell", profesor: "prof. Matei" },
+                { titlu: "Useful tools for project management", autor: "Norden", profesor: "prof. Matei" },
+                { titlu: "Software Engineering", autor: "Van Vliet", profesor: "prof. Matei" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Sisteme inteligente ",
+            carti: [
+                { titlu: "Evolutionary Computation: Principles and practices", autor: " O. Matei", profesor: "prof. Matei" },
+                { titlu: "Inițiere în inteligența artificială, Risoprint", autor: "Goron S", profesor: "prof. Matei" },
+                { titlu: "Inteligență artificială: îndrumar de laborator", autor: "Leția I.A", profesor: "prof. Matei" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Sisteme de prelucrare grafica ",
+            carti: [
+                { titlu: "3D Computer Graphics", autor: " Watt A", profesor: "prof. Costea" },
+                { titlu: "3D Games. Real-time Rendering and Software Technology", autor: "Watt A", profesor: "prof. Costea" },
+                { titlu: "Real-Time Rendering", autor: " Akenine-Moller T", profesor: "prof. Costea" },
+                { titlu: "Computer Graphics. Principles and Practice", autor: "Foley J.D", profesor: "prof. Costea" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Prelucrarea Imaginilor  ",
+            carti: [
+                { titlu: "Tehnici de Compresie a Imaginior", autor: "Ovidiu Cosma", profesor: "prof. Cosma" },
+                { titlu: "Prelucrarea Digitală a Imaginilor", autor: "Ovidiu Cosma", profesor: "prof. Cosma" },
+                { titlu: "Principles of Digital Image Processing Fundamental Techniques", autor: "Wilhelm Burger", profesor: "prof. Cosma" },
+                { titlu: "Digital Image Processing: A Practical Introduction Using Java", autor: "Nick Efford", profesor: "prof. Cosma" }
+            ]
+        },
+
+
+        // ==========================================
+        // --- LICENȚĂ (Calculatoare) - ANUL IV ---
+        // ==========================================
+        {
+            nivel: "licenta", nume: "Instrumentație virtuala ",
+            carti: [
+                { titlu: "Instrumentație Virtuală", autor: " Barz", profesor: "prof. Barz" },
+                { titlu: "Data acquisition for sensor systems", autor: "H. Taylor", profesor: "prof. Barz" },
+                { titlu: "Sisteme de conversie si achizitie de date", autor: "Dabâcan M", profesor: "prof. Barz" },
+                { titlu: " Elemente de inginerie electrică, reglarea automată şi automatizări", autor: " Oprea", profesor: "prof. Barz" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Masuratori electronice, senzori si traductoare",
+            carti: [
+                { titlu: "Standardizare şi Măsurări", autor: " Chiciuc", profesor: "prof. ERDEI" },
+                { titlu: " Masurari Electrice si Electronice, partea I", autor: "N Cotanis", profesor: "prof. ERDEI" },
+                { titlu: "Tehnica măsurării", autor: "Dumitrescu", profesor: "prof. ERDEI" },
+                { titlu: "Măsurări electrice şi electronice", autor: "Iliescu", profesor: "prof. ERDEI" },
+                { titlu: " Măsurări electrice, principii şi metode", autor: "Millea", profesor: "prof. ERDEI" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "SISTEME DISTRIBUITE  ",
+            carti: [
+                { titlu: "Distributed Systems. Concepts and Design", autor: " G. Coulouris", profesor: "prof. Costea" },
+                { titlu: " Distributed Systems", autor: " A. Tanenbaum", profesor: "prof. Costea" },
+                { titlu: " Distributed Computing", autor: " A.D. Kshemkalyan M.Singhal", profesor: "prof. Costea" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Proiectarea rețelelor de calculatoare ",
+            carti: [
+                { titlu: " Reţele de Calcultoare", autor: "A. S. Tanenbaum", profesor: "prof. Petrovan" },
+                { titlu: " Data and Computer Communications", autor: "W. Stallings", profesor: "prof. Petrovan" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "CALCUL MOBIL ",
+            carti: [
+                { titlu: "Beginning Android Application Development", autor: "Wei-Meng Lee", profesor: "prof. Costea" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "E-marketing  ",
+            carti: [
+                { titlu: "Marketing. Manual de Inginerie Economică", autor: "Bacali", profesor: "prof. Șteț" },
+                { titlu: " Esenţialul în  marketing", autor: "Blythe", profesor: "prof. Șteț" },
+                { titlu: " Manual de e-marketing", autor: "Haig", profesor: "prof. Șteț" },
+                { titlu: " Principiile Marketingului", autor: "Kotler", profesor: "prof. Șteț" },
+                { titlu: " E- marketing", autor: "Şteţ M", profesor: "prof. Șteț" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Integrarea sistemelor informatice  ",
+            carti: [
+                { titlu: " Applying UML and Patterns", autor: "Craig Larman", profesor: "prof. Petrovan" },
+                { titlu: " Writing Effective Use Cases", autor: "Alistair Cockburn", profesor: "prof. Petrovan" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Sisteme incorporate ",
+            carti: [
+                { titlu: " Embedded System Design", autor: "Peter Marwedel ", profesor: "prof. ONIGA" },
+                { titlu: "  Embedded  system  design:   A  unified  hardware/software Introduction", autor: "Frank  Vahid", profesor: "prof. ONIGA" },
+                { titlu: "  Proiectare asistată cu Circuite logice programabile", autor: "Mic Daniel", profesor: "prof. ONIGA" },
+                { titlu: " PicoBlaze 8-Bit Microcontroller for Virtex-E and Spartan-II/IIE Devices", autor: "Chapman", profesor: "prof. ONIGA" },
+                { titlu: " The 8051 microcontroller and embedded systems: using Assembly and C", autor: " Muhammad Ali Mazidi", profesor: "prof. ONIGA" },
+                { titlu: " Pagina web a disciplinei de Circuite integrate digitale", autor: "Oniga", profesor: "prof. ONIGA" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Invatare automata  ",
+            carti: [
+                { titlu: " Influence of context availability and soundness in predicting soil moisture using the Context-Aware Data Mining approach. Logic Journal of the IGPL", autor: " Avram", profesor: "prof. Matei" },
+                { titlu: "Missing Data in Collaborative Data Mining", autor: "Anton", profesor: "prof. Matei" },
+                { titlu: "Performance Analysis of Collaborative Data Mining vs Context Aware Data Mining in a Practical Scenario for Predicting Air Humidity", autor: "Anton", profesor: "prof. Matei" },
+                { titlu: "Use of Multiple Data Sources in Collaborative Data Mining.", autor: " Anton", profesor: "prof. Matei" },
+                { titlu: "Context-aware data mining vs classical data mining: case study on predicting soil moisture.", autor: "Avram", profesor: "prof. Matei" },
+                { titlu: "Collaborative data mining in agriculture for prediction of soil moisture and temperature.", autor: "Anton", profesor: "prof. Matei" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Criptografie și securitate informațională ",
+            carti: [
+                { titlu: "Understanding Cryptography: A Textbook for Students and Practitioners", autor: "Paar", profesor: "prof. Petrovan" },
+                { titlu: "Cryptography Engineering: Design Principles and Practical Applications", autor: "Ferguson", profesor: "prof. Petrovan" },
+                { titlu: "Cryptography and Network Security. Principles and Practice", autor: "Stallings", profesor: "prof. Petrovan" },
+                { titlu: " Cryptography: A Very Short Introduction", autor: "Piper", profesor: "prof. Petrovan" },
+                { titlu: " Protecția rețelelor conectate la Internet", autor: "Ogletree", profesor: "prof. Petrovan" },
+                { titlu: "The Secure Shell. TheDefinitive Guide", autor: "Barrett", profesor: "prof. Petrovan" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Structuri hardware reconfigurabile ",
+            carti: [
+                { titlu: " Proiectare asistata cu circuite logice programabile", autor: "D. Mic", profesor: "prof. ONIGA" },
+                { titlu: "  Proiectarea circuitelor digitale VLSI", autor: "S. Hintea", profesor: "prof. ONIGA" },
+                { titlu: " Advanced Digital Design", autor: "RichardE. Haskell", profesor: "prof. ONIGA" },
+                { titlu: " FPGA Prototyping By Verilog Examples: Xilinx Spartan-3 Version", autor: "Pong P. Chu", profesor: "prof. ONIGA" },
+                { titlu: "  Embedded system design: A unified hardware/software Introduction", autor: " Frank Vahid", profesor: "prof. ONIGA" },
+                { titlu: " Pagina web a disciplinei de Circuite integrate digitale", autor: "Oniga", profesor: "prof. ONIGA" }
+            ]
+        },
+
+        // ==========================================
+        // --- MASTER (SIIL) ---
+        // ==========================================
+        // ==========================================
+        // --- MASTER - ANUL 1 ---
+        // ==========================================
+        {
+            nivel: "master", nume: "Tehnologii de comunicație pentru IoT ",
+            carti: [
+                { titlu: "DWDM and Optical Networks", autor: "Otmar Krauss", profesor: "prof. Crisan" },
+                { titlu: "Fiber optic communication systems", autor: "Govind Agrawal", profesor: "prof. Crisan" },
+                { titlu: "Fundamentals of Telecommunications", autor: "Roger Freeman", profesor: "prof. Crisan" },
+                { titlu: " Data and Computer Communications", autor: "W. Stallings", profesor: "prof. Crisan" },
+                { titlu: "Telecommunication Transmision Handbook", autor: "Freeman", profesor: "prof. Crisan" },
+                { titlu: "Fundamentals of IoT Communication Technologies", autor: "Rolando Herrero", profesor: "prof. Crisan" },
+                { titlu: "Computer Networking: a Top Down Approach", autor: "James Kurose", profesor: "prof. Crisan" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Sisteme dedicate pentru IoT ",
+            carti: [
+                { titlu: " Digital Design and Computer Architecture", autor: " David Harris", profesor: "prof. ONIGA" },
+                { titlu: " Embedded Systems: A Contemporary Design Too", autor: " James K. Perkol", profesor: "prof. ONIGA" },
+                { titlu: " Eduardo de la Torre Arnanz and María Dolores Valdés Peña", autor: " Andina", profesor: "prof. ONIGA" },
+                { titlu: " Embedded Systems Architecture", autor: "Tammy Noergaard", profesor: "prof. ONIGA" },
+                { titlu: " Introduction to Embedded Systems – A Cyber-Physical Systems Approach", autor: "E. A. Lee", profesor: "prof. ONIGA" },
+                { titlu: " Embedded System Design – A Unified Hardware/Software Introduction", autor: "F. Vahid", profesor: "prof. ONIGA" },
+                { titlu: " Embedded Systems Foundations of Cyber-Physical Systems, and the Internet of Things", autor: "P. Marwedel", profesor: "prof. ONIGA" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Etica și integritate academică  ",
+            carti: [
+                { titlu: "Adevărul (cinstit) despre necinste. Cum îi minţim pe toţi dar mai ales pe noi înşine", autor: "Ariely", profesor: "prof. Șteț" },
+                { titlu: "Devianţa tolerată", autor: "Boncu", profesor: "prof. Șteț" },
+                { titlu: "Dilema. Cum alegem când nu avem de ales", autor: "Cathcart", profesor: "prof. Șteț" },
+                { titlu: "Etica aplicata", autor: "Miroiu", profesor: "prof. Șteț" },
+                { titlu: "Tratat de Etică", autor: "Singer", profesor: "prof. Șteț" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Tehnici de programare în IoT ",
+            carti: [
+                { titlu: "Fluent Python: Clear, Concise, and Effective Programming, Oreilly & Associates", autor: " Luciano Ramalho", profesor: "prof. Costea" },
+                { titlu: " Mastering Python Design Patterns. Birmingham", autor: " Kasampalis", profesor: "prof. Costea" },
+                { titlu: "Advanced Python Programming", autor: "Quan Nguyen", profesor: "prof. Costea" }
+            ]
+        },
+        {
+            nivel: "master", nume: "Retele de senzori și actuatori  ",
+            carti: [
+                { titlu: "Advanced Interfacing Techniques for Sensors Measurement Circuits and Systems for Intelligent Sensors", autor: "Boby George", profesor: "prof. LUNG" },
+                { titlu: "Embedded Sensors Systems", autor: "Dharma Prakash Agrawal", profesor: "prof. LUNG" },
+                { titlu: "The Things in IoT: Sensors and Actuators. In: Internet of Things From Hype to Reality", autor: "Rayes A", profesor: "prof. LUNG" },
+                { titlu: " A Reference Guide to the Internet of Things", autor: "Greg Dunko", profesor: "prof. LUNG" },
+                { titlu: " Protocoale și arhitecturi pentru rețele de senzori wireless", autor: "Holger Karl", profesor: "prof. LUNG" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Reprezentarea cunoștințelor ",
+            carti: [
+                { titlu: "Logic in Computer Science- Modelling and reasoning about systems", autor: "Michael Huth", profesor: "prof. Petrovan" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Analiza datelor ",
+            carti: [
+                { titlu: "STATISTICA INFERENTIALA. Aplicatii in SPSS", autor: "Buiga A", profesor: "prof. Matei" },
+                { titlu: "Applied Power Analysis for the Behavioral Sciences", autor: "Aberson  Ch.", profesor: "prof. Matei" },
+                { titlu: " Metodologia de sondaj şi analiza datelor în studiile de piaţă", autor: "Buiga A.", profesor: "prof. Matei" },
+                { titlu: "IBM SPSS Statistics 19 Made Simple", autor: "Gray C", profesor: "prof. Matei" },
+                { titlu: " SAS and R: Data Management, Statistical Analysis, and Graphics", autor: "Kleiman K.", profesor: "prof. Matei" },
+                { titlu: " Analiza datelor & informatica", autor: "Saporta G", profesor: "prof. Matei" },
+                { titlu: "Analiza datelor de marketing", autor: "Spircu L.", profesor: "prof. Matei" },
+                { titlu: "Analyse des donnees", autor: "Volle M", profesor: "prof. Matei" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Sisteme de calcul colaborativ ",
+            carti: [
+                { titlu: "Mastering Ethereum: Building Smart Contracts and Dapps", autor: "Andreas M. Antonopoulos", profesor: "prof. Costea" },
+                { titlu: "Blockchain for IoT, CRC Press", autor: "D. Mukhopadhyay", profesor: "prof. Costea" },
+                { titlu: "Blockchain: Principles and Applications in IoT  Chapman and Hall/CRC", autor: "R. Chakraborty", profesor: "prof. Costea" },
+                { titlu: "Rishabh Gar", autor: "Rishabh Garg", profesor: "prof. Costea" },
+                { titlu: "Self-Sovereign Identity - Decentralized Digital Identity And Verifiable Credentials", autor: "A. Preukschat", profesor: "prof. Costea" }
+
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Proiectarea HW-SW integrată a sistemelor de calcul dedicate ",
+            carti: [
+                { titlu: " MicroBlaze, XILINX MicroBlaze Soft Processor Core System User Guide", autor: " Xilinx", profesor: "prof. ONIGA" },
+                { titlu: " Zynq-7000 SoC: Embedded Design Tutorial. A Hands-On Guide to Effective Embedded System Design, UG1165", autor: " Xilinx", profesor: "prof. ONIGA" },
+                { titlu: " Vivado Dsign Suite Tutorial- embedded Processor Hardware Design", autor: " Xilinx", profesor: "prof. ONIGA" },
+                { titlu: "The Zynq Book Tutorials for Zybo and ZedBoard. Strathclyde Academic Media", autor: " Crockett", profesor: "prof. ONIGA" },
+                { titlu: "Exploring Zynq MPSoC : With PYNQ and Machine Learning Applications. Strathclyde Academic Media, Glasgow", autor: " Crockett", profesor: "prof. ONIGA" }
+            ]
+        },
+
+
+        // ==========================================
+        // --- MASTER - ANUL 2 ---
+        // ==========================================
+        {
+            nivel: "licenta", nume: "Deep learning",
+            carti: [
+                { titlu: "Deep Learning with Python", autor: " François Chollet", profesor: "prof. Matei" },
+                { titlu: "Deep Learning with Keras", autor: "Antonio Gulli", profesor: "prof. Matei" },
+                { titlu: "Deep Learning with Python: A Hands-on Introduction", autor: " Nikhil Ketkar", profesor: "prof. Matei" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Cloud computing ",
+            carti: [
+                { titlu: "Cloud Computing, Principles and Paradigms", autor: " Rajkumar Buyya", profesor: "prof. Matei" },
+                { titlu: "Cloud Computing: A Practical Approach", autor: "Anthony T. Velte", profesor: "prof. Matei" },
+                { titlu: "Grid and Cloud Computing A Business Perspective on Technology and Applications", autor: "Katarina Stanoevska Slabeva", profesor: "prof. Matei" },
+                { titlu: "Cloud computing and SOA convergence in your enterprise: a step-by-step guide", autor: "David Linthicum", profesor: "prof. Matei" },
+                { titlu: "Cloud Computing Implementation, Management, and Security", autor: " John W. Rittinghouse", profesor: "prof. Matei" },
+                { titlu: "The Cloud at Your Service", autor: "Jothy Rosenberg", profesor: "prof. Matei" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Edge computing ",
+            carti: [
+                { titlu: "Edge Computing Fundamentals, Advances and Applications", autor: " K. Anitha Kumari", profesor: "prof. ONIGA" },
+                { titlu: " TinyML: Machine Learning with TensorFlow Lite on Arduino and UltraLow-Power Microcontrollers", autor: "P. Warden", profesor: "prof. ONIGA" },
+                { titlu: "Edge Computing: Foundations, Technology, and Applications", autor: "Shui Yu", profesor: "prof. ONIGA" },
+                { titlu: " Edge Computing: A Survey", autor: "M. M. Ali", profesor: "prof. ONIGA" },
+                { titlu: "Practical Edge Computing: A Hands-On Guide to Building and Deploying Edge Computing Systems ", autor: " Shanmugavelayutham Ramaswamy", profesor: "prof. ONIGA" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "IoT industrial ",
+            carti: [
+                { titlu: "The Internet of Things in the Industrial Sector. Security and Device Connectivity, Smart Environments, and Industry 4.0, SpringerLink 2019", autor: "Zaigham Mahmood", profesor: "prof.  CRISAN" },
+                { titlu: "Industrial Internet of Things (IIoT) Applications of Edge and Fog Computing: A Review and Future Directions", autor: "G. S. S. Chalapathi", profesor: "prof.  CRISAN" },
+                { titlu: "Industrial Internet of Things: Technologies and Research Directions (Advances in IoT, Robotics, and Cyber Physical Systems for Industrial Transformation)", autor: "Anand Sharma", profesor: "prof.  CRISAN" },
+                { titlu: " Industrial Internet of Things: Cybermanufacturing System, (Springer Publication) ", autor: " Sabina Jeschke", profesor: "prof.  CRISAN" },
+                { titlu: "Industrial IoT Challenges, Design Principles, Applications, and Security ", autor: "Ismail Butun", profesor: "prof.  CRISAN" }
+            ]
+        },
+        {
+            nivel: "licenta", nume: "Securitate IoT ",
+            carti: [
+                { titlu: " IoT Penetration Testing Cookbook: Identify vulnerabilities and secure your smart devices", autor: "Aaron Guzman", profesor: "prof. Petrovan" },
+                { titlu: " Architecting the Internet of Things. Springer-Verlag Berlin Heidelberg", autor: "D. Uckelmann", profesor: "prof. Petrovan" },
+                { titlu: "Internet-of-Things (IoT) Systems: Architectures, Algorithms, Methodologies.", autor: "Dimitrios Serpanos", profesor: "prof. Petrovan" },
+                { titlu: "IoT Penetration Testing Cookbook: Identify vulnerabilities and secure your smart devices", autor: "Aaron Guzman", profesor: "prof. Petrovan" }
+            ]
+        },
+
+    ];
+
+    function toggleStudentUtcn() {
+        const isChecked = document.getElementById('checkbox-student').checked;
+        const btn = document.getElementById('btn-mergi-fisa');
+        const nav = document.getElementById('nav-fisa');
+
+        if(isChecked) {
+            btn.classList.remove('hidden');
+            nav.classList.remove('hidden');
+            nav.classList.add('flex');
+            renderToateDisciplinele(); // Încărcăm lista de cărți
+        } else {
+            btn.classList.add('hidden');
+            nav.classList.add('hidden');
+            nav.classList.remove('flex');
+            if(document.getElementById('ecran-fisa').classList.contains('z-10')) {
+                schimbaEcran('profil'); // Ne întoarcem dacă a debifat
+            }
+        }
+    }
+
+    function renderToateDisciplinele() {
+        filtreazaDiscipline('licenta');
+        filtreazaDiscipline('master');
+    }
+
+    function filtreazaDiscipline(nivel) {
+        // Obținem valoarea din input-ul specific (cauta-licenta sau cauta-master)
+        const inputElement = document.getElementById('cauta-' + nivel);
+        const input = inputElement ? inputElement.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
+
+        const container = document.getElementById('rezultate-' + nivel);
+        container.innerHTML = '';
+
+        // Filtram disciplinele în funcție de nivel și de termenul căutat
+        const filtrate = disciplineUTCN.filter(d =>
+            d.nivel === nivel && d.nume.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(input)
+        );
+
+        if(filtrate.length === 0) {
+            container.innerHTML = `<div class="col-span-full py-10 text-center text-sm font-bold text-gray-400 border-2 border-dashed border-gray-200 rounded-2xl">Nu am găsit nicio disciplină.</div>`;
+            return;
+        }
+
+        // Dacă utilizatorul nu a scris nimic, afișăm doar primele 2 discipline pentru aerisire
+        // Dacă a scris ceva, le afișăm pe toate cele găsite
+        const afisate = (input === "") ? filtrate.slice(0, 2) : filtrate;
+
+        afisate.forEach(d => {
+            let cartiHtml = d.carti.map(c => `
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-[#f8fbfb] p-4 rounded-xl border border-gray-100 mt-3 hover:border-[#004c4c]/30 transition group shadow-sm">
+                    <div class="mb-3 sm:mb-0">
+                        <p class="text-[15px] font-extrabold font-manrope text-[#004c4c]">${c.titlu}</p>
+                        <p class="text-[11px] text-gray-500 uppercase tracking-wider font-bold mt-1">de ${c.autor} &nbsp;|&nbsp; <span class="text-[#004c4c] bg-[#004c4c]/5 px-2 py-0.5 rounded-md">Recomandat de ${c.profesor}</span></p>
+                    </div>
+                    <button onclick="adaugaTBR('${c.titlu.replace(/'/g, "\\'")}', '${c.autor.replace(/'/g, "\\'")}')" class="bg-white border border-gray-200 text-[#004c4c] px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-[#004c4c] hover:text-white transition shadow-sm shrink-0">Adaugă în TBR</button>
+                </div>
+            `).join('');
+
+            container.innerHTML += `
+                <div class="border border-gray-200 rounded-3xl p-6 shadow-sm hover:shadow-md transition bg-white">
+                    <div class="flex items-center gap-3 mb-4 border-b border-gray-100 pb-3">
+                        <span class="bg-[#004c4c]/10 text-[#004c4c] px-2 py-1 rounded text-[10px] font-extrabold uppercase tracking-widest border border-[#004c4c]/20">Curs</span>
+                        <h4 class="font-extrabold font-manrope text-gray-900 text-lg">${d.nume}</h4>
+                    </div>
+                    ${cartiHtml}
+                </div>
+            `;
+        });
+    }
+
+
     window.onload = function() {
         document.getElementById('sidebar-user-name').innerText = currentUser;
         document.getElementById('avatar-initial').innerText = currentUser.charAt(0).toUpperCase();
@@ -409,7 +1214,7 @@
     };
 
     function schimbaEcran(numeEcran) {
-        const ecrane = ['profil', 'galerie', 'trasee', 'noutati', 'chat', 'notificari'];
+        const ecrane = ['profil', 'galerie', 'trasee', 'noutati', 'chat', 'notificari', 'fisa'];
         ecrane.forEach(e => {
             const div = document.getElementById('ecran-' + e);
             const nav = document.getElementById('nav-' + e);
@@ -425,7 +1230,7 @@
                 div.classList.remove('z-10');
                 setTimeout(() => div.classList.add('hidden'), 300);
 
-                if(nav && e !== 'notificari') nav.className = "flex items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer";
+                if(nav && e !== 'notificari') nav.className = "hidden md:flex items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer";
             }
         });
 
@@ -649,6 +1454,7 @@
         if(!t) return;
         const box = document.getElementById('chat-messages');
 
+        // Mesajul tău (Utilizator)
         box.innerHTML += `
             <div class="flex flex-col items-end max-w-4xl ml-auto w-full mb-2 mt-4">
                 <div class="flex items-center gap-3 mb-2 px-1">
@@ -663,11 +1469,11 @@
         inp.value = "";
         box.scrollTop = box.scrollHeight;
 
+        // Animația de încărcare
         const idLoader = 'loader-' + Date.now();
         box.innerHTML += `
             <div id="${idLoader}" class="flex flex-col items-start max-w-4xl mr-auto w-full mb-4">
-                <div class="bg-white p-5 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 flex items-center gap-3 typing-indicator">
-                    <span class="text-[#004c4c] font-bold text-xs uppercase tracking-wider font-manrope mr-2">Procesare Analitică</span>
+                <div class="bg-white p-5 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 flex items-center typing-indicator">
                     <span></span><span></span><span></span>
                 </div>
             </div>`;
@@ -682,31 +1488,45 @@
             const rawAiText = await res.text();
             document.getElementById(idLoader).remove();
 
+            // 1. Găsim și transformăm cărțile în carduri interactive (ACUM CU COPERTĂ)
             const regexCarte = /\[CARTE:\s*(.*?)\s*\|\s*(.*?)\s*\]/g;
             let aiTextFormatat = rawAiText.replace(regexCarte, (match, titlu, autor) => {
                 const cleanTitlu = titlu.replace(/'/g, "\\'").trim();
                 const cleanAutor = autor.replace(/'/g, "\\'").trim();
+
+                // Generăm URL-ul pozei din sistemul nostru
+                const imgStr = `/api/carti/coperta?titlu=${encodeURIComponent(cleanTitlu)}&autor=${encodeURIComponent(cleanAutor)}`;
+
                 return `
-                    <div class="mt-6 mb-4 p-6 bg-white border border-[#004c4c]/20 rounded-2xl shadow-sm text-sm inline-block w-full">
-                        <div class="font-extrabold font-manrope text-[#004c4c] mb-1 text-xl">${titlu}</div>
-                        <div class="font-medium text-gray-500 text-sm italic mb-4">de ${autor}</div>
-                        <div class="flex gap-3 flex-wrap border-t border-gray-100 pt-4">
-                            <button onclick="adaugaTBR('${cleanTitlu}', '${cleanAutor}')" class="bg-[#004c4c] text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-[#003333] transition shadow-sm">Adaugă în Listă</button>
-                            <button onclick="deschideModalCarteDinChat('${cleanTitlu}', '${cleanAutor}')" class="bg-[#f7fafc] border border-gray-200 text-gray-700 px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-gray-100 transition shadow-sm">Detalii AI</button>
+                    <div class="mt-4 mb-4 p-4 bg-[#f8fbfb] border border-[#004c4c]/20 rounded-2xl shadow-sm text-sm flex flex-row gap-4 w-full max-w-md items-start transition-all hover:shadow-md">
+                        <img src="${imgStr}" alt="Copertă" class="w-16 h-24 object-cover rounded-lg shadow-sm border border-gray-200 shrink-0" onerror="this.src='https://placehold.co/150x220/f7fafc/004c4c?text=AuraDB'">
+
+                        <div class="flex-1 flex flex-col justify-center">
+                            <div class="font-extrabold font-manrope text-[#004c4c] mb-1 text-lg leading-tight">${titlu}</div>
+                            <div class="font-medium text-gray-500 text-[11px] uppercase tracking-wider mb-3">de ${autor}</div>
+
+                            <div class="flex gap-2 flex-wrap mt-auto">
+                                <button onclick="adaugaTBR('${cleanTitlu}', '${cleanAutor}')" class="bg-[#004c4c] text-white px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-[#003333] transition shadow-sm">Adaugă în TBR</button>
+                                <button onclick="deschideModalCarteDinChat('${cleanTitlu}', '${cleanAutor}')" class="bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-gray-50 transition shadow-sm">Detalii AI</button>
+                            </div>
                         </div>
                     </div>`;
             });
 
+            // 2. Formatăm textul bold
             aiTextFormatat = aiTextFormatat.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#004c4c] font-extrabold">$1</strong>');
-            aiTextFormatat = aiTextFormatat.replace(/(.*?)(?=\n|$)/g, '<div class="mt-3 bg-[#FCFAF2] p-4 rounded-xl border-l-4 border-[#004c4c] text-sm text-gray-800 shadow-sm font-medium"><span class="font-extrabold text-[#004c4c] uppercase tracking-wider text-[10px] block mb-1">Argumentație Logică</span>$1</div>');
 
+            // 3. Înlocuim spațiile libere (Enter) cu paragrafe HTML, FĂRĂ acele chenare urâte
+            aiTextFormatat = aiTextFormatat.replace(/\n/g, '<br>');
+
+            // Răspunsul Agentului AI
             box.innerHTML += `
                 <div class="flex flex-col items-start max-w-4xl mr-auto w-full mb-4">
                     <div class="flex items-center gap-3 mb-2 px-1">
                         <span class="text-xs font-bold text-[#004c4c] uppercase tracking-wider">Agent AI</span>
                     </div>
                     <div class="bg-white p-8 rounded-2xl rounded-tl-none shadow-[0px_8px_24px_rgba(0,76,76,0.05)] border border-gray-100">
-                        <div class="text-gray-800 font-manrope leading-relaxed font-medium whitespace-pre-wrap">${aiTextFormatat}</div>
+                        <div class="text-gray-800 font-manrope leading-relaxed font-medium">${aiTextFormatat}</div>
                     </div>
                 </div>`;
 
@@ -723,11 +1543,11 @@
     // ============================================================
     async function filtreazaCarti() {
         const container = document.getElementById('grila-carti');
-        const subiect = document.getElementById('filtru-gen').value.toLowerCase().trim();
-        const autor = document.getElementById('filtru-autor').value.toLowerCase().trim();
+        const titluInput = document.getElementById('filtru-titlu').value.toLowerCase().trim();
+        const autorInput = document.getElementById('filtru-autor').value.toLowerCase().trim();
 
-        if (!subiect && !autor) {
-            container.innerHTML = "<col-span-4 py-20 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-3xl font-medium'>Selectează o categorie sau un autor pentru a explora colecția.</div>";
+        if (!titluInput && !autorInput) {
+            container.innerHTML = "<div class='col-span-4 py-20 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-3xl font-medium'>Selectează un titlu sau un autor pentru a explora colecția.</div>";
             return;
         }
 
@@ -744,30 +1564,20 @@
                 return str.toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
             };
 
-            const subLower = eliminaDiacritice(subiect);
-            const autLower = eliminaDiacritice(autor);
+            const titluLower = eliminaDiacritice(titluInput);
+            const autLower = eliminaDiacritice(autorInput);
 
             const filtrate = toateCartile.filter(c => {
-                const catStr = eliminaDiacritice(getSafeStr(c.categorie));
+                const titluStr = eliminaDiacritice(getSafeStr(c.titlu));
                 const autStr = eliminaDiacritice(getSafeStr(c.autor));
-                const tagStr = eliminaDiacritice(getSafeStr(c.taguri));
 
-                let matchSubiect = false;
-                if (subLower !== "") {
-                    // CAUTĂ STRICT ÎN CATEGORIE SAU CUVINTE CHEIE (TAGS)
-                    matchSubiect = catStr.includes(subLower) || tagStr.includes(subLower);
-                }
+                let matchTitlu = titluLower !== "" ? titluStr.includes(titluLower) : false;
+                let matchAutor = autLower !== "" ? autStr.includes(autLower) : false;
 
-                let matchAutor = false;
-                if (autLower !== "") {
-                    // CAUTĂ STRICT DUPĂ AUTOR
-                    matchAutor = autStr.includes(autLower);
-                }
-
-                if (subLower !== "" && autLower !== "") {
-                    return matchSubiect || matchAutor;
-                } else if (subLower !== "") {
-                    return matchSubiect;
+                if (titluLower !== "" && autLower !== "") {
+                    return matchTitlu || matchAutor;
+                } else if (titluLower !== "") {
+                    return matchTitlu;
                 } else if (autLower !== "") {
                     return matchAutor;
                 }
@@ -850,13 +1660,16 @@
     }
 
     async function incarcaTraseeSalvate() {
-        const res = await fetch('/api/trasee/salvate'); const data = await res.json();
-        document.getElementById('lista-trasee-salvate').innerHTML = data.map(t => `<li onclick="incarcaTraseuExistent('${t}')" class="p-4 bg-[#f7fafc] border border-gray-200 rounded-xl text-sm font-bold text-[#004c4c] hover:bg-[#004c4c] hover:text-white cursor-pointer transition shadow-sm mb-3 text-center">${t}</li>`).join('');
+        // Acum trimitem si username-ul la server
+        const res = await fetch(`/api/trasee/salvate?username=${encodeURIComponent(currentUser)}`);
+        const data = await res.json();
+        document.getElementById('lista-trasee-salvate').innerHTML = data.map(t => `<li onclick="incarcaTraseuExistent('${t.replace(/'/g, "\\'")}')" class="p-4 bg-[#f7fafc] border border-gray-200 rounded-xl text-sm font-bold text-[#004c4c] hover:bg-[#004c4c] hover:text-white cursor-pointer transition shadow-sm mb-3 text-center">${t}</li>`).join('');
     }
 
     async function incarcaTraseuExistent(s) {
         document.getElementById('rezultat-traseu').innerHTML = "<div class='text-center py-20 text-[#004c4c] font-bold animate-pulse'>Se descarcă structura detaliată...</div>";
-        const res = await fetch(`/api/agent/traseu-salvat?subiect=${encodeURIComponent(s)}`);
+        // Acum trimitem si username-ul pentru a incarca detaliile
+        const res = await fetch(`/api/agent/traseu-salvat?subiect=${encodeURIComponent(s)}&username=${encodeURIComponent(currentUser)}`);
         currentTraseuData = JSON.parse(await res.text()); renderTraseuInitial();
     }
 
@@ -874,7 +1687,7 @@
         if (!currentTraseuData || currentTraseuData.length === 0) return;
         let html = renderEtapaHtml(currentTraseuData[0], 1);
         if (currentTraseuData.length > 1) {
-            html += `<div id="bloc-intrebare-baze" class="bg-[#f8fbfb] border border-[#004c4c]/20 p-8 rounded-3xl mb-10 text-center shadow-sm relative overflow-hidden"><div class="absolute top-0 left-0 w-2 h-full bg-[#004c4c]"></div><h4 class="font-extrabold font-manrope text-[#004c4c] text-xl mb-6">Ai parcurs deja lectura fundamentală menționată anterior?</h4><div class="flex flex-col sm:flex-row justify-center gap-4"><button onclick="dezvaluieRestulTraseului('da')" class="px-8 py-4 bg-[#004c4c] text-white font-bold rounded-xl hover:bg-[#003333] transition shadow-md flex-1 sm:flex-none">Confirm parcurgerea</button><button onclick="dezvaluieRestulTraseului('nu')" class="px-8 py-4 bg-white text-[#004c4c] border border-gray-200 font-bold rounded-xl hover:bg-gray-50 transition shadow-sm flex-1 sm:flex-none">Doresc să încep cu ea</button></div></div>`;
+            html += `<div id="bloc-intrebare-baze" class="bg-[#f8fbfb] border border-[#004c4c]/20 p-8 rounded-3xl mb-10 text-center shadow-sm relative overflow-hidden"><div class="absolute top-0 left-0 w-2 h-full bg-[#004c4c]"></div><h4 class="font-extrabold font-manrope text-[#004c4c] text-xl mb-6">Îți recomand să începi cu cartea aceasta de bază.</h4><div class="flex flex-col sm:flex-row justify-center gap-4"><button onclick="dezvaluieRestulTraseului('da')" class="px-8 py-4 bg-[#004c4c] text-white font-bold rounded-xl hover:bg-[#003333] transition shadow-md flex-1 sm:flex-none">Doresc să merg la cele avansate</button><button onclick="dezvaluieRestulTraseului('nu')" class="px-8 py-4 bg-white text-[#004c4c] border border-gray-200 font-bold rounded-xl hover:bg-gray-50 transition shadow-sm flex-1 sm:flex-none">Doresc să încep cu ea</button></div></div>`;
         }
         html += `<div id="restul-etapelor-traseu" class="hidden opacity-0 transition-opacity duration-500">`;
         for(let i = 1; i < currentTraseuData.length; i++) { html += renderEtapaHtml(currentTraseuData[i], i + 1); }
@@ -1005,8 +1818,34 @@
         }).join('');
     }
 
-    function adaugaTBR(titlu, autor) { if(!myTBR.find(b => b.titlu === titlu)) { myTBR.push({titlu, autor}); localStorage.setItem('tbr_' + currentUser, JSON.stringify(myTBR)); deseneazaTBR(); alert(`Adăugată în lista ta TBR`); } }
-    function stergeTBR(titlu) { myTBR = myTBR.filter(b => b.titlu !== titlu); localStorage.setItem('tbr_' + currentUser, JSON.stringify(myTBR)); deseneazaTBR(); }
+    function adaugaTBR(titlu, autor) {
+        // Curățăm spațiile accidentale de la început și sfârșit
+        const titluCurat = titlu.trim();
+        const autorCurat = autor.trim();
+
+        // Verificăm dacă există deja, ignorând spațiile
+        if(!myTBR.find(b => (b.titlu || b.title || "").trim() === titluCurat)) {
+            myTBR.push({titlu: titluCurat, autor: autorCurat});
+            localStorage.setItem('tbr_' + currentUser, JSON.stringify(myTBR));
+            deseneazaTBR();
+            alert(`Adăugată în lista ta TBR`);
+        } else {
+            alert(`Cartea este deja în lista ta!`);
+        }
+    }
+    function stergeTBR(titluDeSters) {
+        // Curățăm spațiile din titlul pe care vrem să-l ștergem
+        const titluCurat = titluDeSters.trim();
+
+        // Păstrăm în listă doar cărțile care NU se potrivesc cu titlul curățat
+        myTBR = myTBR.filter(b => {
+            const titluInLista = (b.titlu || b.title || "").trim();
+            return titluInLista !== titluCurat;
+        });
+
+        localStorage.setItem('tbr_' + currentUser, JSON.stringify(myTBR));
+        deseneazaTBR();
+    }
 
     function inchideModal() { document.getElementById('modal-carte').classList.add('hidden'); }
     function inchideModalTraseu() { document.getElementById('modal-carte-traseu').classList.add('hidden'); }
@@ -1034,8 +1873,17 @@
         document.getElementById('modal-traseu-rezumat').innerHTML = "<span class='animate-pulse text-[#004c4c] font-bold'>Se conectează la serverul AI...</span>";
         document.getElementById('modal-traseu-teme').innerHTML = "";
         document.getElementById('modal-traseu-despre-autor').innerText = "";
-        document.getElementById('modal-traseu-insigna').innerText = "ÎN AȘTEPTARE";
-        document.getElementById('modal-traseu-insigna').className = "inline-block px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-gray-100 text-gray-500 border border-gray-200";
+
+        const safeTitlu = titlu.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeAutor = autor.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+        // Aici adăugăm DINAMIC toate cele 4 butoane mici din partea de sus a modalului de Traseu
+        document.getElementById('containere-butoane-traseu').innerHTML = `
+            <span id="modal-traseu-insigna" class="inline-block px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-gray-100 text-gray-500 border border-gray-200">ÎN AȘTEPTARE</span>
+            <button onclick="deschideModalRecomandare()" class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white text-[#004c4c] border border-[#004c4c]/20 hover:bg-[#004c4c] hover:text-white transition shadow-sm">Recomandă</button>
+            <button onclick="adaugaTBR('${safeTitlu}', '${safeAutor}')" class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#f7fafc] text-gray-700 border border-gray-200 hover:bg-gray-100 transition shadow-sm">De citit</button>
+            <button onclick="marcheazaCaCitita('${safeTitlu}', '${safeAutor}')" class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#004c4c] text-white border border-[#004c4c] hover:bg-[#003333] transition shadow-sm">Citită</button>
+        `;
 
         try {
             const res = await fetch(`/api/carti/detalii-complete?titlu=${encodeURIComponent(titlu)}&autor=${encodeURIComponent(autor)}`);
@@ -1048,10 +1896,11 @@
             let sursaFinala = date.sursa_date;
             if(sursaFinala === "DIN MEMGRAPH" || sursaFinala === "DATE EXTRAS DIN AURADB") { sursaFinala = "AURADB"; }
 
-            document.getElementById('modal-traseu-insigna').innerText = "SURSA DATE: " + sursaFinala;
             if(sursaFinala === "AURADB") {
+                document.getElementById('modal-traseu-insigna').innerText = "DATE: AURADB";
                 document.getElementById('modal-traseu-insigna').className = "inline-block px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#004c4c]/10 text-[#004c4c] border border-[#004c4c]/20";
             } else {
+                document.getElementById('modal-traseu-insigna').innerText = "DATE: AI";
                 document.getElementById('modal-traseu-insigna').className = "inline-block px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-blue-50 text-blue-600 border border-blue-200";
             }
 
@@ -1075,7 +1924,10 @@
         const safeAutor = (c.autor || 'Necunoscut').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         document.getElementById('modal-actions').innerHTML = `
             <button id="btn-genereaza-rezumat" onclick="genereazaRezumatAI()" class="w-full py-4 bg-[#004c4c] text-white rounded-xl font-bold shadow-md hover:bg-[#003333] transition flex items-center justify-center">Generare Analiză AI</button>
-            <button onclick="adaugaTBR('${safeTitlu}', '${safeAutor}')" class="w-full py-4 bg-[#f7fafc] border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition shadow-sm mt-2">Adaugă în lista TBR</button>
+            <div class="flex gap-4 mt-2">
+                <button onclick="adaugaTBR('${safeTitlu}', '${safeAutor}')" class="flex-1 py-4 bg-[#f7fafc] border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition shadow-sm">De citit (TBR)</button>
+                <button onclick="marcheazaCaCitita('${safeTitlu}', '${safeAutor}')" class="flex-1 py-4 bg-white border border-[#004c4c] text-[#004c4c] rounded-xl font-bold hover:bg-[#004c4c] hover:text-white transition shadow-sm">Carte citită</button>
+            </div>
         `;
         document.getElementById('modal-carte').classList.remove('hidden');
     }
@@ -1093,11 +1945,32 @@
 
         document.getElementById('modal-actions').innerHTML = `
             <button id="btn-genereaza-rezumat" onclick="genereazaRezumatAI()" class="w-full py-4 bg-[#004c4c] text-white rounded-xl font-bold shadow-sm hover:bg-[#003333] transition">Generare Analiză AI</button>
-            <button onclick="adaugaTBR('${safeTitlu}', '${safeAutor}')" class="w-full py-4 bg-[#f7fafc] border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition shadow-sm mt-2">Adaugă în lista TBR</button>
+            <div class="flex gap-4 mt-2">
+                <button onclick="adaugaTBR('${safeTitlu}', '${safeAutor}')" class="flex-1 py-4 bg-[#f7fafc] border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition shadow-sm">De citit (TBR)</button>
+                <button onclick="marcheazaCaCitita('${safeTitlu}', '${safeAutor}')" class="flex-1 py-4 bg-white border border-[#004c4c] text-[#004c4c] rounded-xl font-bold hover:bg-[#004c4c] hover:text-white transition shadow-sm">Carte citită</button>
+            </div>
             <div class="flex gap-4 mt-3">
                 <button onclick="cautaPeNet('${safeTitlu}', '${safeAutor}')" class="flex-1 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 shadow-sm transition">Căutare Web</button>
             </div>`;
         document.getElementById('modal-carte').classList.remove('hidden');
+    }
+
+    // Funcția nouă care trimite cartea în grila "Cărțile citite"
+    async function marcheazaCaCitita(titlu, autor) {
+        if(!myBooks.find(b => (b.titlu || b.title) === titlu)) {
+            myBooks.push({title: titlu, author: autor});
+            deseneazaCartiCitite(); // Re-desenează grila de cărți citite
+            try {
+                await fetch('/api/utilizator/adauga-lectura', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({username:currentUser, titlu:titlu, autor:autor})
+                });
+            } catch(e) {}
+            alert("Cartea a fost adăugată în secțiunea 'Cărțile citite'!");
+        } else {
+            alert("Această carte este deja în istoricul tău de lecturi.");
+        }
     }
 
     function cautaPeNet(titlu, autor) { window.open(`https://www.google.com/search?q=${encodeURIComponent(titlu + ' ' + autor + ' carte')}`, '_blank'); }
