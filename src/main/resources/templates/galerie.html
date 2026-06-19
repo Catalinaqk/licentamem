@@ -1134,15 +1134,17 @@
 
         if(isChecked) {
             btn.classList.remove('hidden');
-            nav.classList.remove('hidden');
-            nav.classList.add('flex');
+            // Dacă bifează, arătăm meniul cu stilul normal
+            nav.className = "flex items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer";
             renderToateDisciplinele(); // Încărcăm lista de cărți
         } else {
             btn.classList.add('hidden');
-            nav.classList.add('hidden');
-            nav.classList.remove('flex');
+            // Dacă scoate bifa, îl ascundem complet
+            nav.className = "hidden";
+
+            // Dacă e deja pe ecranul cu fișele și scoate bifa, îl aruncăm înapoi pe profil
             if(document.getElementById('ecran-fisa').classList.contains('z-10')) {
-                schimbaEcran('profil'); // Ne întoarcem dacă a debifat
+                schimbaEcran('profil');
             }
         }
     }
@@ -1215,6 +1217,10 @@
 
     function schimbaEcran(numeEcran) {
         const ecrane = ['profil', 'galerie', 'trasee', 'noutati', 'chat', 'notificari', 'fisa'];
+
+        // Verificăm dacă are bifa pusă în momentul ăsta
+        const isStudent = document.getElementById('checkbox-student') ? document.getElementById('checkbox-student').checked : false;
+
         ecrane.forEach(e => {
             const div = document.getElementById('ecran-' + e);
             const nav = document.getElementById('nav-' + e);
@@ -1224,13 +1230,24 @@
                 setTimeout(() => div.classList.remove('opacity-0'), 10);
                 div.classList.add('z-10');
 
-                if(nav && e !== 'notificari') nav.className = "flex items-center px-5 py-4 rounded-xl text-[#004c4c] font-extrabold translate-x-2 transition-transform bg-white shadow-sm border border-gray-200 cursor-pointer";
+                // Meniul activ primește styling-ul albastru
+                if(nav && e !== 'notificari') {
+                    nav.className = "flex items-center px-5 py-4 rounded-xl text-[#004c4c] font-extrabold translate-x-2 transition-transform bg-white shadow-sm border border-gray-200 cursor-pointer";
+                }
             } else {
                 div.classList.add('opacity-0');
                 div.classList.remove('z-10');
                 setTimeout(() => div.classList.add('hidden'), 300);
 
-                if(nav && e !== 'notificari') nav.className = "hidden md:flex items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer";
+                if(nav && e !== 'notificari') {
+                    // AICI E REPARATIA: Dacă e butonul 'fisa' și NU e student, îl ascundem forțat
+                    if (e === 'fisa' && !isStudent) {
+                        nav.className = "hidden";
+                    } else {
+                        // Restul butoanelor inactive revin la stilul normal
+                        nav.className = "flex items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer";
+                    }
+                }
             }
         });
 
@@ -1507,7 +1524,7 @@
 
                             <div class="flex gap-2 flex-wrap mt-auto">
                                 <button onclick="adaugaTBR('${cleanTitlu}', '${cleanAutor}')" class="bg-[#004c4c] text-white px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-[#003333] transition shadow-sm">Adaugă în TBR</button>
-                                <button onclick="deschideModalCarteDinChat('${cleanTitlu}', '${cleanAutor}')" class="bg-white border border-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-gray-50 transition shadow-sm">Detalii AI</button>
+                                <button onclick="deschideModalCarteDinChat('${cleanTitlu}', '${cleanAutor}')" class="bg-white border border-[#004c4c] text-[#004c4c] px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-[#004c4c] hover:text-white transition shadow-sm">Vezi Argumentația AI</button>
                             </div>
                         </div>
                     </div>`;
@@ -1923,7 +1940,7 @@
         const safeTitlu = c.titlu.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const safeAutor = (c.autor || 'Necunoscut').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         document.getElementById('modal-actions').innerHTML = `
-            <button id="btn-genereaza-rezumat" onclick="genereazaRezumatAI()" class="w-full py-4 bg-[#004c4c] text-white rounded-xl font-bold shadow-md hover:bg-[#003333] transition flex items-center justify-center">Generare Analiză AI</button>
+            <button id="btn-genereaza-rezumat" onclick="genereazaRezumatAI()" class="w-full py-4 bg-[#004c4c] text-white rounded-xl font-bold shadow-md hover:bg-[#003333] transition flex items-center justify-center">Generare Argumentație AI</button>
             <div class="flex gap-4 mt-2">
                 <button onclick="adaugaTBR('${safeTitlu}', '${safeAutor}')" class="flex-1 py-4 bg-[#f7fafc] border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition shadow-sm">De citit (TBR)</button>
                 <button onclick="marcheazaCaCitita('${safeTitlu}', '${safeAutor}')" class="flex-1 py-4 bg-white border border-[#004c4c] text-[#004c4c] rounded-xl font-bold hover:bg-[#004c4c] hover:text-white transition shadow-sm">Carte citită</button>
@@ -1944,7 +1961,7 @@
         const safeAutor = (c.autor || 'Necunoscut').replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
         document.getElementById('modal-actions').innerHTML = `
-            <button id="btn-genereaza-rezumat" onclick="genereazaRezumatAI()" class="w-full py-4 bg-[#004c4c] text-white rounded-xl font-bold shadow-sm hover:bg-[#003333] transition">Generare Analiză AI</button>
+            <button id="btn-genereaza-rezumat" onclick="genereazaRezumatAI()" class="w-full py-4 bg-[#004c4c] text-white rounded-xl font-bold shadow-sm hover:bg-[#003333] transition">Generare Argumentație AI</button>
             <div class="flex gap-4 mt-2">
                 <button onclick="adaugaTBR('${safeTitlu}', '${safeAutor}')" class="flex-1 py-4 bg-[#f7fafc] border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition shadow-sm">De citit (TBR)</button>
                 <button onclick="marcheazaCaCitita('${safeTitlu}', '${safeAutor}')" class="flex-1 py-4 bg-white border border-[#004c4c] text-[#004c4c] rounded-xl font-bold hover:bg-[#004c4c] hover:text-white transition shadow-sm">Carte citită</button>
@@ -1976,9 +1993,29 @@
     function cautaPeNet(titlu, autor) { window.open(`https://www.google.com/search?q=${encodeURIComponent(titlu + ' ' + autor + ' carte')}`, '_blank'); }
 
     async function genereazaRezumatAI() {
-        const btn = document.getElementById('btn-genereaza-rezumat'); const box = document.getElementById('modal-ai-rezumat');
-        btn.innerHTML = `<span class="animate-pulse">Procesare text...</span>`; btn.disabled = true;
-        try { const res = await fetch('/api/agent/rezumat', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({titlu: selectedBook.titlu, autor: selectedBook.autor}) }); box.classList.remove('hidden'); box.innerHTML = `<div class="font-black text-[#004c4c] mb-3 uppercase text-[10px] tracking-widest border-b border-[#004c4c]/10 pb-2">Analiză AI GraphRAG</div><div class="text-gray-800">` + (await res.text()).replace(/\n/g, '<br>') + `</div>`; btn.innerHTML = "Regenerare Analiză"; btn.disabled = false; box.scrollIntoView({ behavior: 'smooth'}); } catch (e) { btn.innerText = "Eroare Procesare"; btn.disabled = false; }
+        const btn = document.getElementById('btn-genereaza-rezumat');
+        const box = document.getElementById('modal-ai-rezumat');
+
+        btn.innerHTML = `<span class="animate-pulse">Sistemul generează argumentația...</span>`;
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/agent/rezumat', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({titlu: selectedBook.titlu, autor: selectedBook.autor})
+            });
+
+            box.classList.remove('hidden');
+            box.innerHTML = `<div class="font-black text-[#004c4c] mb-3 uppercase text-[10px] tracking-widest border-b border-[#004c4c]/10 pb-2">Argumentație AI (Explainability) - GraphRAG</div><div class="text-gray-800 leading-relaxed">` + (await res.text()).replace(/\n/g, '<br>') + `</div>`;
+
+            btn.innerHTML = "Regenerare Argumentație";
+            btn.disabled = false;
+            box.scrollIntoView({ behavior: 'smooth'});
+        } catch (e) {
+            btn.innerText = "Eroare Procesare";
+            btn.disabled = false;
+        }
     }
 
     function logout() { sessionStorage.clear(); window.location.href = "/login"; }
