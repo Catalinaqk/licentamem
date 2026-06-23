@@ -180,12 +180,16 @@ public class BookGeneratorAgent {
             }
 
             String regulaCartiCitite = cartiCitite.length() > 0 ?
-                    "REGULĂ STRICTĂ: Utilizatorul a citit deja următoarele cărți. ESTE INTERZIS să le incluzi în acest traseu:\n" + cartiCitite.toString() + "\n" : "";
+                    "REGULĂ: Utilizatorul a citit deja următoarele cărți. ESTE INTERZIS să le incluzi în acest traseu:\n" + cartiCitite.toString() + "\n" : "";
 
+            // MODIFICAREA ESTE AICI: I-am impus reguli extrem de stricte pentru cărțile selectate.
             String prompt = "Elaborează un plan de studiu structurat pentru subiectul: '" + subiect + "' în exact " + nrEtape + " etape logice. \n" +
                     nivelInstructiune + "\n\n" +
                     regulaCartiCitite +
-                    "Integreză referințe din această listă dacă e relevant: \n" + contextBazaDeDate.toString() + "\n" +
+                    "Referințe din baza de date (folosește-le DOAR dacă se potrivesc perfect): \n" + contextBazaDeDate.toString() + "\n\n" +
+                    "REGULĂ CRITICĂ: Trebuie să recomanzi DOAR CĂRȚI REALE, recunoscute la nivel internațional, strict legate de subiectul cerut (" + subiect + "). " +
+                    "Dacă lista mea de referințe este goală, caută în baza ta de date generală manuale, tratate sau cărți de specialitate relevante. " +
+                    "ESTE STRICT INTERZIS să folosești cărți de ficțiune, romane sau exemple generice (cum ar fi Jane Austen) pentru domenii tehnice, științifice sau legislative!\n\n" +
                     "Răspunde STRICT utilizând un Array JSON valid, fără explicații. Structura cerută: " +
                     "[ { \"nivel\": \"INTRODUCERE\", \"titlu_etapa\": \"...\", \"descriere\": \"...\", \"carti\": [ { \"titlu\": \"...\", \"autor\": \"...\", \"an\": 2024, \"descriere\": \"...\" } ] } ]";
 
@@ -197,7 +201,6 @@ public class BookGeneratorAgent {
             if (start != -1 && end != -1) {
                 String finalJson = curatat.substring(start, end + 1);
                 try (Session session = driver.session()) {
-                    // AICI AM ADĂUGAT username: $u pentru a-l face personal
                     session.run("MERGE (tr:Traseu {subiect: $sub, username: $u}) SET tr.json = $json",
                             Map.of("sub", subiect, "u", username, "json", finalJson));
                 }
@@ -351,7 +354,7 @@ public class BookGeneratorAgent {
             if (tags != null) {
                 for (String t : tags) {
                     if (t == null || t.trim().isEmpty()) continue;
-                    session.run("MATCH (u:Utilizator {username: $u}) MERGE (tag:Tag {nume: $t}) MERGE (u)-[r:INTERESAT_DE]->(tag) SET r.score = 5.0", Map.of("u", username, "t", t.toLowerCase().trim()));
+                    session.run("MATCH (u:Utilizator {username: $u}) MERGE (tag:Tag {nume: $t}) MERGE (u)-[r:INTERESAT_DE]->(tag) SET r.score = 5.0", Map.of("u", username, "t", t.trim()));
                 }
             }
 

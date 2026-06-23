@@ -185,7 +185,7 @@ public class BookController {
         return "Succes";
     }
 
-    @PostMapping("/api/carti/salveaza-interese")
+    @PostMapping("/api/utilizator/salveaza-interese")
     @ResponseBody
     public String salveazaInterese(@RequestBody Map<String, Object> payload) {
         String username = (String) payload.get("username");
@@ -266,6 +266,21 @@ public class BookController {
             }
         } catch (Exception e) {}
         return trasee;
+    }
+
+
+    @PostMapping("/api/trasee/sterge")
+    @ResponseBody
+    public String stergeTraseuSalvat(@RequestBody Map<String, String> payload) {
+        String subiect = payload.get("subiect");
+        String username = payload.get("username");
+        try (Session session = driver.session()) {
+            session.run("MATCH (t:Traseu {subiect: $sub, username: $u}) DELETE t",
+                    Map.of("sub", subiect, "u", username));
+            return "{\"status\":\"succes\"}";
+        } catch (Exception e) {
+            return "{\"status\":\"eroare\"}";
+        }
     }
 
     @PostMapping("/api/agent/rezumat")

@@ -1679,10 +1679,38 @@
     }
 
     async function incarcaTraseeSalvate() {
-        // Acum trimitem si username-ul la server
         const res = await fetch(`/api/trasee/salvate?username=${encodeURIComponent(currentUser)}`);
         const data = await res.json();
-        document.getElementById('lista-trasee-salvate').innerHTML = data.map(t => `<li onclick="incarcaTraseuExistent('${t.replace(/'/g, "\\'")}')" class="p-4 bg-[#f7fafc] border border-gray-200 rounded-xl text-sm font-bold text-[#004c4c] hover:bg-[#004c4c] hover:text-white cursor-pointer transition shadow-sm mb-3 text-center">${t}</li>`).join('');
+
+        document.getElementById('lista-trasee-salvate').innerHTML = data.map(t => {
+            const safeT = t.replace(/'/g, "\\'");
+            return `
+            <li class="relative group p-4 bg-[#f7fafc] border border-gray-200 rounded-xl text-sm font-bold text-[#004c4c] hover:bg-[#004c4c] hover:text-white cursor-pointer transition shadow-sm mb-3 flex justify-between items-center" onclick="incarcaTraseuExistent('${safeT}')">
+                <span class="truncate flex-1 text-center">${t}</span>
+                <button onclick="event.stopPropagation(); executaStergereTraseu('${safeT}')" class="opacity-0 group-hover:opacity-100 text-red-500 hover:text-white bg-white hover:bg-red-500 rounded-full w-6 h-6 flex items-center justify-center font-bold transition-all shadow-sm ml-2 shrink-0 border border-red-100">X</button>
+            </li>`;
+        }).join('');
+    }
+
+    async function executaStergereTraseu(subiect) {
+        if (!confirm(`Ești sigur că vrei să ștergi definitiv traseul pentru "${subiect}"?`)) return;
+
+        try {
+            await fetch('/api/trasee/sterge', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({subiect: subiect, username: currentUser})
+            });
+
+            // Dacă traseul șters era cel deschis pe ecran, curățăm ecranul
+            document.getElementById('rezultat-traseu').innerHTML = "<div class='h-full flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-3xl bg-white/50 font-medium text-sm'>Traseu șters. Introdu un subiect pentru a genera altul.</div>";
+            document.getElementById('input-traseu').value = "";
+
+            // Reîncărcăm lista din stânga (care nu va mai conține traseul șters)
+            incarcaTraseeSalvate();
+        } catch(e) {
+            alert("Eroare la ștergerea traseului.");
+        }
     }
 
     async function incarcaTraseuExistent(s) {
