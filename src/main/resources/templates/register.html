@@ -42,7 +42,7 @@
 
     <div class="section-title">Informații de Autentificare</div>
     <div class="input-group">
-        <label>Nume / Pseudonim</label>
+        <label>Nume </label>
         <input type="text" id="nume" placeholder="Cum dorești să te numim?">
     </div>
     <div class="input-group">
@@ -98,9 +98,8 @@
             .then(res => res.json())
             .then(data => {
                 if(data.status === 'success') {
-                    // Salvăm utilizatorul în sesiune și îl direcționăm spre pagina principală
-                    sessionStorage.setItem('currentUser', nume);
-                    window.location.href = '/?user=' + encodeURIComponent(nume);
+                    sessionStorage.setItem('currentUser', data.username);
+                    window.location.href = '/';
                 } else {
                     alert(data.message);
                     btn.innerText = "Finalizează Crearea Contului";

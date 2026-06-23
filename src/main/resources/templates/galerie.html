@@ -260,25 +260,7 @@
                 </div>
             </div>
 
-            <div id="ecran-noutati" class="hidden absolute inset-0 flex flex-col overflow-y-auto p-8 z-0 transition-opacity duration-300 opacity-0 bg-[#FCFAF2]">
-                <div class="max-w-5xl mx-auto w-full">
-                    <h2 id="titlu-noutati" class="text-3xl font-extrabold font-manrope mb-2 text-[#004c4c]">Descoperă Cărți</h2>
-                    <p class="text-gray-500 mb-6 font-medium">Caută apariții recente sau titluri populare specifice unui anumit autor ori subiect.</p>
 
-                    <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm mb-8 flex gap-4">
-                        <div class="flex-1">
-                            <input type="text" id="input-cauta-noutati" class="w-full border border-gray-200 p-4 rounded-xl outline-none focus:border-[#004c4c] bg-[#f7fafc] font-medium text-sm" placeholder="Ex: Stephen King, Dezvoltare personală, Thriller..." onkeypress="if(event.key==='Enter') cautaNoutatiPersonalizate()">
-                        </div>
-                        <button onclick="cautaNoutatiPersonalizate()" class="bg-[#004c4c] text-white px-8 py-4 rounded-xl font-bold hover:bg-[#006666] transition shadow-md text-sm shrink-0">Caută Cărți</button>
-                    </div>
-
-                    <div id="grila-noutati" class="flex flex-col gap-8 pb-20">
-                        <div class="py-10 text-center text-gray-400 font-medium border-2 border-dashed border-gray-200 rounded-3xl bg-white/50 h-64 flex items-center justify-center">
-                            Introdu un subiect în bara de mai sus pentru a explora recomandările.
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <div id="ecran-notificari" class="hidden absolute inset-0 flex flex-col overflow-y-auto p-8 z-0 transition-opacity duration-300 opacity-0 bg-[#FCFAF2]">
                 <div class="max-w-4xl mx-auto w-full">
@@ -319,10 +301,6 @@
 
             <a id="nav-trasee" onclick="schimbaEcran('trasee')" class="flex items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer">
                 <span class="font-inter text-sm tracking-wide">Trasee de Lectură</span>
-            </a>
-
-            <a id="nav-noutati" onclick="schimbaEcran('noutati')" class="flex items-center px-5 py-4 rounded-xl text-[#3f4948] font-bold hover:bg-white hover:text-[#004c4c] hover:shadow-sm border border-transparent transition-all duration-200 cursor-pointer">
-                <span class="font-inter text-sm tracking-wide">Explorează</span>
             </a>
 
             <a id="nav-chat" onclick="schimbaEcran('chat')" class="flex items-center px-5 py-4 rounded-xl text-[#004c4c] font-extrabold translate-x-2 transition-transform bg-white shadow-sm border border-gray-200 cursor-pointer absolute bottom-8 left-8 right-8">
@@ -408,6 +386,9 @@
 </div>
 
 <script>
+    if (!sessionStorage.getItem('currentUser') || sessionStorage.getItem('currentUser') === 'null' || sessionStorage.getItem('currentUser') === 'undefined') {
+        window.location.replace('/login');
+    }
     // Funcție sigură care elimină erorile cu null/undefined
     function getSafeStr(val) {
         if (!val || val === 'null' || val === 'undefined') return '';
@@ -417,7 +398,7 @@
     let toateCartile = [];
     let toateNoutatile = [];
     let chatIstoric = [];
-    let currentUser = new URLSearchParams(window.location.search).get('user') || sessionStorage.getItem('currentUser') || "Utilizator";
+    let currentUser = sessionStorage.getItem('currentUser');
     let myTags = [];
     let myBooks = [];
     let myTBR = JSON.parse(localStorage.getItem('tbr_' + currentUser)) || [];
@@ -1204,6 +1185,8 @@
         document.getElementById('sidebar-user-name').innerText = currentUser;
         document.getElementById('avatar-initial').innerText = currentUser.charAt(0).toUpperCase();
 
+        schimbaEcran('profil');
+
         fetch('/api/carti/toate').then(r => r.json()).then(data => {
             toateCartile = data;
             incarcaProfil();
@@ -1216,7 +1199,7 @@
     };
 
     function schimbaEcran(numeEcran) {
-        const ecrane = ['profil', 'galerie', 'trasee', 'noutati', 'chat', 'notificari', 'fisa'];
+        const ecrane = ['profil', 'galerie', 'trasee', 'chat', 'notificari', 'fisa'];
 
         // Verificăm dacă are bifa pusă în momentul ăsta
         const isStudent = document.getElementById('checkbox-student') ? document.getElementById('checkbox-student').checked : false;
@@ -1524,7 +1507,7 @@
 
                             <div class="flex gap-2 flex-wrap mt-auto">
                                 <button onclick="adaugaTBR('${cleanTitlu}', '${cleanAutor}')" class="bg-[#004c4c] text-white px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-[#003333] transition shadow-sm">Adaugă în TBR</button>
-                                <button onclick="deschideModalCarteDinChat('${cleanTitlu}', '${cleanAutor}')" class="bg-white border border-[#004c4c] text-[#004c4c] px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-[#004c4c] hover:text-white transition shadow-sm">Vezi Argumentația AI</button>
+                                <button onclick="cereArgumentatieChat('${cleanTitlu}', '${cleanAutor}')" class="bg-white border border-[#004c4c] text-[#004c4c] px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-[#004c4c] hover:text-white transition shadow-sm">Vezi Argumentația AI</button>
                             </div>
                         </div>
                     </div>`;
@@ -1554,7 +1537,14 @@
             box.innerHTML += `<div class="text-red-500 font-bold p-4 text-sm">Eroare de conexiune cu serverul.</div>`;
         }
     }
+    function cereArgumentatieChat(titlu, autor) {
+        // Punem textul automat in input-ul de chat
+        const inp = document.getElementById('chat-input');
+        inp.value = `Te rog să-mi argumentezi detaliat de ce mi-ai recomandat cartea "${titlu}" de ${autor}.`;
 
+        // Apelam trimiterea mesajului
+        trimiteMesajChat();
+    }
     // ============================================================
     // AICI E FUNCȚIA DE CĂUTARE PENTRU MENIUL DROPDOWN
     // ============================================================
@@ -1640,17 +1630,29 @@
 
         const g = document.getElementById('grila-noutati');
         g.className = "flex flex-col gap-10 pb-10";
-        g.innerHTML = `<div class="py-20 text-center"><div class="inline-block animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-[#004c4c] mb-6"></div><p class="text-[#004c4c] font-manrope font-bold text-lg">Se caută recomandări pentru: ${input}...</p></div>`;
+        // Mesaj de încărcare modificat:
+        g.innerHTML = `<div class="py-20 text-center"><div class="inline-block animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-[#004c4c] mb-6"></div><p class="text-[#004c4c] font-manrope font-bold text-lg">Se caută apariții noi (2025-2026) pentru: ${input}...</p></div>`;
 
         try {
             const res = await fetch('/api/carti/noutati-personalizate', {
                 method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({subiect: input})
             });
             const textRaw = await res.text();
-            const jsonCurat = textRaw.substring(textRaw.indexOf('['), textRaw.lastIndexOf(']') + 1);
+            const startIndex = textRaw.indexOf('[');
+            const endIndex = textRaw.lastIndexOf(']');
+
+            if (startIndex === -1 || endIndex === -1) throw new Error("JSON invalid");
+
+            const jsonCurat = textRaw.substring(startIndex, endIndex + 1);
             const categorii = JSON.parse(jsonCurat);
 
             toateNoutatile = []; g.innerHTML = "";
+
+            // Mesaj de eroare modificat:
+            if (categorii.length === 0) {
+                g.innerHTML = `<div class="py-10 text-center text-gray-500 font-bold border-2 border-dashed border-gray-200 rounded-3xl bg-white/50 h-64 flex items-center justify-center">În perioada 2025-2026 nu au apărut cărți noi pe subiectul: ${input}</div>`;
+                return;
+            }
 
             categorii.forEach(cat => {
                 let cartiHtml = cat.carti.map(c => {

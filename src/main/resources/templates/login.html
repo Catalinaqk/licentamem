@@ -87,13 +87,12 @@
         })
             .then(res => res.json())
             .then(data => {
-                // Aici am schimbat 'succes' cu 'success' (cum trimite Java)
                 if(data.status === 'success') {
-                    // Java trimite 'username', nu 'nume'
+                    // Salvăm userul în sesiune
                     sessionStorage.setItem('currentUser', data.username);
-                    window.location.href = '/?user=' + encodeURIComponent(data.username);
+                    // Îl trimitem pe ruta principală (care deschide galerie.html)
+                    window.location.href = '/';
                 } else {
-                    // Aici am schimbat 'mesaj' cu 'message'
                     alert(data.message);
                     btn.innerText = "Intră în cont"; btn.disabled = false;
                 }

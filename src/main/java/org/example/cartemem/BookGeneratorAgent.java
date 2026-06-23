@@ -227,19 +227,6 @@ public class BookGeneratorAgent {
         return "[]";
     }
 
-    public String cautaNoutatiDupaSubiect(String subiect) {
-        String prompt = "Caută 4-8 cărți REALE și verificate despre: '" + subiect + "'. " +
-                "Returnează STRICT un Array JSON: [{\"gen\": \"Rezultate pentru: " + subiect + "\", \"carti\": [{\"titlu\": \"...\", \"autor\": \"...\", \"imagine\": \"\", \"descriere\": \"...\"}]}]";
-
-        String raspunsClaude = trimitePromptLaClaude(prompt);
-        try {
-            String curatat = raspunsClaude.replace("```json", "").replace("```", "").trim();
-            int start = curatat.indexOf("[");
-            int end = curatat.lastIndexOf("]");
-            if (start != -1 && end != -1) return curatat.substring(start, end + 1);
-        } catch (Exception e) { }
-        return "[]";
-    }
 
     public String obtineDetaliiCompleteCarte(String titlu, String autor) {
         try {

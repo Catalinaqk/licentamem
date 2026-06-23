@@ -229,6 +229,7 @@ public class BookController {
         }
     }
 
+
     @GetMapping("/api/agent/traseu-salvat")
     @ResponseBody
     public String getTraseuSalvat(@RequestParam("subiect") String subiect, @RequestParam("username") String username) {
@@ -287,13 +288,7 @@ public class BookController {
         return bookAgent.cautaNoutatiInternet(interese);
     }
 
-    @PostMapping("/api/carti/noutati-personalizate")
-    @ResponseBody
-    public ResponseEntity<String> noutatiPersonalizate(@RequestBody Map<String, String> payload) {
-        String subiect = payload.get("subiect");
-        String rezultat = bookAgent.cautaNoutatiDupaSubiect(subiect);
-        return ResponseEntity.ok(rezultat);
-    }
+
 
     @GetMapping("/api/carti/toate")
     @ResponseBody
