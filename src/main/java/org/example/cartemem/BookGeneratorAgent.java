@@ -6,7 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Session;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -518,6 +522,79 @@ public class BookGeneratorAgent {
             return "Eroare import: " + e.getMessage();
         }
     }
+
+
+
+    public void streamRezumatLaClaude(String titlu, String autor, SseEmitter emitter) {
+        new Thread(() -> {
+            try {
+                String prompt = "Scrie un rezumat detaliat și o analiză a temelor pentru cartea '" + titlu + "' de " + autor + ". " +
+                        "Textul trebuie să fie în limba română, minim 200 de cuvinte, formatat frumos în paragrafe. Fără Markdown de tip cod.";
+
+                Map<String, Object> message = Map.of("role", "user", "content", prompt);
+                Map<String, Object> requestBody = new HashMap<>();
+                requestBody.put("model", MODEL_NAME);
+                requestBody.put("max_tokens", 4000);
+                requestBody.put("stream", true); // SETARE CRUCIALĂ PENTRU STREAMING
+                requestBody.put("messages", List.of(message));
+
+                String jsonBody = objectMapper.writeValueAsString(requestBody);
+
+                HttpRequest req = HttpRequest.newBuilder().uri(URI.create(ANTHROPIC_URL))
+                        .header("Content-Type", "application/json")
+                        .header("x-api-key", ANTHROPIC_API_KEY)
+                        .header("anthropic-version", "2023-06-01")
+                        .POST(HttpRequest.BodyPublishers.ofString(jsonBody)).build();
+
+                // Preia răspunsul ca InputStream (flux continuu de date)
+                HttpResponse<InputStream> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofInputStream());
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(resp.body(), StandardCharsets.UTF_8));
+                String line;
+                StringBuilder raspunsComplet = new StringBuilder();
+
+                while ((line = reader.readLine()) != null) {
+                    if (line.startsWith("data: ")) {
+                        String data = line.substring(6);
+                        if (data.equals("[DONE]")) continue;
+                        try {
+                            JsonNode node = objectMapper.readTree(data);
+                            if (node.has("type") && node.get("type").asText().equals("content_block_delta")) {
+                                String textChunk = node.path("delta").path("text").asText();
+                                raspunsComplet.append(textChunk);
+
+                                // Înlocuim newline-urile cu <br> pentru afișarea corectă în frontend
+                                String safeChunk = textChunk.replace("\n", "<br>");
+                                emitter.send(safeChunk); // Trimitem bucățica spre frontend
+                            }
+                        } catch (Exception ex) {
+                            // Ignorăm erorile de parsare JSON pentru linii incomplete
+                        }
+                    }
+                }
+
+                // La final, salvăm răspunsul complet în Neo4j (Caching)
+                try (Session session = driver.session()) {
+                    session.run("MATCH (c:Carte {titlu: $t}) SET c.descriere_ampla = $d",
+                            Map.of("t", titlu, "d", raspunsComplet.toString()));
+                }
+
+                // Închidem conexiunea cu succes
+                emitter.complete();
+
+            } catch (Exception e) {
+                try {
+                    emitter.send("Eroare la generarea textului.");
+                    emitter.completeWithError(e);
+                } catch(Exception ignored) {}
+            }
+        }).start();
+    }
+
+
+
+
+
 
     public void importMasiv(List<Map<String, Object>> listaCarti) {
         try (Session session = driver.session()) {

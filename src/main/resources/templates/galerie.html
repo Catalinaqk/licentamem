@@ -375,7 +375,18 @@
                     <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Teme Principale</h4>
                     <div id="modal-traseu-teme" class="flex flex-wrap gap-2"></div>
                 </div>
+                <div class="mt-8 pt-6 border-t border-gray-100 pb-4">
+                    <button id="btn-stream-traseu" onclick="pornesteStreamTraseu()" class="w-full py-4 bg-[#004c4c] text-white rounded-xl font-bold shadow-md hover:bg-[#003333] transition flex items-center justify-center">
+                        Generare Argumentație AI (Streaming live)
+                    </button>
+
+                    <div id="box-stream-traseu" class="hidden mt-4 bg-[#f8fbfb] p-6 rounded-2xl text-sm text-[#004c4c] leading-relaxed border border-[#004c4c]/20 shadow-sm max-h-80 overflow-y-auto">
+                        <div class="font-black text-[#004c4c] mb-3 uppercase text-[10px] tracking-widest border-b border-[#004c4c]/10 pb-2">Argumentație AI (Explainability) - GraphRAG</div>
+                        <div id="text-stream-traseu" class="text-gray-800 leading-relaxed font-medium"></div>
+                    </div>
+                </div>
             </div>
+
             <div class="p-6 border-t border-gray-100 bg-[#f7fafc] flex flex-col sm:flex-row gap-3">
                 <a id="btn-magazin-google" href="#" target="_blank" class="flex-1 py-3 bg-white text-gray-800 text-center rounded-xl font-bold hover:bg-gray-50 transition text-sm border border-gray-200 shadow-sm">Google Books</a>
                 <a id="btn-magazin-amazon" href="#" target="_blank" class="flex-1 py-3 bg-white text-gray-800 text-center rounded-xl font-bold hover:bg-gray-50 transition text-sm border border-gray-200 shadow-sm">Amazon</a>
@@ -404,6 +415,7 @@
     let myTBR = JSON.parse(localStorage.getItem('tbr_' + currentUser)) || [];
     let myFriends = [];
     let selectedBookTitle = "";
+    let activeStream = null;
 
     let domeniiDisponibile = ["Science Fiction", "Fantasy", "Thriller", "Mister", "Romance", "Istorie", "Psihologie", "Dragoste"];
     let currentTraseuData = [];
@@ -1895,7 +1907,13 @@
     }
 
     function inchideModal() { document.getElementById('modal-carte').classList.add('hidden'); }
-    function inchideModalTraseu() { document.getElementById('modal-carte-traseu').classList.add('hidden'); }
+    function inchideModalTraseu() {
+        if (activeStream) {
+            activeStream.close();
+            activeStream = null;
+        }
+        document.getElementById('modal-carte-traseu').classList.add('hidden');
+    }
 
     function deschideModalCarteDinListaPersonala(titlu, autor) {
         let imagine = `/api/carti/coperta?titlu=${encodeURIComponent(titlu)}&autor=${encodeURIComponent(autor)}`;
@@ -1913,6 +1931,20 @@
     }
 
     async function arataModalUniversal(titlu, autor, imagine) {
+        // --- RESETARE ZONĂ STREAMING ---
+        if (activeStream) { activeStream.close(); activeStream = null; }
+        const boxStream = document.getElementById('box-stream-traseu');
+        const textStream = document.getElementById('text-stream-traseu');
+        const btnStream = document.getElementById('btn-stream-traseu');
+
+        if(boxStream) boxStream.classList.add('hidden');
+        if(textStream) textStream.innerHTML = "";
+        if(btnStream) {
+            btnStream.innerHTML = "Generare Argumentație AI (Streaming live)";
+            btnStream.disabled = false;
+        }
+        // -------------------------------
+
         document.getElementById('modal-carte-traseu').classList.remove('hidden');
         document.getElementById('modal-traseu-titlu').innerText = titlu;
         document.getElementById('modal-traseu-autor').innerText = "de " + autor;
@@ -1924,13 +1956,12 @@
         const safeTitlu = titlu.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const safeAutor = autor.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
-        // Aici adăugăm DINAMIC toate cele 4 butoane mici din partea de sus a modalului de Traseu
         document.getElementById('containere-butoane-traseu').innerHTML = `
-            <span id="modal-traseu-insigna" class="inline-block px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-gray-100 text-gray-500 border border-gray-200">ÎN AȘTEPTARE</span>
-            <button onclick="deschideModalRecomandare()" class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white text-[#004c4c] border border-[#004c4c]/20 hover:bg-[#004c4c] hover:text-white transition shadow-sm">Recomandă</button>
-            <button onclick="adaugaTBR('${safeTitlu}', '${safeAutor}')" class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#f7fafc] text-gray-700 border border-gray-200 hover:bg-gray-100 transition shadow-sm">De citit</button>
-            <button onclick="marcheazaCaCitita('${safeTitlu}', '${safeAutor}')" class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#004c4c] text-white border border-[#004c4c] hover:bg-[#003333] transition shadow-sm">Citită</button>
-        `;
+        <span id="modal-traseu-insigna" class="inline-block px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-gray-100 text-gray-500 border border-gray-200">ÎN AȘTEPTARE</span>
+        <button onclick="deschideModalRecomandare()" class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white text-[#004c4c] border border-[#004c4c]/20 hover:bg-[#004c4c] hover:text-white transition shadow-sm">Recomandă</button>
+        <button onclick="adaugaTBR('${safeTitlu}', '${safeAutor}')" class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#f7fafc] text-gray-700 border border-gray-200 hover:bg-gray-100 transition shadow-sm">De citit</button>
+        <button onclick="marcheazaCaCitita('${safeTitlu}', '${safeAutor}')" class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#004c4c] text-white border border-[#004c4c] hover:bg-[#003333] transition shadow-sm">Citită</button>
+    `;
 
         try {
             const res = await fetch(`/api/carti/detalii-complete?titlu=${encodeURIComponent(titlu)}&autor=${encodeURIComponent(autor)}`);
@@ -2049,6 +2080,77 @@
     }
 
     function logout() { sessionStorage.clear(); window.location.href = "/login"; }
+
+
+
+    function genereazaRezumatAI() {
+        const btn = document.getElementById('btn-genereaza-rezumat');
+        const box = document.getElementById('modal-ai-rezumat');
+
+        btn.innerHTML = `<span class="animate-pulse">Se scrie argumentația în timp real...</span>`;
+        btn.disabled = true;
+
+        box.classList.remove('hidden');
+        box.innerHTML = `
+        <div class="font-black text-[#004c4c] mb-3 uppercase text-[10px] tracking-widest border-b border-[#004c4c]/10 pb-2">Argumentație AI (Explainability) - GraphRAG</div>
+        <div id="text-stream-rezumat" class="text-gray-800 leading-relaxed font-medium"></div>`;
+
+        const textBox = document.getElementById('text-stream-rezumat');
+        box.scrollIntoView({ behavior: 'smooth' });
+
+        // Deschiderea conexiunii Server-Sent Events
+        const url = `/api/agent/stream-rezumat?titlu=${encodeURIComponent(selectedBook.titlu)}&autor=${encodeURIComponent(selectedBook.autor)}`;
+        const eventSource = new EventSource(url);
+
+        // Declanșat la fiecare bucățică de cuvânt primită de la server
+        eventSource.onmessage = function(event) {
+            textBox.innerHTML += event.data;
+            box.scrollTop = box.scrollHeight; // Autoscroll pe măsură ce scrie
+        };
+
+        // Declanșat la finalizarea stream-ului sau în caz de eroare
+        eventSource.onerror = function(event) {
+            eventSource.close();
+            btn.innerHTML = "Regenerare Argumentație";
+            btn.disabled = false;
+        };
+    }
+
+    function pornesteStreamTraseu() {
+        const titlu = document.getElementById('modal-traseu-titlu').innerText;
+        let autor = document.getElementById('modal-traseu-autor').innerText;
+        if (autor.startsWith("de ")) { autor = autor.substring(3); }
+
+        const btn = document.getElementById('btn-stream-traseu');
+        const box = document.getElementById('box-stream-traseu');
+        const textBox = document.getElementById('text-stream-traseu');
+
+        btn.innerHTML = `<span class="animate-pulse">Se redactează în timp real...</span>`;
+        btn.disabled = true;
+
+        box.classList.remove('hidden');
+        textBox.innerHTML = "";
+        box.scrollIntoView({ behavior: 'smooth' });
+
+        // Siguranță: tăiem orice conexiune veche rămasă activă
+        if (activeStream) { activeStream.close(); }
+
+        const url = `/api/agent/stream-rezumat?titlu=${encodeURIComponent(titlu)}&autor=${encodeURIComponent(autor)}`;
+        activeStream = new EventSource(url);
+
+        activeStream.onmessage = function(event) {
+            textBox.innerHTML += event.data;
+            box.scrollTop = box.scrollHeight;
+        };
+
+        activeStream.onerror = function(event) {
+            activeStream.close();
+            activeStream = null;
+            btn.innerHTML = "Regenerare Argumentație AI";
+            btn.disabled = false;
+        };
+    }
+
 </script>
 </body>
 </html>

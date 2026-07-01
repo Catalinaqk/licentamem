@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.net.URI;
@@ -500,6 +501,20 @@ public class BookController {
         bookAgent.importMasiv(payload);
         return "Import finalizat cu succes!";
     }
+
+
+
+    @GetMapping(path = "/api/agent/stream-rezumat", produces = org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamRezumat(@RequestParam String titlu, @RequestParam String autor) {
+        // SseEmitter menține conexiunea deschisă. Setăm timeout-ul la 2 minute.
+        SseEmitter emitter = new SseEmitter(120000L);
+        bookAgent.streamRezumatLaClaude(titlu, autor, emitter);
+        return emitter;
+    }
+
+
+
+
 
     private String incarcaPagina(String query, String gen, Model model, String templateName) {
         List<Map<String, String>> listaCarti = new ArrayList<>();
