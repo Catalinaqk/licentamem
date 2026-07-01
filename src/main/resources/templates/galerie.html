@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Book AI - Sanctuarul Intelectual</title>
+    <title>Book AI - Biblioteca</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
@@ -92,7 +92,7 @@
     <main class="flex-grow flex flex-col h-screen warm-canvas relative overflow-hidden">
 
         <header class="flex justify-between items-center w-full px-8 h-20 bg-[#FCFAF2]/80 backdrop-blur-xl border-b border-gray-200 shrink-0 z-40">
-            <h1 class="text-2xl font-extrabold font-manrope tracking-tighter text-[#004c4c]">Recomandare cărți</h1>
+            <h1 class="text-2xl font-extrabold font-manrope tracking-tighter text-[#004c4c]">Generarea traseelor de lectură personalizate utilizând arhitectura GraphRAG</h1>
             <button onclick="logout()" class="text-xs text-red-500 hover:text-red-700 font-bold bg-white px-4 py-2 rounded-lg shadow-sm border border-red-100 transition">Ieșire Cont</button>
         </header>
 
@@ -961,6 +961,25 @@
         // --- MASTER - ANUL 1 ---
         // ==========================================
         {
+            nivel: "master", nume: "Analiza datelor ",
+            carti: [
+                { titlu: "STATISTICA INFERENTIALA. Aplicatii in SPSS", autor: "Buiga A", profesor: "prof. Matei" },
+                { titlu: "Applied Power Analysis for the Behavioral Sciences", autor: "Aberson  Ch.", profesor: "prof. Matei" },
+                { titlu: " Metodologia de sondaj şi analiza datelor în studiile de piaţă", autor: "Buiga A.", profesor: "prof. Matei" },
+                { titlu: "IBM SPSS Statistics 19 Made Simple", autor: "Gray C", profesor: "prof. Matei" },
+                { titlu: " SAS and R: Data Management, Statistical Analysis, and Graphics", autor: "Kleiman K.", profesor: "prof. Matei" },
+                { titlu: " Analiza datelor & informatica", autor: "Saporta G", profesor: "prof. Matei" },
+                { titlu: "Analiza datelor de marketing", autor: "Spircu L.", profesor: "prof. Matei" },
+                { titlu: "Analyse des donnees", autor: "Volle M", profesor: "prof. Matei" }
+            ]
+        },
+        {
+            nivel: "master", nume: "Reprezentarea cunoștințelor ",
+            carti: [
+                { titlu: "Logic in Computer Science- Modelling and reasoning about systems", autor: "Michael Huth", profesor: "prof. Petrovan" }
+            ]
+        },
+        {
             nivel: "master", nume: "Tehnologii de comunicație pentru IoT ",
             carti: [
                 { titlu: "DWDM and Optical Networks", autor: "Otmar Krauss", profesor: "prof. Crisan" },
@@ -973,7 +992,7 @@
             ]
         },
         {
-            nivel: "licenta", nume: "Sisteme dedicate pentru IoT ",
+            nivel: "master", nume: "Sisteme dedicate pentru IoT ",
             carti: [
                 { titlu: " Digital Design and Computer Architecture", autor: " David Harris", profesor: "prof. ONIGA" },
                 { titlu: " Embedded Systems: A Contemporary Design Too", autor: " James K. Perkol", profesor: "prof. ONIGA" },
@@ -985,7 +1004,7 @@
             ]
         },
         {
-            nivel: "licenta", nume: "Etica și integritate academică  ",
+            nivel: "master", nume: "Etica și integritate academică  ",
             carti: [
                 { titlu: "Adevărul (cinstit) despre necinste. Cum îi minţim pe toţi dar mai ales pe noi înşine", autor: "Ariely", profesor: "prof. Șteț" },
                 { titlu: "Devianţa tolerată", autor: "Boncu", profesor: "prof. Șteț" },
@@ -995,7 +1014,7 @@
             ]
         },
         {
-            nivel: "licenta", nume: "Tehnici de programare în IoT ",
+            nivel: "master", nume: "Tehnici de programare în IoT ",
             carti: [
                 { titlu: "Fluent Python: Clear, Concise, and Effective Programming, Oreilly & Associates", autor: " Luciano Ramalho", profesor: "prof. Costea" },
                 { titlu: " Mastering Python Design Patterns. Birmingham", autor: " Kasampalis", profesor: "prof. Costea" },
@@ -1013,26 +1032,7 @@
             ]
         },
         {
-            nivel: "licenta", nume: "Reprezentarea cunoștințelor ",
-            carti: [
-                { titlu: "Logic in Computer Science- Modelling and reasoning about systems", autor: "Michael Huth", profesor: "prof. Petrovan" }
-            ]
-        },
-        {
-            nivel: "licenta", nume: "Analiza datelor ",
-            carti: [
-                { titlu: "STATISTICA INFERENTIALA. Aplicatii in SPSS", autor: "Buiga A", profesor: "prof. Matei" },
-                { titlu: "Applied Power Analysis for the Behavioral Sciences", autor: "Aberson  Ch.", profesor: "prof. Matei" },
-                { titlu: " Metodologia de sondaj şi analiza datelor în studiile de piaţă", autor: "Buiga A.", profesor: "prof. Matei" },
-                { titlu: "IBM SPSS Statistics 19 Made Simple", autor: "Gray C", profesor: "prof. Matei" },
-                { titlu: " SAS and R: Data Management, Statistical Analysis, and Graphics", autor: "Kleiman K.", profesor: "prof. Matei" },
-                { titlu: " Analiza datelor & informatica", autor: "Saporta G", profesor: "prof. Matei" },
-                { titlu: "Analiza datelor de marketing", autor: "Spircu L.", profesor: "prof. Matei" },
-                { titlu: "Analyse des donnees", autor: "Volle M", profesor: "prof. Matei" }
-            ]
-        },
-        {
-            nivel: "licenta", nume: "Sisteme de calcul colaborativ ",
+            nivel: "master", nume: "Sisteme de calcul colaborativ ",
             carti: [
                 { titlu: "Mastering Ethereum: Building Smart Contracts and Dapps", autor: "Andreas M. Antonopoulos", profesor: "prof. Costea" },
                 { titlu: "Blockchain for IoT, CRC Press", autor: "D. Mukhopadhyay", profesor: "prof. Costea" },
@@ -1043,7 +1043,7 @@
             ]
         },
         {
-            nivel: "licenta", nume: "Proiectarea HW-SW integrată a sistemelor de calcul dedicate ",
+            nivel: "master", nume: "Proiectarea HW-SW integrată a sistemelor de calcul dedicate ",
             carti: [
                 { titlu: " MicroBlaze, XILINX MicroBlaze Soft Processor Core System User Guide", autor: " Xilinx", profesor: "prof. ONIGA" },
                 { titlu: " Zynq-7000 SoC: Embedded Design Tutorial. A Hands-On Guide to Effective Embedded System Design, UG1165", autor: " Xilinx", profesor: "prof. ONIGA" },
@@ -1058,7 +1058,7 @@
         // --- MASTER - ANUL 2 ---
         // ==========================================
         {
-            nivel: "licenta", nume: "Deep learning",
+            nivel: "master", nume: "Deep learning",
             carti: [
                 { titlu: "Deep Learning with Python", autor: " François Chollet", profesor: "prof. Matei" },
                 { titlu: "Deep Learning with Keras", autor: "Antonio Gulli", profesor: "prof. Matei" },
@@ -1066,7 +1066,7 @@
             ]
         },
         {
-            nivel: "licenta", nume: "Cloud computing ",
+            nivel: "master", nume: "Cloud computing ",
             carti: [
                 { titlu: "Cloud Computing, Principles and Paradigms", autor: " Rajkumar Buyya", profesor: "prof. Matei" },
                 { titlu: "Cloud Computing: A Practical Approach", autor: "Anthony T. Velte", profesor: "prof. Matei" },
@@ -1077,7 +1077,7 @@
             ]
         },
         {
-            nivel: "licenta", nume: "Edge computing ",
+            nivel: "master", nume: "Edge computing ",
             carti: [
                 { titlu: "Edge Computing Fundamentals, Advances and Applications", autor: " K. Anitha Kumari", profesor: "prof. ONIGA" },
                 { titlu: " TinyML: Machine Learning with TensorFlow Lite on Arduino and UltraLow-Power Microcontrollers", autor: "P. Warden", profesor: "prof. ONIGA" },
@@ -1087,7 +1087,7 @@
             ]
         },
         {
-            nivel: "licenta", nume: "IoT industrial ",
+            nivel: "master", nume: "IoT industrial ",
             carti: [
                 { titlu: "The Internet of Things in the Industrial Sector. Security and Device Connectivity, Smart Environments, and Industry 4.0, SpringerLink 2019", autor: "Zaigham Mahmood", profesor: "prof.  CRISAN" },
                 { titlu: "Industrial Internet of Things (IIoT) Applications of Edge and Fog Computing: A Review and Future Directions", autor: "G. S. S. Chalapathi", profesor: "prof.  CRISAN" },
@@ -1097,7 +1097,7 @@
             ]
         },
         {
-            nivel: "licenta", nume: "Securitate IoT ",
+            nivel: "master", nume: "Securitate IoT ",
             carti: [
                 { titlu: " IoT Penetration Testing Cookbook: Identify vulnerabilities and secure your smart devices", autor: "Aaron Guzman", profesor: "prof. Petrovan" },
                 { titlu: " Architecting the Internet of Things. Springer-Verlag Berlin Heidelberg", autor: "D. Uckelmann", profesor: "prof. Petrovan" },

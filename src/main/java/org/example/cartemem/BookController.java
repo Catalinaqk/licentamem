@@ -494,6 +494,13 @@ public class BookController {
         return bookAgent.importaJsonInBazaDeDate(payload);
     }
 
+    @PostMapping("/api/carti/import-masiv")
+    @ResponseBody
+    public String importMasivCarti(@RequestBody List<Map<String, Object>> payload) {
+        bookAgent.importMasiv(payload);
+        return "Import finalizat cu succes!";
+    }
+
     private String incarcaPagina(String query, String gen, Model model, String templateName) {
         List<Map<String, String>> listaCarti = new ArrayList<>();
         List<String> listaGenuri = List.of("Bestseller", "Science Fiction", "Fantasy", "Horror", "Thriller", "Mister", "Romance", "Istorie", "Psihologie", "Documentar");

@@ -519,6 +519,21 @@ public class BookGeneratorAgent {
         }
     }
 
+    public void importMasiv(List<Map<String, Object>> listaCarti) {
+        try (Session session = driver.session()) {
+            String cypher = "UNWIND $lista AS dateCarte " +
+                    "MERGE (c:Carte {titlu: dateCarte.titlu}) " +
+                    "SET c.an = dateCarte.an, c.editura = dateCarte.editura, c.limba = dateCarte.limba, c.categoria = dateCarte.categorie, c.nr_pagini = dateCarte.nr_pagini " +
+                    "MERGE (a:Autor {nume: dateCarte.autor}) " +
+                    "MERGE (c)-[:SCRISA_DE]->(a) " +
+                    "WITH c, dateCarte " +
+                    "UNWIND dateCarte.cuvinte_cheie AS cuvant " +
+                    "MERGE (t:Tag {nume: trim(toLower(toString(cuvant)))}) " +
+                    "MERGE (c)-[:ARE_TAG]->(t)";
+            session.run(cypher, Map.of("lista", listaCarti));
+        }
+    }
+
     public String genereazaSiSalveaza(String gen) { return "Metodă dezactivată."; }
     public String genereazaPersonalizat(String sursa, String autor) { return "Metodă dezactivată."; }
     public String reparaDateLipsa() { return "Metodă dezactivată."; }
